@@ -1,0 +1,96 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp" >
+
+    <TextView
+        android:id="@+id/textviewLogo"
+        android:layout_width="221dp"
+        android:layout_height="54dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="16dp"
+        android:text="수정"
+        android:textSize="40sp" />
+
+    <TextView
+        android:id="@+id/subject_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textviewLogo"
+        android:text="일정명"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/timetable_subject"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:layout_marginBottom="10dp"
+        android:inputType="textEmailAddress"
+        android:layout_below="@+id/subject_name">
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/place_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/timetable_subject"
+        android:text="일정장소"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/timetable_place"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/place_name"
+        android:layout_marginBottom="10dp"
+        android:ems="10"
+        android:inputType="textEmailAddress" />
+
+    <ImageButton
+        android:id="@+id/delete_timetable"
+        android:layout_width="wrap_content"
+        android:layout_height="56dip"
+        android:layout_alignBottom="@+id/textviewLogo"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="19dp"
+        android:layout_marginBottom="3dp"
+        android:background="@color/white"
+        android:src="@drawable/ic_trash"
+        android:visibility="visible" />
+
+    <ImageButton
+        android:id="@+id/delete_all_timetable"
+        android:layout_width="wrap_content"
+        android:layout_height="56dip"
+        android:layout_alignBottom="@+id/textviewLogo"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="59dp"
+        android:layout_marginBottom="1dp"
+        android:background="@color/white"
+        android:src="@drawable/ic_trash_all"
+        android:visibility="visible" />
+
+    <Button
+        android:id="@+id/confirm_timetable"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/timetable_place"
+        android:layout_marginBottom="20dp"
+        android:text="모든 일정 수정" />
+
+    <Button
+        android:id="@+id/revise_one_plan"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/timetable_place"
+        android:layout_alignEnd="@+id/textviewLogo"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="20dp"
+        android:text="해당 일정 수정" />
+</RelativeLayout>
