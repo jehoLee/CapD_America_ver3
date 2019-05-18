@@ -13,6 +13,7 @@ import android.os.Parcelable;
 public class Cell implements Parcelable {
 
     private int status;// 과목
+    private int position;
     private String PlaceName;//
     private String SubjectName;//
     private String startTime;
@@ -49,6 +50,10 @@ public class Cell implements Parcelable {
     public String getWeekofday() { return weekofday; }
 
     public void setWeekofday(String weekofday) { this.weekofday = weekofday; }
+
+    public void setPosition(int position){this.position = position; }
+
+    public int getPosition(){ return position; }
 
 
     @Override
