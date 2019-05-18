@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: cn.zhouchaoyuan:excelpanel:1.0.5@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/jetified-excelpanel-1.0.5.aar/197c53b7da871683f370bd31e1e5ebd4/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/jetified-excelpanel-1.0.5.aar/197c53b7da871683f370bd31e1e5ebd4/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cn.zhouchaoyuan/excelpanel/1.0.5/afefed279d1fce67b60c9319eb0ec2d1414034c8/excelpanel-1.0.5-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
