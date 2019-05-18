@@ -6,12 +6,16 @@ import android.os.Parcelable;
 
 import ajou.com.skechip.Event.MeetingCreationEvent;
 import ajou.com.skechip.Fragment.bean.Cell;
+import ajou.com.skechip.Fragment.bean.GroupEntity;
 import androidx.annotation.NonNull;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -55,16 +59,22 @@ public class MainActivity extends AppCompatActivity {
 //        groupListFragment.addGroupEntity(event.getNewGroup());
 //        groupListFragment.updateGroupListView();
 //    }
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onMeetingCreationEvent(MeetingCreationEvent event){
-        Log.d(TAG, "미팅 생성 이벤트 발생!");
-        //update for EP fragment and Group fragment
-        epFragment.Onmeeting_created((ArrayList<Cell>)event.getNewMeeting().getMeetingTimeCells());
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMeetingCreationEvent(MeetingCreationEvent event) {
+        Log.d(TAG, "미팅 생성 이벤트 발생 !");
+
+        GroupEntity groupWithNewMeeting = event.getGroupEntityWithNewMeeting();
+        ArrayList<Cell> cells = (ArrayList<Cell>) groupWithNewMeeting.getMeetingEntities().get(0).getMeetingTimeCells();
+
+        epFragment.Onmeeting_created(cells);
+
+        groupListFragment.updateGroupEntityOnMeetingCreate(groupWithNewMeeting);
+        groupListFragment.updateGroupListView();
     }
 
-    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
-    public void onGroupCreationEvent(GroupCreationEvent event){
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onGroupCreationEvent(GroupCreationEvent event) {
         Log.d(TAG, "이벤트 발생!!");
         groupListFragment.addGroupEntity(event.getNewGroup());
         groupListFragment.updateGroupListView();
@@ -110,11 +120,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     /*
-    * init_Main() 함수
-    * 1. kakao 계정의 친구 목록을 불러온다
-    * 2. kakao 계정의 유저 정보를 불러온다
-    * 3. 위 정보를 불러온 뒤에, fragment를 초기화하고 navigationView를 등록한다.
-    * */
+     * init_Main() 함수
+     * 1. kakao 계정의 친구 목록을 불러온다
+     * 2. kakao 계정의 유저 정보를 불러온다
+     * 3. 위 정보를 불러온 뒤에, fragment를 초기화하고 navigationView를 등록한다.
+     * */
     public void init_Main() {
         KakaoTalkService.getInstance().requestAppFriends(friendContext,
                 new TalkResponseCallback<AppFriendsResponse>() {
@@ -182,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
                                     kakaoUserInfo = response;
                                     saveUser(kakaoUserInfo);
 
-                                    for(AppFriendInfo friend : kakaoFriends){
+                                    for (AppFriendInfo friend : kakaoFriends) {
                                         saveUser(friend);
                                         saveFriendRelationShip(kakaoUserInfo, friend);
                                     }
@@ -250,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void saveUser(final AppFriendInfo user){
+    private void saveUser(final AppFriendInfo user) {
         Call<DefaultResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
@@ -266,6 +276,7 @@ public class MainActivity extends AppCompatActivity {
 //                    Toast.makeText(MainActivity.this, user.getProfileNickname() + " already exist", Toast.LENGTH_LONG).show();
 //                }
             }
+
             @Override
             public void onFailure(Call<DefaultResponse> call, Throwable t) {
                 Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
@@ -273,11 +284,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void saveUser(final MeV2Response user){
+    private void saveUser(final MeV2Response user) {
         Call<DefaultResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
-                .createUser(user.getId(), user.getNickname(),1);
+                .createUser(user.getId(), user.getNickname(), 1);
 
         call.enqueue(new Callback<DefaultResponse>() {
             @Override
@@ -290,6 +301,7 @@ public class MainActivity extends AppCompatActivity {
 //                    Toast.makeText(MainActivity.this, user.getNickname() + " already exist", Toast.LENGTH_LONG).show();
 //                }
             }
+
             @Override
             public void onFailure(Call<DefaultResponse> call, Throwable t) {
                 Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
@@ -297,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void saveFriendRelationShip(final MeV2Response user, final AppFriendInfo friend){
+    public void saveFriendRelationShip(final MeV2Response user, final AppFriendInfo friend) {
         Call<DefaultResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
@@ -312,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
 //                    Toast.makeText(MainActivity.this, user.getNickname() + "과"+ friend.getProfileNickname() + "의 Friend relationship already exist", Toast.LENGTH_LONG).show();
 //                }
             }
+
             @Override
             public void onFailure(Call<DefaultResponse> call, Throwable t) {
                 Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
@@ -320,13 +333,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void savePreferencesBoolean(String key, boolean value){
+    public void savePreferencesBoolean(String key, boolean value) {
         SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.putBoolean(key, value).apply();
     }
 
-    public boolean getPreferencesBoolean(String key){
+    public boolean getPreferencesBoolean(String key) {
         SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
         return pref.getBoolean(key, false);
     }

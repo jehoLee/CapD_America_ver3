@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import com.kakao.friends.response.model.AppFriendInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GroupEntity implements Parcelable {
@@ -23,7 +24,7 @@ public class GroupEntity implements Parcelable {
         this.groupMembers = groupMembers;
     }
 
-    private List<MeetingEntity> meetingEntities;
+    private List<MeetingEntity> meetingEntities = new ArrayList<MeetingEntity>();
 
     public String getGroupTitle() {
         return groupTitle;
@@ -69,18 +70,20 @@ public class GroupEntity implements Parcelable {
         return isMeetingAdded;
     }
 
+    public void setMeetingAdded(Boolean meetingAdded) {
+        isMeetingAdded = meetingAdded;
+    }
+
     public List<MeetingEntity> getMeetingEntities() {
         return meetingEntities;
     }
 
     public void setMeetingEntities(List<MeetingEntity> meetingEntities) {
         this.meetingEntities = meetingEntities;
-        isMeetingAdded = true;
     }
 
     public void addMeetingEntity(MeetingEntity meetingEntity){
         this.meetingEntities.add(meetingEntity);
-        isMeetingAdded = true;
     }
 
     public GroupEntity(Parcel in) {

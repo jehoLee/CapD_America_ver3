@@ -1,21 +1,17 @@
 package ajou.com.skechip.Event;
 
+import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
 
 public class MeetingCreationEvent {
 
-    private MeetingEntity newMeeting;
+    private GroupEntity groupEntity;
 
-    public MeetingCreationEvent(MeetingEntity meetingEntity){
-        this.newMeeting = meetingEntity;
+    public MeetingCreationEvent(GroupEntity groupEntity){
+        this.groupEntity = groupEntity;
     }
 
-    public MeetingEntity getNewMeeting() {
-        return newMeeting;
+    public GroupEntity getGroupEntityWithNewMeeting() {
+        return groupEntity;
     }
-
-    public void setNewMeeting(MeetingEntity newMeeting) {
-        this.newMeeting = newMeeting;
-    }
-
 }

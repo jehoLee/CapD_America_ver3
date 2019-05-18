@@ -85,7 +85,7 @@ public class GroupEntity_Recycler_Adapter extends RecyclerView.Adapter<GroupEnti
             holder.meetingNameText.setText(meetingEntity.getTitle());
             holder.meetingLocText.setText(meetingEntity.getLocation());
 
-            String time = meetingEntity.getMeetingTimeCells().get(0).getWeekofday() + meetingEntity.getMeetingTimeCells().get(0).getStartTime();
+            String time = meetingEntity.getMeetingTimeCells().get(0).getWeekofday() + " " + meetingEntity.getMeetingTimeCells().get(0).getStartTime();
             holder.meetingTimeText.setText(time);
 
         }

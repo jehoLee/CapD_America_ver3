@@ -131,13 +131,15 @@ public class MeetingCreateActivity extends AppCompatActivity {
                 MeetingEntity meetingEntity = new MeetingEntity(
                         meetingTitle, meetingLocation, meetingType, meetingTimeCells, selectedMembers);
 
+                groupEntity.setMeetingAdded(true);
+                groupEntity.addMeetingEntity(meetingEntity);
+
                 //TODO : server put
 
-                //TODO : onMeetingCreateEvent in EP_fragment <- main activity
                 //TODO : onMeetingCreateEvent in MeetingFragment <- main activity
                 //TODO : onMeetingCreateEvent in GroupDetailActivity
 
-                EventBus.getDefault().post(new MeetingCreationEvent(meetingEntity));
+                EventBus.getDefault().post(new MeetingCreationEvent(groupEntity));
 
 //                EventBus.getDefault().postSticky(new adawdawadwad(meetingEntity));
                 finish();

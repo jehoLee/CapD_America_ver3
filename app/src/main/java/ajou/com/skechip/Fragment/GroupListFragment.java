@@ -101,6 +101,14 @@ public class GroupListFragment extends Fragment {
         groupEntities.add(groupEntity);
     }
 
+    public void updateGroupEntityOnMeetingCreate(GroupEntity groupEntity){
+        for(int i = 0; i < groupEntities.size(); i++){
+            if(groupEntities.get(i).getGroupTitle().equals(groupEntity.getGroupTitle())){//TODO:추후 그룹id로 변경하기
+                groupEntities.set(i, groupEntity);//update
+            }
+        }
+    }
+
     public void updateGroupListView() {
         if (groupEntities.isEmpty()) {
             groupCreateBtn = view.findViewById(R.id.meeting_create_btn);
