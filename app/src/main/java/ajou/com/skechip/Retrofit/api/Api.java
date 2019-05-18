@@ -3,6 +3,7 @@ package ajou.com.skechip.Retrofit.api;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
 import ajou.com.skechip.Retrofit.models.TimeTableResponse;
 import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
+import ajou.com.skechip.Retrofit.models.UserResponse;
 import retrofit2.Call;
 import retrofit2.http.DELETE;
 import retrofit2.http.Field;
@@ -38,6 +39,11 @@ public interface Api {
             @Field("title") String title,
             @Field("place") String place,
             @Field("cellPosition") int cellPosition
+    );
+
+    @GET("getuser")
+    Call<UserResponse> getUser(
+            @Query("kakaoId") long kakaoId
     );
 
     @GET("gettimetables")
