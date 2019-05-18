@@ -187,6 +187,7 @@ public class EP_Fragment extends Fragment {
                     setting.setVisibility(View.VISIBLE);
                     append.setVisibility(View.INVISIBLE);
                     title.setText("시간표");
+                    change.setImageResource(R.drawable.ic_plus);
 
                     if (SELECTED_CELLS.size() > 0) {
                         Toast.makeText(getActivity(), "추가정보를 입력해주세요", Toast.LENGTH_LONG).show();
