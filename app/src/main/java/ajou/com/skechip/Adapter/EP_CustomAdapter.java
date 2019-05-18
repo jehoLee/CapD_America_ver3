@@ -1,10 +1,8 @@
 package ajou.com.skechip.Adapter;
-import android.app.Activity;
 import android.content.Context;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +18,8 @@ import cn.zhouchaoyuan.excelpanel.BaseExcelPanelAdapter;
 public class EP_CustomAdapter extends BaseExcelPanelAdapter <RowTitle, ColTitle, Cell> {
     private Context context;
     private View.OnClickListener blockListener;
+    private int common_height;
+    private int common_width;
     public EP_CustomAdapter(Context context, View.OnClickListener blockListener) {
         super(context);
         this.context = context;
@@ -29,7 +29,16 @@ public class EP_CustomAdapter extends BaseExcelPanelAdapter <RowTitle, ColTitle,
     @Override
     public RecyclerView.ViewHolder onCreateCellViewHolder(ViewGroup parent, int viewType) {
         View layout = LayoutInflater.from(parent.getContext()).inflate(R.layout.room_status_normal_cell, parent, false);
+        RelativeLayout cellContainer = layout.findViewById(R.id.cell_status_normal);
         CellHolder cellHolder = new CellHolder(layout);
+        WindowManager manager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        manager.getDefaultDisplay().getMetrics(displayMetrics);
+        ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) cellContainer.getLayoutParams();
+        common_height =  displayMetrics.heightPixels/11;
+        common_width = displayMetrics.widthPixels/6;
+        params.height = common_height;
+        params.width = common_width;
         return cellHolder;
     }
     @Override
@@ -99,6 +108,9 @@ public class EP_CustomAdapter extends BaseExcelPanelAdapter <RowTitle, ColTitle,
     @Override
     public RecyclerView.ViewHolder onCreateTopViewHolder(ViewGroup parent, int viewType) {
         View layout = LayoutInflater.from(parent.getContext()).inflate(R.layout.room_status_top_header_item, parent, false);
+        RelativeLayout cellContainer = layout.findViewById(R.id.status_top_header);
+        ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) cellContainer.getLayoutParams();
+        params.width = common_width;
         TopHolder topHolder = new TopHolder(layout);
         return topHolder;
     }
@@ -138,6 +150,7 @@ public class EP_CustomAdapter extends BaseExcelPanelAdapter <RowTitle, ColTitle,
         viewHolder.alphabetLabel.setText(colTitle.getAlphabetName());
         viewHolder.timeRangeLabel.setText(colTitle.getTimeRangeName());
         ViewGroup.LayoutParams lp = viewHolder.root.getLayoutParams();
+        lp.height= common_height;
         viewHolder.root.setLayoutParams(lp);
     }
     static class LeftHolder extends RecyclerView.ViewHolder {
@@ -146,7 +159,7 @@ public class EP_CustomAdapter extends BaseExcelPanelAdapter <RowTitle, ColTitle,
         public final View root;
         public LeftHolder(View itemView) {
             super(itemView);
-            root = itemView.findViewById(R.id.root);
+            root = itemView.findViewById(R.id.status_left_header);
             alphabetLabel = itemView.findViewById(R.id.alphabet_time);
             timeRangeLabel = itemView.findViewById(R.id.time_range);
         }
