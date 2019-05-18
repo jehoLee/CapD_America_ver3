@@ -31,9 +31,8 @@ import ajou.com.skechip.Fragment.bean.FriendEntity;
 import ajou.com.skechip.Fragment.bean.RowTitle;
 import ajou.com.skechip.R;
 
-import java.lang.reflect.Array;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
@@ -66,7 +65,6 @@ public class EP_Fragment extends Fragment {
     private List<RowTitle> rowTitles;
     private List<ColTitle> colTitles;
     private List<List<Cell>> cells;
-    private SimpleDateFormat weekFormatPattern;
     private TextView title;
     private List<String> friendsNickname_list = new ArrayList<>();
     private String kakaoUserImg;
@@ -409,15 +407,13 @@ public class EP_Fragment extends Fragment {
     };
 
     private void initData() {
-        weekFormatPattern = new SimpleDateFormat(WEEK_FORMAT_PATTERN);
         rowTitles = new ArrayList<>();
         colTitles = new ArrayList<>();
         cells = new ArrayList<>();
         for (int i = 0; i < ROW_SIZE; i++) {
             cells.add(new ArrayList<Cell>());
         }
-        long startTime = 24 * 3600 * 1000 * 4;
-        rowTitles.addAll(genRowData(startTime));
+        rowTitles.addAll(genRowData());
         colTitles.addAll(genColData());
 
         initTimeTableView();
@@ -514,11 +510,12 @@ public class EP_Fragment extends Fragment {
         });
     }
 
-    private List<RowTitle> genRowData(long startTime) {
+    private List<RowTitle> genRowData() {
         List<RowTitle> rowTitles = new ArrayList<>();
+        List<String> weekofday = Arrays.asList(new String[]{"월","화","수","목","금"});
         for (int i = 0; i < PAGE_SIZE; i++) {
             RowTitle rowTitle = new RowTitle();
-            rowTitle.setWeekString(weekFormatPattern.format(startTime + i * ONE_DAY));
+            rowTitle.setWeekString(weekofday.get(i));
             rowTitles.add(rowTitle);
         }
         return rowTitles;
@@ -619,7 +616,7 @@ public class EP_Fragment extends Fragment {
     private Cell getCell(String startTime, String dayofweek) {
         List<Cell> cell;
         switch (startTime) {
-            case "09:00":
+            case "9:00":
                 cell = cells.get(0);
                 break;
             case "10:30":
@@ -651,13 +648,13 @@ public class EP_Fragment extends Fragment {
                 break;
         }
         switch (dayofweek) {
-            case "Monday":
+            case "월":
                 return cell.get(0);
-            case "Tuesday":
+            case "화":
                 return cell.get(1);
-            case "Wednesday":
+            case "수":
                 return cell.get(2);
-            case "Thursday":
+            case "목":
                 return cell.get(3);
             default:
                 return cell.get(4);
