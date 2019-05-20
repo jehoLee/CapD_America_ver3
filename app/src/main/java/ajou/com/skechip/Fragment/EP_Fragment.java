@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
+import ajou.com.skechip.SettingActivity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -121,20 +122,7 @@ public class EP_Fragment extends Fragment {
             excelPanel.setAdapter(adapter);
             append = view.findViewById(R.id.append_timetable_button);
             append.setVisibility(View.INVISIBLE);
-//            PLACE_NAME.add("");
-//            PLACE_NAME.add("팔달325");
-//            PLACE_NAME.add("팔달409");
-//            PLACE_NAME.add("팔달410");
-//            PLACE_NAME.add("팔달309");
-//            PLACE_NAME.add("팔달409");
-//
-//            SUBJECT_NAME.add("");
-//            SUBJECT_NAME.add("정보보호");
-//            SUBJECT_NAME.add("이산수학");
-//            SUBJECT_NAME.add("확률통계");
-//            SUBJECT_NAME.add("캡디");
-//            SUBJECT_NAME.add("컴파일러");
-//        revise_mode = bundle.getBoolean("revise_mode");
+
             revise_mode = false;
             initData();
 
@@ -148,7 +136,7 @@ public class EP_Fragment extends Fragment {
             setting.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(getActivity(), CalendarActivity.class);
+                    Intent intent = new Intent(getActivity(), SettingActivity.class);
                     startActivity(intent);
                 }
             });
@@ -201,6 +189,8 @@ public class EP_Fragment extends Fragment {
                         final EditText place = (EditText) dialog_view.findViewById(R.id.timetable_place);
                         final ImageButton delete_Button = (ImageButton) dialog_view.findViewById(R.id.delete_timetable);
                         final ImageButton all_delete_Button = (ImageButton) dialog_view.findViewById(R.id.delete_all_timetable);
+                        final TextView textviewLogo = (TextView) dialog_view.findViewById(R.id.textviewLogo);
+                        textviewLogo.setText("수정");
                         final AlertDialog dialog = builder.create();
                         dialog.setCancelable(false);
                         dialog.show();
@@ -248,7 +238,7 @@ public class EP_Fragment extends Fragment {
                                     SUBJECT_NAME.add(strSubject);
                                     PLACE_NAME.add(strPlace);
                                 }
-                                conn.append_server(SELECTED_CELLS, kakaoUserID);
+                                conn.append_server(SELECTED_CELLS, kakaoUserID,'c');
                                 SELECTED_CELLS.clear();
                                 dialog.dismiss();
                                 Log.e("test", "" + 2);
@@ -418,27 +408,6 @@ public class EP_Fragment extends Fragment {
         colTitles.addAll(genColData());
 
         initTimeTableView();
-
-
-//        for (int i = 0; i < cells1.size(); i++) {
-//            Log.e("sssss",""+cells1.get(i));
-//            cells.get(i).addAll(cells1.get(i));
-//        }
-//        for (int i = 0; i < ROW_SIZE; i++) {
-//            List<Cell> tmplist = new ArrayList<Cell>();
-//            for (int j = 0; j < PAGE_SIZE; j++) {
-//                Cell tmp = cells1.get(i * PAGE_SIZE + j);
-//                tmp.setStartTime(colTitles.get(i).getTimeRangeName().split("~")[0]);
-//                Log.e("sss",""+colTitles.get(i).getTimeRangeName().split("~")[0]);
-//                tmp.setWeekofday(rowTitles.get(j).getWeekString());
-//                tmplist.add(tmp);
-//            }
-//            cells.get(i).addAll(tmplist);
-//        }
-//        progress.setVisibility(View.GONE);
-//        adapter.setAllData(colTitles, rowTitles, cells);
-//        adapter.disableFooter();
-//        adapter.disableHeader();
     }
 
     private void initTimeTableView() {
@@ -661,33 +630,4 @@ public class EP_Fragment extends Fragment {
                 return cell.get(4);
         }
     }
-
-//    private void saveCourseList(){
-//        Call<TimeTablesResponse> call = RetrofitClient
-////                .getInstance()
-//                .getApi()
-//                .getCourse(kakaoUserID);
-//
-//        Log.e("여기예요", kakaoUserID + "입니다.");
-//
-//        call.enqueue(new Callback<TimeTablesResponse>() {
-//            @Override
-//            public void onResponse(Call<TimeTablesResponse> call, Response<TimeTablesResponse> response) {
-//                Log.e("여기예요",  "여기도 됐다 입니다.");
-//
-//                courseList = response.body().getCourse();
-//                Log.e("여기예요", courseList.get(1).getPlace() + "입니다.");
-//
-//                for(TimeTable c : courseList){
-////                    Toast.makeText(getActivity(), c.getSellPosition(), Toast.LENGTH_LONG).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<TimeTablesResponse> call, Throwable t) {
-//                Log.e("여기예요", t.getMessage() + "입니다.");
-//            }
-//        });
-//    }
-
 }

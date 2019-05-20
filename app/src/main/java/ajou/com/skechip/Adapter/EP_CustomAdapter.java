@@ -50,7 +50,10 @@ public class EP_CustomAdapter extends BaseExcelPanelAdapter <RowTitle, ColTitle,
         CellHolder viewHolder = (CellHolder) holder;
         viewHolder.cellContainer.setTag(cell);
         viewHolder.cellContainer.setOnClickListener(blockListener);
-        if(cell.getStatus()==-1){
+        if(cell.getStatus()==-2){
+            viewHolder.cellContainer.setBackgroundResource(R.drawable.ic_forbid);
+        }
+        else if(cell.getStatus()==-1){
             viewHolder.cellContainer.setBackgroundResource(R.drawable.revise_selected);
         }
         else if (cell.getStatus() == 0) {

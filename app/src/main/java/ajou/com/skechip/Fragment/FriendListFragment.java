@@ -1,8 +1,10 @@
 package ajou.com.skechip.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import ajou.com.skechip.Fragment.bean.FriendEntity;
+import ajou.com.skechip.FriendDetailActivity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -14,11 +16,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-
-import ajou.com.skechip.Adapter.FriendListAdapter;
 import ajou.com.skechip.R;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
+
 
 import com.kakao.friends.response.model.AppFriendInfo;
 
@@ -28,17 +27,13 @@ import java.util.List;
 public class FriendListFragment extends Fragment {
     private FriendListFragment tmp = this;
     private final String TAG = "#FriendListFragment: ";
-//    private FriendTimetableFragment friend_timetable = new FriendTimetableFragment();
     private List<String> friendsNickname_list = new ArrayList<>();
     private String kakaoUserImg;
     private String kakaoUserName;
     private Long kakaoUserID;
     private List<AppFriendInfo> kakaoFriends;
-    private List<FriendEntity> friendEntities = new ArrayList<>();
-    private FragmentManager fragmentManager;
-    private Boolean isForGroupCreation;
-
-    private FriendListAdapter friendListAdapter;
+    private FriendEntity friendEntity;
+    private Bundle bundle;
 
     public static FriendListFragment newInstance(Bundle bundle) {
         FriendListFragment fragment = new FriendListFragment();
@@ -54,7 +49,7 @@ public class FriendListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-        Bundle bundle = getArguments();
+        bundle = getArguments();
         if(bundle != null){
             kakaoUserID = bundle.getLong("kakaoUserID");
             kakaoUserName = bundle.getString("kakaoUserName");
@@ -68,7 +63,6 @@ public class FriendListFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
-        fragmentManager = getActivity().getSupportFragmentManager();
 
         View view;
         view = inflater.inflate(R.layout.fragment_friend_list, container, false);
@@ -79,15 +73,13 @@ public class FriendListFragment extends Fragment {
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                        String item = String.valueOf(parent.getItemAtPosition(position));
-//                        FragmentTransaction transaction = fragmentManager.beginTransaction();
-//                        transaction.add(R.id.frame_layout, friend_timetable).hide(tmp);
-//                        transaction.commit();
+                        friendEntity= new FriendEntity(kakaoFriends.get(position).getId(),kakaoFriends.get(position).getProfileNickname(),kakaoFriends.get(position).getProfileThumbnailImage());
+                        Intent intent = new Intent(getActivity(), FriendDetailActivity.class);
+                        intent.putExtra("kakaoBundle", bundle);
+                        intent.putExtra("friendEntity", friendEntity);
+                        startActivity(intent);
                     }
-                }
-        );
-
-
+                });
         return view;
     }
 
@@ -102,8 +94,5 @@ public class FriendListFragment extends Fragment {
         Log.d(TAG, "onPause");
         super.onPause();
     }
-
-
-
 
 }
