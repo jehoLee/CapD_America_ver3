@@ -11,12 +11,12 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CallMethod {
-    public void append_server(List<Cell> cell, long kakaoUserID){
+    public void append_server(List<Cell> cell, long kakaoUserID, char type){
         for(Cell c : cell){
             Call<DefaultResponse> call = RetrofitClient
                     .getInstance()
                     .getApi()
-                    .createTimeTable(kakaoUserID, 'c', c.getSubjectName(), c.getPlaceName(), c.getPosition());
+                    .createTimeTable(kakaoUserID, type, c.getSubjectName(), c.getPlaceName(), c.getPosition());
             call.enqueue(new Callback<DefaultResponse>() {
                 @Override
                 public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
