@@ -1,5 +1,9 @@
 package ajou.com.skechip.Retrofit.api;
 
+import java.util.List;
+
+import ajou.com.skechip.Retrofit.models.AsManyUserAsAvailableResponse;
+import ajou.com.skechip.Retrofit.models.AvailableMeetingTimesResponse;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
 import ajou.com.skechip.Retrofit.models.TimeTableResponse;
 import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
@@ -49,6 +53,16 @@ public interface Api {
     @GET("gettimetables")
     Call<TimeTablesResponse> getTimeTables(
             @Query("kakaoId") long kakaoId
+    );
+
+    @GET("getAvailableMeetingTimes")
+    Call<AvailableMeetingTimesResponse> getAvailableMeetingTimes(
+            @Query("kakaoIds") String kakaoIdList
+    );
+
+    @GET("getAsManyUserAsAvailable")
+    Call<AsManyUserAsAvailableResponse> getAsManyUserAsAvailable(
+            @Query("kakaoIds") String kakaoIdList
     );
 
     @FormUrlEncoded
