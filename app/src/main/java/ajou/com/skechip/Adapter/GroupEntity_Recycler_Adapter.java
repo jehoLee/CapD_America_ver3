@@ -70,7 +70,7 @@ public class GroupEntity_Recycler_Adapter extends RecyclerView.Adapter<GroupEnti
 
         holder.groupNameTextView.setText(curGroup.getGroupTitle());
         holder.groupTagText.setText(curGroup.getGroupTag());
-        holder.groupMemberNumText.setText(Integer.toString(curGroup.getGroupMemberNum()));
+        holder.groupMemberNumText.setText(Integer.toString(curGroup.getGroupMemberNum()+1));
 //        holder.mImageView.setImageResource(groupEntities.get(position).getGroupImg());
 
         if(curGroup.isMeetingAdded()){

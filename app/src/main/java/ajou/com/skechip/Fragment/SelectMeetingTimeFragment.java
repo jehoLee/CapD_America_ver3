@@ -12,6 +12,10 @@ import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.ColTitle;
 import ajou.com.skechip.Fragment.bean.RowTitle;
 import ajou.com.skechip.MeetingCreateActivity;
+import ajou.com.skechip.Retrofit.api.RetrofitClient;
+import ajou.com.skechip.Retrofit.models.AvailableMeetingTimesResponse;
+import ajou.com.skechip.Retrofit.models.TimeTable;
+import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
@@ -24,9 +28,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.kakao.friends.response.model.AppFriendInfo;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,6 +44,9 @@ import java.util.Random;
 
 import ajou.com.skechip.R;
 import cn.zhouchaoyuan.excelpanel.ExcelPanel;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static ajou.com.skechip.Fragment.EP_Fragment.ONE_DAY;
 import static ajou.com.skechip.Fragment.EP_Fragment.PAGE_SIZE;
@@ -45,7 +55,6 @@ import static ajou.com.skechip.Fragment.EP_Fragment.WEEK_FORMAT_PATTERN;
 
 
 public class SelectMeetingTimeFragment extends Fragment {
-
     private ExcelPanel excelPanel;
     private List<RowTitle> rowTitles;
     private List<ColTitle> colTitles;
@@ -57,6 +66,12 @@ public class SelectMeetingTimeFragment extends Fragment {
     public List<String> PLACE_NAME = new ArrayList<String>();
     public List<String> SUBJECT_NAME = new ArrayList<String>();
 
+    private List<TimeTable> timeTableList;
+    private View view;
+    private ProgressBar progress;
+
+    private List<AppFriendInfo> selectedMembers;
+    private List<Long> selectedMemberIds = new ArrayList<>();
 
     public static SelectMeetingTimeFragment newInstance(Bundle bundle) {
         SelectMeetingTimeFragment fragment = new SelectMeetingTimeFragment();
@@ -71,7 +86,17 @@ public class SelectMeetingTimeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            selectedMembers = bundle.getParcelableArrayList("selectedMembers");
+            Long myId = bundle.getLong("kakaoUserID");
+
+            if (selectedMembers != null) {
+                selectedMemberIds.add(myId);
+                for(AppFriendInfo friend : selectedMembers){
+                    selectedMemberIds.add(friend.getId());
+                }
+            }
 
         }
     }
@@ -79,8 +104,9 @@ public class SelectMeetingTimeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_select_meeting_time, container, false);
+        view = inflater.inflate(R.layout.fragment_select_meeting_time, container, false);
 
+        progress = view.findViewById(R.id.progress);
 
         //임시
         PLACE_NAME.add("");
@@ -97,13 +123,11 @@ public class SelectMeetingTimeFragment extends Fragment {
         SUBJECT_NAME.add("캡디");
         SUBJECT_NAME.add("컴파일러");
 
-
-
         excelPanel = view.findViewById(R.id.content_container);
         timeTableAdapter = new EP_CustomAdapter(getActivity(), blockListener);
         excelPanel.setAdapter(timeTableAdapter);
 
-        initData();
+        initTimeTableView();
 
         Button confirmTimeBtn = view.findViewById(R.id.confirm_time_button);
         confirmTimeBtn.setOnClickListener(new View.OnClickListener() {
@@ -135,6 +159,82 @@ public class SelectMeetingTimeFragment extends Fragment {
 
 
 
+    private void initTimeTableView() {
+        rowTitles = new ArrayList<>();
+        colTitles = new ArrayList<>();
+        cells = new ArrayList<>();
+        for (int i = 0; i < ROW_SIZE; i++) {
+            cells.add(new ArrayList<Cell>());
+        }
+        rowTitles.addAll(genRowData());
+        colTitles.addAll(genColData());
+
+        Call<AvailableMeetingTimesResponse> call = RetrofitClient
+                .getInstance()
+                .getApi()
+                .getAvailableMeetingTimes(selectedMemberIds.toString());
+
+        call.enqueue(new Callback<AvailableMeetingTimesResponse>() {
+            @Override
+            public void onResponse(Call<AvailableMeetingTimesResponse> call, Response<AvailableMeetingTimesResponse> response) {
+
+                List<Integer> availableCellPositions = response.body().getAvailableMeetingTimes();
+
+//                timeTableList = response.body().getAvailableMeetingTimes();
+
+                SUBJECT_NAME.add("");
+                PLACE_NAME.add("");
+
+                ArrayList<Cell> cellList = new ArrayList<>();
+                int cursor = 0;
+                for (int i = 0; i < ROW_SIZE * PAGE_SIZE; i++) {
+                    Cell cell = new Cell();
+                    cell.setPosition(i);
+                    if (cursor<availableCellPositions.size() && i == availableCellPositions.get(cursor)) {
+//                        if (SUBJECT_NAME.contains(availableCellPositions.get(cursor))) {
+//                            int num = SUBJECT_NAME.indexOf(timeTableList.get(cursor).getTitle());
+//                            cell.setStatus(num);
+//                            cell.setPlaceName(PLACE_NAME.get(num));
+//                            cell.setSubjectName(SUBJECT_NAME.get(num));
+//                        } else {
+//                            cell.setStatus(PLACE_NAME.size());
+//                            cell.setPlaceName(timeTableList.get(cursor).getPlace());
+//                            cell.setSubjectName(timeTableList.get(cursor).getTitle());
+//                            PLACE_NAME.add(timeTableList.get(cursor).getPlace());
+//                            SUBJECT_NAME.add(timeTableList.get(cursor).getTitle());
+//                        }
+                        cell.setStatus(0);
+                        cursor++;
+                    } else {
+                        cell.setSubjectName("선택불가");
+                        cell.setStatus(3);
+                    }
+                    cellList.add(cell);
+                }
+
+                for (int i = 0; i < ROW_SIZE; i++) {
+                    List<Cell> tmplist = new ArrayList<Cell>();
+                    for (int j = 0; j < PAGE_SIZE; j++) {
+                        Cell tmp = cellList.get(i * PAGE_SIZE + j);
+                        tmp.setStartTime(colTitles.get(i).getTimeRangeName().split("~")[0]);
+                        tmp.setWeekofday(rowTitles.get(j).getWeekString());
+                        tmplist.add(tmp);
+                    }
+                    cells.get(i).addAll(tmplist);
+                }
+
+                progress.setVisibility(View.GONE);
+                timeTableAdapter.setAllData(colTitles, rowTitles, cells);
+                timeTableAdapter.disableFooter();
+                timeTableAdapter.disableHeader();
+            }
+
+            @Override
+            public void onFailure(Call<AvailableMeetingTimesResponse> call, Throwable t) {
+            }
+        });
+    }
+
     private View.OnClickListener blockListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -150,35 +250,6 @@ public class SelectMeetingTimeFragment extends Fragment {
             }
         }
     };
-
-
-    private void initData() {
-        weekFormatPattern = new SimpleDateFormat(WEEK_FORMAT_PATTERN);
-        rowTitles = new ArrayList<>();
-        colTitles = new ArrayList<>();
-        cells = new ArrayList<>();
-        for (int i = 0; i < ROW_SIZE; i++) {
-            cells.add(new ArrayList<Cell>());
-        }
-        rowTitles.addAll(genRowData());
-        colTitles.addAll(genColData());
-
-        List<Cell> cells1 = genCellData();
-
-        for (int i = 0; i < ROW_SIZE; i++) {
-            List<Cell> tmplist = new ArrayList<Cell>();
-            for (int j = 0; j < PAGE_SIZE; j++) {
-                Cell tmp = cells1.get(i * PAGE_SIZE + j);
-                tmp.setStartTime(colTitles.get(i).getTimeRangeName().split("~")[0]);
-                tmp.setWeekofday(rowTitles.get(j).getWeekString());
-                tmplist.add(tmp);
-            }
-            cells.get(i).addAll(tmplist);
-        }
-        timeTableAdapter.setAllData(colTitles, rowTitles, cells);
-        timeTableAdapter.disableFooter();
-        timeTableAdapter.disableHeader();
-    }
 
     private List<RowTitle> genRowData() {
         List<RowTitle> rowTitles = new ArrayList<>();
@@ -218,23 +289,71 @@ public class SelectMeetingTimeFragment extends Fragment {
         return colTitles;
     }
 
-    private ArrayList<Cell> genCellData() {
-        ArrayList<Cell> cellList = new ArrayList<>();
-        for (int i = 0; i < ROW_SIZE * PAGE_SIZE; i++) {
-            Cell cell = new Cell();
-            Random random = new Random();
-            int number = random.nextInt(15);
-            if (number == 1 || number == 2 || number == 3 || number == 4 || number == 5) {
-                cell.setStatus(number);
-                cell.setPlaceName(PLACE_NAME.get(number));
-                cell.setSubjectName(SUBJECT_NAME.get(number));
-            } else {
-                cell.setStatus(0);
-            }
-            cellList.add(cell);
-        }
-        return cellList;
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //previous version
+
+//    private void initData() {
+//        weekFormatPattern = new SimpleDateFormat(WEEK_FORMAT_PATTERN);
+//        rowTitles = new ArrayList<>();
+//        colTitles = new ArrayList<>();
+//        cells = new ArrayList<>();
+//        for (int i = 0; i < ROW_SIZE; i++) {
+//            cells.add(new ArrayList<Cell>());
+//        }
+//        rowTitles.addAll(genRowData());
+//        colTitles.addAll(genColData());
+//
+//        List<Cell> cells1 = genCellData();
+//
+//        for (int i = 0; i < ROW_SIZE; i++) {
+//            List<Cell> tmplist = new ArrayList<Cell>();
+//            for (int j = 0; j < PAGE_SIZE; j++) {
+//                Cell tmp = cells1.get(i * PAGE_SIZE + j);
+//                tmp.setStartTime(colTitles.get(i).getTimeRangeName().split("~")[0]);
+//                tmp.setWeekofday(rowTitles.get(j).getWeekString());
+//                tmplist.add(tmp);
+//            }
+//            cells.get(i).addAll(tmplist);
+//        }
+//        timeTableAdapter.setAllData(colTitles, rowTitles, cells);
+//        timeTableAdapter.disableFooter();
+//        timeTableAdapter.disableHeader();
+//    }
+//
+//
+//
+//    private ArrayList<Cell> genCellData() {
+//        ArrayList<Cell> cellList = new ArrayList<>();
+//        for (int i = 0; i < ROW_SIZE * PAGE_SIZE; i++) {
+//            Cell cell = new Cell();
+//            Random random = new Random();
+//            int number = random.nextInt(15);
+//            if (number == 1 || number == 2 || number == 3 || number == 4 || number == 5) {
+//                cell.setStatus(number);
+//                cell.setPlaceName(PLACE_NAME.get(number));
+//                cell.setSubjectName(SUBJECT_NAME.get(number));
+//            } else {
+//                cell.setStatus(0);
+//            }
+//            cellList.add(cell);
+//        }
+//        return cellList;
+//    }
 
 
 

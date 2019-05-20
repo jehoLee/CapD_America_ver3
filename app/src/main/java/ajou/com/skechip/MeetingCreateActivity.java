@@ -7,6 +7,7 @@ import ajou.com.skechip.Fragment.SelectMeetingTimeFragment;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
+import ajou.com.skechip.Retrofit.conn.CallMethod;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -54,6 +55,8 @@ public class MeetingCreateActivity extends AppCompatActivity {
 
     private FragmentManager fragmentManager;
 
+    private CallMethod conn= new CallMethod();
+    private Long kakaoUserID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +65,7 @@ public class MeetingCreateActivity extends AppCompatActivity {
         if (getIntent() != null) {
             bundle = getIntent().getBundleExtra("kakaoBundle");
             groupEntity = getIntent().getParcelableExtra("groupEntity");
+            kakaoUserID = bundle.getLong("kakaoUserID");
         }
 
         infoEnterView = findViewById(R.id.info_enter_view);
@@ -92,10 +96,7 @@ public class MeetingCreateActivity extends AppCompatActivity {
                 infoEnterView.setVisibility(View.GONE);
                 frameLayout.setVisibility(View.VISIBLE);
 
-//                RelativeLayout.LayoutParams params= new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-//                params.addRule(RelativeLayout.BELOW, R.id.appbarLayout);
-//                frameLayout.setLayoutParams(params);
-
+                bundle.putParcelableArrayList("selectedMembers", (ArrayList<? extends Parcelable>) selectedMembers);
                 selectMeetingTimeFragment = SelectMeetingTimeFragment.newInstance(bundle);
 
                 fragmentManager.beginTransaction()
@@ -103,49 +104,6 @@ public class MeetingCreateActivity extends AppCompatActivity {
                         .commit();
             }
         });
-
-
-        createMeetingBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //멤버들, 제목, 타입, 장소, 일정시간
-
-                EditText meetingTitleEdit = findViewById(R.id.meeting_title_edit);
-                String meetingTitle = meetingTitleEdit.getText().toString();
-
-                EditText meetingLocEdit = findViewById(R.id.meeting_location_edit);
-                String meetingLocation = meetingLocEdit.getText().toString();
-
-                for(Cell cell : meetingTimeCells){
-                    cell.setSubjectName(meetingTitle);
-                    cell.setPlaceName(meetingLocation);
-                }
-
-                Toast.makeText(getApplicationContext(), meetingTitle +
-                        "\n" + meetingLocation + "\n" + meetingType + "\n" +
-                        meetingTimeCells.get(0).getSubjectName() + "에서\n" +
-                        meetingTimeCells.get(0).getStartTime() + meetingTimeCells.get(0).getWeekofday() + "에\n" +
-                        selectedMembers.get(0).getProfileNickname() + "와 함께"
-                        , Toast.LENGTH_LONG).show();
-
-                MeetingEntity meetingEntity = new MeetingEntity(
-                        meetingTitle, meetingLocation, meetingType, meetingTimeCells, selectedMembers);
-
-                groupEntity.setMeetingAdded(true);
-                groupEntity.addMeetingEntity(meetingEntity);
-
-                //TODO : server put
-
-                //TODO : onMeetingCreateEvent in MeetingFragment <- main activity
-                //TODO : onMeetingCreateEvent in GroupDetailActivity
-
-                EventBus.getDefault().post(new MeetingCreationEvent(groupEntity));
-
-//                EventBus.getDefault().postSticky(new adawdawadwad(meetingEntity));
-                finish();
-            }
-        });
-
 
 
 
@@ -181,6 +139,7 @@ public class MeetingCreateActivity extends AppCompatActivity {
         //Do somethin with meetingTimeCells
 
         //update selected time view
+
         TextView selectedTimeText = findViewById(R.id.selected_time_text);
         selectedTimeText.setText(meetingTimeCells.get(0).getWeekofday() + " " + meetingTimeCells.get(0).getStartTime());
 
@@ -193,6 +152,44 @@ public class MeetingCreateActivity extends AppCompatActivity {
         findViewById(R.id.get_time_view).setVisibility(View.GONE);
         findViewById(R.id.selected_time_view).setVisibility(View.VISIBLE);
         infoEnterView.setVisibility(View.VISIBLE);
+
+        createMeetingBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //멤버들, 제목, 타입, 장소, 일정시간
+
+                EditText meetingTitleEdit = findViewById(R.id.meeting_title_edit);
+                String meetingTitle = meetingTitleEdit.getText().toString();
+
+                EditText meetingLocEdit = findViewById(R.id.meeting_location_edit);
+                String meetingLocation = meetingLocEdit.getText().toString();
+
+                for(Cell cell : meetingTimeCells){
+                    cell.setSubjectName(meetingTitle);
+                    cell.setPlaceName(meetingLocation);
+                }
+
+                Toast.makeText(getApplicationContext(), meetingTitle +
+                                "\n" + meetingLocation + "\n" + meetingType + "\n" +
+                                meetingTimeCells.get(0).getSubjectName() + "에서\n" +
+                                meetingTimeCells.get(0).getStartTime() + meetingTimeCells.get(0).getWeekofday() + "에\n" +
+                                selectedMembers.get(0).getProfileNickname() + "와 함께"
+                        , Toast.LENGTH_LONG).show();
+
+                MeetingEntity meetingEntity = new MeetingEntity(
+                        meetingTitle, meetingLocation, meetingType, meetingTimeCells, selectedMembers);
+
+                groupEntity.setMeetingAdded(true);
+                groupEntity.addMeetingEntity(meetingEntity);
+
+                //TODO : server put
+                conn.append_server(meetingTimeCells, kakaoUserID, 'm');
+
+                EventBus.getDefault().post(new MeetingCreationEvent(groupEntity));
+
+                finish();
+            }
+        });
 
     }
 
@@ -241,7 +238,6 @@ public class MeetingCreateActivity extends AppCompatActivity {
                 return view;
             }
         };
-
 
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_list_item_1);
         meetingTypeSpinner.setAdapter(spinnerArrayAdapter);
