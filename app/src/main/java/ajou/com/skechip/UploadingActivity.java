@@ -106,7 +106,7 @@ public class UploadingActivity extends AppCompatActivity {
                     Log.e("1"," "+(5*i+j));
                     cell.setPosition(5*i+j);
                     cell.setPlaceName("");
-                    cell.setStatus(2);
+                    cell.setStatus((j*i)%5+1);
                     scheduleCells.add(cell);
                 }
                 else
