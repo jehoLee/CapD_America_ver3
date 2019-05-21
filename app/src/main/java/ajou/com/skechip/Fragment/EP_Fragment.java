@@ -4,7 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
-import ajou.com.skechip.SettingActivity;
+//import ajou.com.skechip.SettingActivity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -76,7 +76,7 @@ public class EP_Fragment extends Fragment {
     private Boolean timeTableUploaded;
     private CallMethod conn= new CallMethod();
     private List<Cell> cells1;
-
+    private Bundle bundle;
     private List<TimeTable> timeTableList;
 
     public static EP_Fragment newInstance(Bundle bundle) {
@@ -92,7 +92,7 @@ public class EP_Fragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle bundle = getArguments();
+        bundle = getArguments();
         if (bundle != null) {
             kakaoUserID = bundle.getLong("kakaoUserID");
             kakaoUserName = bundle.getString("kakaoUserName");
@@ -136,8 +136,8 @@ public class EP_Fragment extends Fragment {
             setting.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(getActivity(), SettingActivity.class);
-                    startActivity(intent);
+//                    Intent intent = new Intent(getActivity(), SettingActivity.class);
+//                    startActivity(intent);
                 }
             });
             change.setOnClickListener(new Button.OnClickListener() {
@@ -257,6 +257,7 @@ public class EP_Fragment extends Fragment {
                 public void onClick(View v) {
                     //TODO : 업로드 액티비티 띄우고 갤러리 이미지 불러온 뒤 선택하게 하기
                     Intent intent = new Intent(getActivity(), UploadingActivity.class);
+                    intent.putExtra("kakaoUserID",bundle);
                     startActivity(intent);
                 }
             });
