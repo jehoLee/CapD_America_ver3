@@ -33,29 +33,34 @@
             android:id="@+id/change_timetable"
             android:layout_width="wrap_content"
             android:layout_height="56dip"
+            android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="95dp"
-            android:src="@drawable/ic_plus"
-            android:background="@color/white" />
+            android:layout_marginTop="0dp"
+            android:layout_marginRight="94dp"
+            android:background="@color/white"
+            android:src="@drawable/ic_plus" />
 
         <ImageButton
-            android:id="@+id/change_timetable_selected"
+            android:id="@+id/compare_selected"
             android:layout_width="wrap_content"
             android:layout_height="56dip"
             android:layout_alignParentRight="true"
             android:layout_marginRight="95dp"
             android:background="@color/white"
-            android:src="@drawable/ic_plus_selected"
+            android:src="@drawable/ic_compare_selected"
             android:visibility="invisible" />
 
         <ImageButton
             android:id="@+id/calendar"
             android:layout_width="wrap_content"
             android:layout_height="56dip"
+            android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="55dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginRight="53dp"
             android:background="@color/white"
             android:src="@drawable/ic_calendar" />
+
         <ImageButton
             android:id="@+id/compare"
             android:layout_width="wrap_content"
@@ -63,7 +68,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:layout_marginTop="0dp"
-            android:layout_marginRight="74dp"
+            android:layout_marginRight="54dp"
             android:background="@color/white"
             android:src="@drawable/ic_compare"
             tools:visibility="invisible" />
@@ -86,7 +91,7 @@
             android:layout_marginEnd="12dp"
             android:background="@drawable/button_textshape"
             android:clickable="true"
-            android:text="생성"
+            android:text="추가"
             android:textIsSelectable="false"
             android:textSize="18sp"
             android:textStyle="bold"
