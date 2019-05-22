@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
 
+import ajou.com.skechip.Event.AppointmentCreationEvent;
 import ajou.com.skechip.Event.MeetingCreationEvent;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
@@ -53,12 +54,14 @@ import org.opencv.core.Mat;
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "ssss.MainActivity";
 
-//    @Subscribe(threadMode = ThreadMode.MAIN)
-//    public void onGroupCreationEvent(GroupCreationEvent event){
-//        Log.d(TAG, "이벤트 발생!!");
-//        groupListFragment.addGroupEntity(event.getNewGroup());
-//        groupListFragment.updateGroupListView();
-//    }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onAppointmentCreationEvent(AppointmentCreationEvent event){
+        Log.d(TAG, "약속 생성 이벤트 발생 !");
+
+        ArrayList<Cell> cells = (ArrayList<Cell>)event.getAppointmentTimeCells();
+
+        epFragment.onTimeCellsCreateEvent(cells);
+    }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMeetingCreationEvent(MeetingCreationEvent event) {
@@ -67,10 +70,10 @@ public class MainActivity extends AppCompatActivity {
         GroupEntity groupWithNewMeeting = event.getGroupEntityWithNewMeeting();
         ArrayList<Cell> cells = (ArrayList<Cell>) groupWithNewMeeting.getMeetingEntities().get(0).getMeetingTimeCells();
 
-        epFragment.Onmeeting_created(cells);
+        epFragment.onTimeCellsCreateEvent(cells);
 
         groupListFragment.updateGroupEntityOnMeetingCreate(groupWithNewMeeting);
-        groupListFragment.updateGroupListView();
+//        groupListFragment.updateGroupListView();
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)

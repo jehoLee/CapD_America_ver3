@@ -1,5 +1,6 @@
 package ajou.com.skechip.Retrofit.conn;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ajou.com.skechip.Fragment.bean.Cell;
@@ -11,8 +12,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CallMethod {
-    public void append_server(List<Cell> cell, long kakaoUserID, char type){
-        for(Cell c : cell){
+    public void append_server(List<Cell> cell, Long kakaoUserID, char type) {
+        for (Cell c : cell) {
             Call<DefaultResponse> call = RetrofitClient
                     .getInstance()
                     .getApi()
@@ -29,9 +30,16 @@ public class CallMethod {
                 }
             });
         }
+
     }
 
-    public void update_server(Cell cell, long kakaoUserID) {
+    public void append_server(List<Cell> cells, ArrayList<Long> kakaoUserIDs, char type) {
+        for (Long userID : kakaoUserIDs) {
+            this.append_server(cells, userID, type);
+        }
+    }
+
+    public void update_server(Cell cell, Long kakaoUserID) {
         Call<TimeTableResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
@@ -49,8 +57,8 @@ public class CallMethod {
         });
     }
 
-    public void delete_server(List<Cell> cell, long kakaoUserID){
-        for(Cell c : cell){
+    public void delete_server(List<Cell> cell, Long kakaoUserID) {
+        for (Cell c : cell) {
             Call<TimeTableResponse> call = RetrofitClient
                     .getInstance()
                     .getApi()

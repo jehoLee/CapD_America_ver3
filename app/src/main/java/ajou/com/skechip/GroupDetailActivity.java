@@ -1,6 +1,7 @@
 package ajou.com.skechip;
 
 import ajou.com.skechip.Event.MeetingCreationEvent;
+import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -47,11 +48,7 @@ public class GroupDetailActivity extends AppCompatActivity {
         if (getIntent() != null) {
             bundle = getIntent().getBundleExtra("kakaoBundle");
             groupEntity = getIntent().getParcelableExtra("groupEntity");
-//            kakaoUserID = kakaoBundle.getLong("kakaoUserID");
-//            kakaoUserName = kakaoBundle.getString("kakaoUserName");
-//            kakaoUserImg = kakaoBundle.getString("kakaoUserImg");
-//            kakaoFriends = kakaoBundle.getParcelableArrayList("kakaoFriends");
-//            friendsNickname_list = kakaoBundle.getStringArrayList("friendsNickname_list");
+            meetingEntities = getIntent().getParcelableArrayListExtra("meetingEntities");
         }
 
         EventBus.getDefault().register(this);
@@ -62,8 +59,7 @@ public class GroupDetailActivity extends AppCompatActivity {
         meetingAddView = findViewById(R.id.initial_meeting_card);
         meetingView = findViewById(R.id.meeting_view);
 
-        if(!groupEntity.isMeetingAdded()){
-
+        if(meetingEntities.isEmpty()){
             meetingAddView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -112,12 +108,11 @@ public class GroupDetailActivity extends AppCompatActivity {
 
     public void updateGroupEntity(GroupEntity newGroup){
         groupEntity = newGroup;
+        meetingEntities = groupEntity.getMeetingEntities();
     }
 
     public void updateMeetingAndRelatedView() {
         //TODO : 일단 카드뷰 하나 박아놓고 모임일정 띄워준다. 추후 모임일정 리스트 구현할 때 어댑터로 리사이클러뷰 구현하자
-        meetingEntities = groupEntity.getMeetingEntities();
-
         //임시: 첫번째꺼만 보여줌
         MeetingEntity meetingEntity = meetingEntities.get(0);
 
@@ -138,41 +133,29 @@ public class GroupDetailActivity extends AppCompatActivity {
 
 
     public void startCreateMeeting(){
-        Toast.makeText(getApplicationContext(), "start create meeting", Toast.LENGTH_SHORT).show();
-
         Intent intent = new Intent(this, MeetingCreateActivity.class);
 
         intent.putExtra("kakaoBundle", bundle);
         intent.putExtra("groupEntity", groupEntity);
 
         startActivity(intent);
-//        meetingAddView.setVisibility(View.GONE);
-
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        FragmentTransaction transaction = fragmentManager.beginTransaction();
-//
-//        meetingCreateFragment = MeetingCreateFragment.newInstance(bundle);
-//        transaction.add(R.id.frame_layout, meetingCreateFragment);
-//        transaction.commit();
-
     }
 
     @Override
     public void onBackPressed() {
         EventBus.getDefault().unregister(this);
+        finish();
         super.onBackPressed();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-//        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-//        EventBus.getDefault().unregister(this);
     }
 
 

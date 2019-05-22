@@ -169,22 +169,25 @@ public class MeetingCreateActivity extends AppCompatActivity {
                     cell.setPlaceName(meetingLocation);
                 }
 
-                Toast.makeText(getApplicationContext(), meetingTitle +
-                                "\n" + meetingLocation + "\n" + meetingType + "\n" +
-                                meetingTimeCells.get(0).getSubjectName() + "에서\n" +
-                                meetingTimeCells.get(0).getStartTime() + meetingTimeCells.get(0).getWeekofday() + "에\n" +
-                                selectedMembers.get(0).getProfileNickname() + "와 함께"
-                        , Toast.LENGTH_LONG).show();
+//                Toast.makeText(getApplicationContext(), meetingTitle +
+//                                "\n" + meetingLocation + "\n" + meetingType + "\n" +
+//                                meetingTimeCells.get(0).getSubjectName() + "에서\n" +
+//                                meetingTimeCells.get(0).getStartTime() + meetingTimeCells.get(0).getWeekofday() + "에\n" +
+//                                selectedMembers.get(0).getProfileNickname() + "와 함께"
+//                        , Toast.LENGTH_LONG).show();
 
                 MeetingEntity meetingEntity = new MeetingEntity(
                         meetingTitle, meetingLocation, meetingType, meetingTimeCells, selectedMembers);
 
-                groupEntity.setMeetingAdded(true);
                 groupEntity.addMeetingEntity(meetingEntity);
 
-                //TODO : server put
-                conn.append_server(meetingTimeCells, kakaoUserID, 'm');
+                //server put
+                ArrayList<Long> memberIDs = new ArrayList<>();
+                for(AppFriendInfo member : groupEntity.getGroupMembers())
+                    memberIDs.add(member.getId());
+                conn.append_server(meetingTimeCells, memberIDs, 'm');
 
+                //UI update
                 EventBus.getDefault().post(new MeetingCreationEvent(groupEntity));
 
                 finish();
