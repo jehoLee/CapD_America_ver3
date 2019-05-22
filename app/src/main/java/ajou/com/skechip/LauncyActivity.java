@@ -3,12 +3,21 @@ package ajou.com.skechip;;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+
+import ajou.com.skechip.Fragment.bean.Cell;
+import ajou.com.skechip.Retrofit.api.RetrofitClient;
+import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
 import androidx.appcompat.app.AppCompatActivity;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 import android.os.Bundle;
 import android.content.SharedPreferences;
 import android.content.Intent;
 import android.util.Base64;
 import android.util.Log;
+import android.view.View;
 
 import com.kakao.auth.ApiResponseCallback;
 import com.kakao.auth.ISessionCallback;
@@ -20,7 +29,9 @@ import com.kakao.util.helper.log.Logger;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class LauncyActivity extends AppCompatActivity {
@@ -45,24 +56,8 @@ public class LauncyActivity extends AppCompatActivity {
         Session.getCurrentSession().checkAndImplicitOpen();
         //kakao
 
-//        String idx = getPreferences("idx");
-//        String username = getPreferences("username");
-//        String password = getPreferences("password");
-//        Boolean login = getPreferencesBoolean("login");
-//
-//        if(idx != "" && username != "" && login)
-//        {
-//            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-//            intent.putExtra("username", username);
-//            intent.putExtra("password", password);
-//            intent.putExtra("idx", idx);
-//
-//            finish();
-//            startActivity(intent);
-//        }
     }//onCreate
 
-    //for kakao API
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult");
@@ -99,9 +94,7 @@ public class LauncyActivity extends AppCompatActivity {
 
     //로그인 완료 후 시작할 액티비티
     protected void startMainActivity() {
-        //<제호> 런치액티비티에서 프로필 정보를 얻어와서 메인액티비티 시작할 때 넘겨줘야 하는가?
-        // -> 아닐 것 같다. 카톡 세션이 오픈 fail 뜨면 다시 로그인하게 해야하므로
-        Intent intent = new Intent(this, MainActivity.class);;
+        Intent intent = new Intent(this, MainActivity.class);
 
         startActivity(intent);
         finish();

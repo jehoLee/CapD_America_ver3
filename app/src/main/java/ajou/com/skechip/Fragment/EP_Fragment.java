@@ -78,6 +78,7 @@ public class EP_Fragment extends Fragment {
     private List<Cell> cells1;
 
     private List<TimeTable> timeTableList;
+    private Bundle bundle;
 
     public static EP_Fragment newInstance(Bundle bundle) {
         EP_Fragment fragment = new EP_Fragment();
@@ -92,15 +93,16 @@ public class EP_Fragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle bundle = getArguments();
+        bundle = getArguments();
         if (bundle != null) {
             kakaoUserID = bundle.getLong("kakaoUserID");
             kakaoUserName = bundle.getString("kakaoUserName");
             kakaoUserImg = bundle.getString("kakaoUserImg");
             kakaoFriendInfo_list = bundle.getParcelableArrayList("kakaoFriendInfo_list");
             friendsNickname_list = bundle.getStringArrayList("friendsNickname_list");
-//            timeTableUploaded = bundle.getBoolean("timeTableUploaded");
-            timeTableUploaded = true;
+
+            timeTableUploaded = bundle.getBoolean("timeTableUploaded");
+//            timeTableUploaded = true;
         }
     }
 
@@ -258,6 +260,7 @@ public class EP_Fragment extends Fragment {
                 public void onClick(View v) {
                     //TODO : 업로드 액티비티 띄우고 갤러리 이미지 불러온 뒤 선택하게 하기
                     Intent intent = new Intent(getActivity(), UploadingActivity.class);
+                    intent.putExtra("kakaoBundle", bundle);
                     startActivity(intent);
                 }
             });

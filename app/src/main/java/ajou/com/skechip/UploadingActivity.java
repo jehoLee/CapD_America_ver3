@@ -1,5 +1,7 @@
 package ajou.com.skechip;
 
+import ajou.com.skechip.Event.GroupCreationEvent;
+import ajou.com.skechip.Event.TimeTableImageUploadEvent;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.Retrofit.conn.CallMethod;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,8 +17,10 @@ import android.provider.MediaStore;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 
+import org.greenrobot.eventbus.EventBus;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -25,6 +29,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class UploadingActivity extends AppCompatActivity {
     /*
@@ -125,38 +130,47 @@ public class UploadingActivity extends AppCompatActivity {
         //con.delete_server(scheduleCells,kakaoUserID);
         con.append_server(scheduleCells,kakaoUserID,'c');
 
+        //TODO : UI update
+        //2. 시간표 업데이트
+
+        EventBus.getDefault().post(new TimeTableImageUploadEvent());
+
     }
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode == RESULT_OK) {
+            if (requestCode == GET_GALLERY_IMAGE) {
+                if (data.getData() != null) {
+                    Uri uri = data.getData();
 
-        if ( requestCode == GET_GALLERY_IMAGE){
+                    try {
+                        String path = getRealPathFromURI(uri);
+                        int orientation = getOrientationOfImage(path); // 런타임 퍼미션 필요
+                        Bitmap temp = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                        Bitmap bitmap = getRotatedBitmap(temp, orientation);
+                        img_input = new Mat();
+                        Bitmap bmp32 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                        Utils.bitmapToMat(bmp32, img_input);
 
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
-            if (data.getData() != null) {
-                Uri uri = data.getData();
-
-                try {
-                    String path = getRealPathFromURI(uri);
-                    int orientation = getOrientationOfImage(path); // 런타임 퍼미션 필요
-                    Bitmap temp = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                    Bitmap bitmap = getRotatedBitmap(temp, orientation);
-                    img_input = new Mat();
-                    Bitmap bmp32 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                    Utils.bitmapToMat(bmp32, img_input);
-
-
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
-
+                imageprocess_and_showResult();
             }
-            imageprocess_and_showResult();
-
+        }
+        else {
+            finish();
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 
     private String getRealPathFromURI(Uri contentUri) {
 
