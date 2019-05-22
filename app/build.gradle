@@ -75,4 +75,6 @@ dependencies {
 
     implementation 'me.saket:inboxrecyclerview:1.0.0-rc1'
 
+    implementation 'de.hdodenhof:circleimageview:3.0.0'
+
 }
