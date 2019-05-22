@@ -24,6 +24,7 @@ import android.widget.Toast;
 import ajou.com.skechip.Event.GroupCreationEvent;
 import ajou.com.skechip.Fragment.EP_Fragment;
 import ajou.com.skechip.Fragment.FriendListFragment;
+import ajou.com.skechip.Fragment.AlarmFragment;
 import ajou.com.skechip.Fragment.GroupListFragment;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
     private FriendListFragment friendListFragment;
     private GroupListFragment groupListFragment;
     private EP_Fragment epFragment;
+    private AlarmFragment alertFragment;
 
     private Fragment curActivatedFragment;
 
@@ -221,6 +223,7 @@ public class MainActivity extends AppCompatActivity {
 
         groupListFragment = GroupListFragment.newInstance(bundle);
         friendListFragment = FriendListFragment.newInstance(bundle);
+        alertFragment = AlarmFragment.newInstance(bundle);
 
         boolean timeTableUploaded = getPreferencesBoolean("timeTableUploaded");
         bundle.putBoolean("timeTableUploaded", timeTableUploaded);
@@ -232,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(R.id.frame_layout, groupListFragment).hide(groupListFragment);
         transaction.add(R.id.frame_layout, friendListFragment).hide(friendListFragment);
+        transaction.add(R.id.frame_layout, alertFragment).hide(alertFragment);
         transaction.add(R.id.frame_layout, epFragment);
         transaction.commit();
 
@@ -256,6 +260,11 @@ public class MainActivity extends AppCompatActivity {
                         transaction.hide(curActivatedFragment).show(friendListFragment);
                         transaction.commit();
                         curActivatedFragment = friendListFragment;
+                        break;
+                    case R.id.navigation_alert:
+                        transaction.hide(curActivatedFragment).show(alertFragment);
+                        transaction.commit();
+                        curActivatedFragment = alertFragment;
                         break;
                 }
                 return true;
