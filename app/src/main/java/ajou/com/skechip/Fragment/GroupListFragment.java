@@ -6,10 +6,13 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.kakao.friends.response.model.AppFriendInfo;
@@ -84,7 +87,7 @@ public class GroupListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_group_list, container, false);
 
-        Button groupCreateBarBtn = view.findViewById(R.id.group_create_bar_btn);
+        ImageButton groupCreateBarBtn = view.findViewById(R.id.group_create_bar_btn);
         groupCreateBarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,6 +110,10 @@ public class GroupListFragment extends Fragment {
                 groupEntities.set(i, groupEntity);//update
             }
         }
+
+        Toast.makeText(getActivity(), "미팅 : " + groupEntities.get(0).getMeetingEntities().get(0).getTitle(), Toast.LENGTH_SHORT).show();
+
+        updateGroupListView();
     }
 
     public void updateGroupListView() {
@@ -133,12 +140,11 @@ public class GroupListFragment extends Fragment {
                     new RecyclerItemClickListener(getActivity(), mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
-                            Toast.makeText(getActivity(), position + "번 째 아이템 클릭 : " + groupEntities.get(position).getGroupTitle(), Toast.LENGTH_SHORT).show();
-                            //TODO : 해당 모임 상세 액티비티 이동
 
                             Intent intent = new Intent(getActivity(), GroupDetailActivity.class);
                             intent.putExtra("kakaoBundle", bundle);
                             intent.putExtra("groupEntity", groupEntities.get(position));
+                            intent.putParcelableArrayListExtra("meetingEntities", (ArrayList<? extends Parcelable>)groupEntities.get(position).getMeetingEntities());
 
                             startActivity(intent);
 
@@ -146,7 +152,7 @@ public class GroupListFragment extends Fragment {
 
                         @Override
                         public void onLongItemClick(View view, int position) {
-                            Toast.makeText(getActivity(), position + "번 째 아이템 롱 클릭", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(getActivity(), position + "번 째 아이템 롱 클릭", Toast.LENGTH_SHORT).show();
                         }
                     }));
 

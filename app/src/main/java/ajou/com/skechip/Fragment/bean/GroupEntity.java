@@ -14,8 +14,7 @@ public class GroupEntity implements Parcelable {
     private String groupTag;
     private int groupMemberNum;
     private List<AppFriendInfo> groupMembers;
-
-    private Boolean isMeetingAdded = false;
+    private List<MeetingEntity> meetingEntities = new ArrayList<>();
 
     public GroupEntity(String groupTitle, String groupTag, int groupMemberNum, List<AppFriendInfo> groupMembers){
         this.groupTitle = groupTitle;
@@ -23,8 +22,6 @@ public class GroupEntity implements Parcelable {
         this.groupMemberNum = groupMemberNum;
         this.groupMembers = groupMembers;
     }
-
-    private List<MeetingEntity> meetingEntities = new ArrayList<MeetingEntity>();
 
     public String getGroupTitle() {
         return groupTitle;
@@ -66,21 +63,13 @@ public class GroupEntity implements Parcelable {
         this.groupMembers = groupMembers;
     }
 
-    public Boolean isMeetingAdded() {
-        return isMeetingAdded;
-    }
-
-    public void setMeetingAdded(Boolean meetingAdded) {
-        isMeetingAdded = meetingAdded;
-    }
-
     public List<MeetingEntity> getMeetingEntities() {
         return meetingEntities;
     }
 
-    public void setMeetingEntities(List<MeetingEntity> meetingEntities) {
-        this.meetingEntities = meetingEntities;
-    }
+//    public void setMeetingEntities(List<MeetingEntity> meetingEntities) {
+//        this.meetingEntities = meetingEntities;
+//    }
 
     public void addMeetingEntity(MeetingEntity meetingEntity){
         this.meetingEntities.add(meetingEntity);

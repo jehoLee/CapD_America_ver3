@@ -7,7 +7,6 @@ import com.kakao.friends.response.model.AppFriendInfo;
 import java.util.List;
 
 public class MeetingEntity implements Parcelable {
-
     private String title;
     private String location;
     private String type;
@@ -85,7 +84,7 @@ public class MeetingEntity implements Parcelable {
         selectedMembers = in.createTypedArrayList(AppFriendInfo.CREATOR);
     }
 
-    public static final Creator<MeetingEntity> CREATOR = new Creator<MeetingEntity>() {
+    public static final Parcelable.Creator<MeetingEntity> CREATOR = new Parcelable.Creator<MeetingEntity>() {
         @Override
         public MeetingEntity createFromParcel(Parcel in) {
             return new MeetingEntity(in);
@@ -96,6 +95,7 @@ public class MeetingEntity implements Parcelable {
             return new MeetingEntity[size];
         }
     };
+
 
 
 

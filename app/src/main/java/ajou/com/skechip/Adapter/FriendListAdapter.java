@@ -2,17 +2,14 @@ package ajou.com.skechip.Adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RectShape;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -20,16 +17,21 @@ import android.widget.Toast;
 
 import com.kakao.friends.response.model.AppFriendInfo;
 
-import org.w3c.dom.Text;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import ajou.com.skechip.R;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class FriendListAdapter extends BaseAdapter{
 
     private Context activityContext;
+    private Bitmap bitmap;
 
     public List<AppFriendInfo> getSelectedFriends() {
         return selectedFriends;
@@ -44,6 +46,7 @@ public class FriendListAdapter extends BaseAdapter{
     private LinearLayout selectedFriendsView;
 
     private List<TextView> selectedNames = new ArrayList<>();
+    private List<LinearLayout> selectedView = new ArrayList<>();
 
     public FriendListAdapter(Context activityContext, List<AppFriendInfo> friendEntities, RelativeLayout layout) {
         this.activityContext = activityContext;
@@ -93,36 +96,12 @@ public class FriendListAdapter extends BaseAdapter{
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                bitmap = null;
+
                 if(isChecked) {
-//                    Toast.makeText(activityContext, friendEntity.getProfileNickname() + ": checked!", Toast.LENGTH_SHORT).show();
-                    selectedFriends.add(friendEntity);
-                    selectedFriendsNumberText.setText(Integer.toString(++selectedFriendsNum));
-
-                    final TextView name = new TextView(activityContext);
-                    name.setText(friendEntity.getProfileNickname());
-
-//                    ShapeDrawable sd = new ShapeDrawable();
-//                    sd.setShape(new RectShape());
-//                    sd.getPaint().setColor(Color.BLACK);
-//                    sd.getPaint().setStrokeWidth(1f);
-//                    sd.getPaint().setStyle(Paint.Style.STROKE);
-//                    name.setBackground(sd);
-//                    name.setPadding(10, 5, 10, 5);
-                    name.setTextColor(activityContext.getResources().getColor(R.color.text_dark1));
-
-
-                    selectedFriendsView.addView(name);
-                    selectedNames.add(name);
-
+                    addSelectedFriendToView(friendEntity);
                 }else{
-//                    Toast.makeText(activityContext, friendEntity.getProfileNickname() + ": unchecked!", Toast.LENGTH_SHORT).show();
-                    selectedFriends.remove(friendEntity);
-                    selectedFriendsNumberText.setText(Integer.toString(--selectedFriendsNum));
-
-                    for(TextView target : selectedNames){
-                        if((target.getText().toString()).equals(friendEntity.getProfileNickname()))
-                            selectedFriendsView.removeView(target);
-                    }
+                    removeSelectedFriendFromView(friendEntity);
 
                 }
             }
@@ -130,6 +109,71 @@ public class FriendListAdapter extends BaseAdapter{
 
         return convertView;
     }
+
+    private void addSelectedFriendToView(final AppFriendInfo friendEntity) {
+        selectedFriends.add(friendEntity);
+        selectedFriendsNumberText.setText(Integer.toString(++selectedFriendsNum));
+
+        final TextView name = new TextView(activityContext);
+        name.setText(friendEntity.getProfileNickname());
+        name.setTextColor(activityContext.getResources().getColor(R.color.text_dark1));
+
+        CircleImageView imageView = new CircleImageView(activityContext);
+        Thread thread = new Thread(){
+            @Override
+            public void run(){
+                try{
+                    if(friendEntity.getProfileThumbnailImage().isEmpty()){
+                        bitmap = BitmapFactory.decodeResource(activityContext.getResources(),R.drawable.defalt_thumb_nail_image);
+                    }
+                    else {
+                        URL url = new URL(friendEntity.getProfileThumbnailImage());
+                        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                        connection.setDoInput(true);
+                        connection.connect();
+
+                        InputStream inputStream = connection.getInputStream();
+                        bitmap = BitmapFactory.decodeStream(inputStream);
+                    }
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        thread.start();
+
+        try {
+            thread.join();
+            imageView.setImageBitmap(bitmap);
+            LinearLayout friendView = new LinearLayout(activityContext);
+            friendView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            friendView.setOrientation(LinearLayout.VERTICAL);
+            friendView.addView(imageView);
+            friendView.addView(name);
+            selectedFriendsView.addView(friendView);
+            selectedView.add(friendView);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void removeSelectedFriendFromView(AppFriendInfo friendEntity) {
+        selectedFriends.remove(friendEntity);
+        selectedFriendsNumberText.setText(Integer.toString(--selectedFriendsNum));
+        for(LinearLayout target : selectedView){
+            TextView textview = (TextView)target.getChildAt(1);
+            if((textview.getText().toString()).equals(friendEntity.getProfileNickname()))
+                selectedFriendsView.removeView(target);
+        }
+    }
+
+
+
+
+
 
 
 }

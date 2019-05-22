@@ -78,7 +78,7 @@ public class Cell implements Parcelable {
         weekofday = in.readString();
     }
 
-    public static final Creator<Cell> CREATOR = new Creator<Cell>() {
+    public static final Parcelable.Creator<Cell> CREATOR = new Parcelable.Creator<Cell>() {
         @Override
         public Cell createFromParcel(Parcel in) {
             return new Cell(in);

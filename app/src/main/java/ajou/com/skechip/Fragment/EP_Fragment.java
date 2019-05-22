@@ -76,7 +76,7 @@ public class EP_Fragment extends Fragment {
     private Boolean timeTableUploaded;
     private CallMethod conn= new CallMethod();
     private List<Cell> cells1;
-    private Bundle bundle;
+
     private List<TimeTable> timeTableList;
 
     public static EP_Fragment newInstance(Bundle bundle) {
@@ -92,7 +92,7 @@ public class EP_Fragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        bundle = getArguments();
+        Bundle bundle = getArguments();
         if (bundle != null) {
             kakaoUserID = bundle.getLong("kakaoUserID");
             kakaoUserName = bundle.getString("kakaoUserName");
@@ -187,12 +187,13 @@ public class EP_Fragment extends Fragment {
                         final Button submit_one = (Button) dialog_view.findViewById(R.id.revise_one_plan);
                         final EditText subject = (EditText) dialog_view.findViewById(R.id.timetable_subject);
                         final EditText place = (EditText) dialog_view.findViewById(R.id.timetable_place);
-                        final ImageButton delete_Button = (ImageButton) dialog_view.findViewById(R.id.delete_timetable);
-                        final ImageButton all_delete_Button = (ImageButton) dialog_view.findViewById(R.id.delete_all_timetable);
+                        final Button delete_Button = (Button) dialog_view.findViewById(R.id.delete_timetable);
+                        final Button all_delete_Button = (Button) dialog_view.findViewById(R.id.delete_all_timetable);
                         final TextView textviewLogo = (TextView) dialog_view.findViewById(R.id.textviewLogo);
-                        textviewLogo.setText("수정");
+                        textviewLogo.setText("일정 추가");
                         final AlertDialog dialog = builder.create();
                         dialog.setCancelable(false);
+                        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
                         dialog.show();
                         delete_Button.setVisibility(View.INVISIBLE);
                         all_delete_Button.setVisibility(View.INVISIBLE);
@@ -257,7 +258,6 @@ public class EP_Fragment extends Fragment {
                 public void onClick(View v) {
                     //TODO : 업로드 액티비티 띄우고 갤러리 이미지 불러온 뒤 선택하게 하기
                     Intent intent = new Intent(getActivity(), UploadingActivity.class);
-                    intent.putExtra("kakaoBundle",bundle);
                     startActivity(intent);
                 }
             });
@@ -265,7 +265,6 @@ public class EP_Fragment extends Fragment {
 
         return view;
     }
-    /*==================================Time Table code============================== */
 
     private View.OnClickListener blockListener = new View.OnClickListener() {
         @Override
@@ -281,8 +280,8 @@ public class EP_Fragment extends Fragment {
             final EditText subject = (EditText) dialog_view.findViewById(R.id.timetable_subject);
             final EditText place = (EditText) dialog_view.findViewById(R.id.timetable_place);
             final TextView textviewLogo = (TextView) dialog_view.findViewById(R.id.textviewLogo);
-            final ImageButton delete_Button = (ImageButton) dialog_view.findViewById(R.id.delete_timetable);
-            final ImageButton all_delete_Button = (ImageButton) dialog_view.findViewById(R.id.delete_all_timetable);
+            final Button delete_Button = (Button) dialog_view.findViewById(R.id.delete_timetable);
+            final Button all_delete_Button = (Button) dialog_view.findViewById(R.id.delete_all_timetable);
             final AlertDialog dialog = builder.create();
             if (cell.getStatus() == 0 && revise_mode) {      //빈칸 클릭
                 SELECTED_CELLS.add(cell);
@@ -292,8 +291,12 @@ public class EP_Fragment extends Fragment {
                 SELECTED_CELLS.remove(cell);
                 cell.setStatus(0);
                 adapter.setAllData(colTitles, rowTitles, cells);
-            } else if (cell.getStatus() != 0) {    //빈칸이 아닐때, 대화창을 띄워준다.
-                textviewLogo.setText("수정");
+            }
+// else if (cell.getStatus() < 0 && ){
+//
+//            }
+            else if (cell.getStatus() != 0) {    //빈칸이 아닐때, 대화창을 띄워준다.
+                textviewLogo.setText("일정 수정");
                 subject.setText(cell.getSubjectName());
                 place.setText(cell.getPlaceName());
                 submit.setOnClickListener(new View.OnClickListener() {
@@ -393,6 +396,7 @@ public class EP_Fragment extends Fragment {
                         builder1.show();
                     }
                 });
+                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
                 dialog.show();
             }
         }
@@ -519,42 +523,17 @@ public class EP_Fragment extends Fragment {
         return colTitles;
     }
 
-    //====================================generate data==========================================
-//    private ArrayList<Cell> genCellData() {
-////        saveCourseList();
-//        ArrayList<Cell> cellList = new ArrayList<>();
-//        int cursor=0;
-//        for (int i = 0; i < ROW_SIZE * PAGE_SIZE; i++) {
-//            Cell cell = new Cell();
-//            if(i==courseList.get(cursor).getSellPosition()) {
-//                if(SUBJECT_NAME.contains(courseList.get(cursor).getTitle())) {
-//                    int num = SUBJECT_NAME.indexOf(courseList.get(cursor).getTitle());
-//                    cell.setStatus(num);
-//                    cell.setPlaceName(PLACE_NAME.get(num));
-//                    cell.setSubjectName(SUBJECT_NAME.get(num));
-////                    Log.e("Cell val:",""+NAME[number]+i+j);
-//                    cursor++;
-//                }
-//                else{
-//                    cell.setStatus(PLACE_NAME.size());
-//                    cell.setPlaceName(courseList.get(cursor).getPlace());
-//                    cell.setSubjectName(courseList.get(cursor).getTitle());
-////
-//                    PLACE_NAME.add(courseList.get(cursor).getPlace());
-//                    SUBJECT_NAME.add(courseList.get(cursor).getTitle());
-//
-//                }
-//            }
-//            else {
-//                cell.setStatus(0);
-////                    Log.e("Cell val:",""+0);
-//            }
-//            cellList.add(cell);
-//        }
-//        return cellList;
-//    }
 
-    public void Onmeeting_created(ArrayList<Cell> cell) {
+    public void onTimeCellsCreateEvent(ArrayList<Cell> cell) {
+
+        //이 방법으로 하려 했으나, network 동기화 문제에 의해 일단 보류
+//        cells = new ArrayList<>();
+//        for (int i = 0; i < ROW_SIZE; i++) {
+//            cells.add(new ArrayList<Cell>());
+//        }
+//
+//        initTimeTableView();
+
         for (int i = 0; i < cell.size(); i++)
             SELECTED_CELLS.add(getCell(cell.get(i).getStartTime(), cell.get(i).getWeekofday()));
         String strSubject = cell.get(0).getSubjectName();

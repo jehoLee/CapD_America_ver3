@@ -73,7 +73,7 @@ public class GroupEntity_Recycler_Adapter extends RecyclerView.Adapter<GroupEnti
         holder.groupMemberNumText.setText(Integer.toString(curGroup.getGroupMemberNum()+1));
 //        holder.mImageView.setImageResource(groupEntities.get(position).getGroupImg());
 
-        if(curGroup.isMeetingAdded()){
+        if(!curGroup.getMeetingEntities().isEmpty()){
             //TODO : 모임 일정 1개 이상 리스트로 둘 수 있게 했을 때, 어댑터로 리스트뷰 설정하기
 
             holder.emptyView.setVisibility(View.GONE);

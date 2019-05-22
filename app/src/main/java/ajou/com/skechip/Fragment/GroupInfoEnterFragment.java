@@ -1,5 +1,7 @@
 package ajou.com.skechip.Fragment;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -21,18 +23,27 @@ import com.kakao.friends.response.model.AppFriendInfo;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import ajou.com.skechip.Event.GroupCreationEvent;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.GroupCreateActivity;
 import ajou.com.skechip.R;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class GroupInfoEnterFragment extends Fragment {
     private List<AppFriendInfo> selectedFriends;
     private String groupName;
     private String groupTag;
     private int groupMemberNum;
+
+    private AppFriendInfo curFriend;
+    private Bitmap bitmap;
 
     public static GroupInfoEnterFragment newInstance(Bundle bundle) {
         GroupInfoEnterFragment fragment = new GroupInfoEnterFragment();
@@ -76,11 +87,6 @@ public class GroupInfoEnterFragment extends Fragment {
 
 
                 //TODO - DB/server : 모임 생성 API 호출 + 모임 정보 DB 저장
-
-
-
-
-
 
                 GroupEntity newGroup = new GroupEntity(groupName, groupTag, groupMemberNum, selectedFriends);
 
@@ -161,12 +167,63 @@ public class GroupInfoEnterFragment extends Fragment {
         String text = Integer.toString(selectedFriends.size()) + "명의 친구";
         selectedFriendsNum.setText(text);
 
+
         for(AppFriendInfo friendEntity : selectedFriends){
+            curFriend = friendEntity;
+            bitmap = null;
             final TextView name = new TextView(getActivity());
             name.setText(friendEntity.getProfileNickname());
             name.setTextColor(getResources().getColor(R.color.text_dark1));
-            selectedFriendsView.addView(name);
+
+            final CircleImageView imageView = new CircleImageView(getActivity());
+            Thread thread = new Thread(){
+                @Override
+                public void run(){
+                    try{
+                        if(curFriend.getProfileThumbnailImage().isEmpty()){
+                            bitmap = BitmapFactory.decodeResource(getActivity().getResources(),R.drawable.defalt_thumb_nail_image);
+                        }
+                        else {
+                            URL url = new URL(curFriend.getProfileThumbnailImage());
+                            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                            connection.setDoInput(true);
+                            connection.connect();
+
+                            InputStream inputStream = connection.getInputStream();
+                            bitmap = BitmapFactory.decodeStream(inputStream);
+                        }
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+
+            thread.start();
+
+            try {
+                thread.join();
+                imageView.setImageBitmap(bitmap);
+                LinearLayout friendView = new LinearLayout(getActivity());
+                friendView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                friendView.setOrientation(LinearLayout.VERTICAL);
+                friendView.addView(imageView);
+                friendView.addView(name);
+                selectedFriendsView.addView(friendView);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
         }
+
+
+//        for(AppFriendInfo friendEntity : selectedFriends){
+//            final TextView name = new TextView(getActivity());
+//            name.setText(friendEntity.getProfileNickname());
+//            name.setTextColor(getResources().getColor(R.color.text_dark1));
+//            selectedFriendsView.addView(name);
+//        }
 
     }
 

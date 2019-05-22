@@ -64,7 +64,7 @@ public class EP_CustomAdapter extends BaseExcelPanelAdapter <RowTitle, ColTitle,
             viewHolder.bookingName.setText(cell.getSubjectName());
             viewHolder.channelName.setText(cell.getPlaceName());
             if (cell.getStatus() == 1) {
-                viewHolder.cellContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.Subject1));
+                viewHolder.cellContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.CapD_color_main));
             } else if (cell.getStatus() == 2) {
                 viewHolder.cellContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.Subject2));
             } else if(cell.getStatus() == 3){

@@ -191,23 +191,11 @@ public class SelectMeetingTimeFragment extends Fragment {
                     Cell cell = new Cell();
                     cell.setPosition(i);
                     if (cursor<availableCellPositions.size() && i == availableCellPositions.get(cursor)) {
-//                        if (SUBJECT_NAME.contains(availableCellPositions.get(cursor))) {
-//                            int num = SUBJECT_NAME.indexOf(timeTableList.get(cursor).getTitle());
-//                            cell.setStatus(num);
-//                            cell.setPlaceName(PLACE_NAME.get(num));
-//                            cell.setSubjectName(SUBJECT_NAME.get(num));
-//                        } else {
-//                            cell.setStatus(PLACE_NAME.size());
-//                            cell.setPlaceName(timeTableList.get(cursor).getPlace());
-//                            cell.setSubjectName(timeTableList.get(cursor).getTitle());
-//                            PLACE_NAME.add(timeTableList.get(cursor).getPlace());
-//                            SUBJECT_NAME.add(timeTableList.get(cursor).getTitle());
-//                        }
                         cell.setStatus(0);
                         cursor++;
                     } else {
-                        cell.setSubjectName("선택불가");
-                        cell.setStatus(3);
+//                        cell.setSubjectName("선택불가");
+                        cell.setStatus(-2);
                     }
                     cellList.add(cell);
                 }
