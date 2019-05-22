@@ -36,6 +36,7 @@ public class SelectFriendsFragment extends Fragment {
     private ListView selectableListView;
     private RelativeLayout checkInteractionView;
     private Button confirmFriendsButton;
+    private Long kakaoUserID;
 
 
     public static SelectFriendsFragment newInstance(Bundle bundle) {
@@ -54,6 +55,7 @@ public class SelectFriendsFragment extends Fragment {
         Bundle bundle = getArguments();
         if(bundle != null){
             kakaoFriends = bundle.getParcelableArrayList("kakaoFriends");
+            kakaoUserID = bundle.getLong("kakaoUserID");
             isForMeetingCreate = bundle.getBoolean("isForMeetingCreate", false);
 
             if(isForMeetingCreate){

@@ -134,7 +134,7 @@ public class UploadingActivity extends AppCompatActivity {
         //2. 시간표 업데이트
 
         EventBus.getDefault().post(new TimeTableImageUploadEvent());
-
+        finish();
     }
 
 

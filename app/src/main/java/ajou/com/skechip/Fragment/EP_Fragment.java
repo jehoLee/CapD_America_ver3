@@ -221,17 +221,22 @@ public class EP_Fragment extends Fragment {
                                 String strSubject = subject.getText().toString();
                                 String strPlace = place.getText().toString();
                                 boolean newone = true;
-                                for (int i = 0; i < SUBJECT_NAME.size(); i++) {
-                                    if (SUBJECT_NAME.get(i).equals(strSubject)) {
-                                        for (int j = 0; j < SELECTED_CELLS.size(); j++) {
-                                            SELECTED_CELLS.get(j).setStatus(i);
-                                            SELECTED_CELLS.get(j).setSubjectName(strSubject);
-                                            SELECTED_CELLS.get(j).setPlaceName(strPlace);
+
+                                if(SUBJECT_NAME.contains(strSubject)) {
+                                    for (int i = 0; i < SUBJECT_NAME.size(); i++) {
+                                        if (SUBJECT_NAME.get(i).equals(strSubject)) {
+                                            for (int j = 0; j < SELECTED_CELLS.size(); j++) {
+                                                SELECTED_CELLS.get(j).setStatus(i);
+                                                SELECTED_CELLS.get(j).setSubjectName(strSubject);
+                                                SELECTED_CELLS.get(j).setPlaceName(strPlace);
+                                            }
+                                            newone = false;
+                                            break;
                                         }
-                                        newone = false;
-                                        break;
                                     }
                                 }
+
+
                                 if (newone) {
                                     for (int i = 0; i < SELECTED_CELLS.size(); i++) {
                                         SELECTED_CELLS.get(i).setStatus(SUBJECT_NAME.size());
@@ -241,6 +246,8 @@ public class EP_Fragment extends Fragment {
                                     SUBJECT_NAME.add(strSubject);
                                     PLACE_NAME.add(strPlace);
                                 }
+
+
                                 conn.append_server(SELECTED_CELLS, kakaoUserID,'c');
                                 SELECTED_CELLS.clear();
                                 dialog.dismiss();
@@ -526,9 +533,7 @@ public class EP_Fragment extends Fragment {
         return colTitles;
     }
 
-
     public void onTimeCellsCreateEvent(ArrayList<Cell> cell) {
-
         //이 방법으로 하려 했으나, network 동기화 문제에 의해 일단 보류
 //        cells = new ArrayList<>();
 //        for (int i = 0; i < ROW_SIZE; i++) {
@@ -541,18 +546,23 @@ public class EP_Fragment extends Fragment {
             SELECTED_CELLS.add(getCell(cell.get(i).getStartTime(), cell.get(i).getWeekofday()));
         String strSubject = cell.get(0).getSubjectName();
         String strPlace = cell.get(0).getPlaceName();
+
         boolean newone = true;
-        for (int i = 0; i < SUBJECT_NAME.size(); i++) {
-            if (SUBJECT_NAME.get(i).equals(strSubject)) {
-                for (int j = 0; j < SELECTED_CELLS.size(); j++) {
-                    SELECTED_CELLS.get(j).setStatus(i);
-                    SELECTED_CELLS.get(j).setSubjectName(strSubject);
-                    SELECTED_CELLS.get(j).setPlaceName(strPlace);
+
+        if(SUBJECT_NAME.contains(strSubject)) {
+            for (int i = 0; i < SUBJECT_NAME.size(); i++) {
+                if (SUBJECT_NAME.get(i).equals(strSubject)) {
+                    for (int j = 0; j < SELECTED_CELLS.size(); j++) {
+                        SELECTED_CELLS.get(j).setStatus(i);
+                        SELECTED_CELLS.get(j).setSubjectName(strSubject);
+                        SELECTED_CELLS.get(j).setPlaceName(strPlace);
+                    }
+                    newone = false;
+                    break;
                 }
-                newone = false;
-                break;
             }
         }
+
         if (newone) {
             for (int i = 0; i < SELECTED_CELLS.size(); i++) {
                 SELECTED_CELLS.get(i).setStatus(SUBJECT_NAME.size());
@@ -562,6 +572,7 @@ public class EP_Fragment extends Fragment {
             SUBJECT_NAME.add(strSubject);
             PLACE_NAME.add(strPlace);
         }
+
         SELECTED_CELLS.clear();
         adapter.setAllData(colTitles, rowTitles, cells);
     }

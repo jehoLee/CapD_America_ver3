@@ -3,6 +3,12 @@ package ajou.com.skechip.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 
+import ajou.com.skechip.Fragment.bean.Cell;
+import ajou.com.skechip.Retrofit.api.RetrofitClient;
+import ajou.com.skechip.Retrofit.models.GroupResponse;
+import ajou.com.skechip.Retrofit.models.Kakao;
+import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
+import ajou.com.skechip.Retrofit.models.UserByGroupIdResponse;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +30,9 @@ import ajou.com.skechip.GroupCreateActivity;
 import ajou.com.skechip.GroupDetailActivity;
 import ajou.com.skechip.R;
 import ajou.com.skechip.RecyclerItemClickListener;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +103,100 @@ public class GroupListFragment extends Fragment {
                 startGroupCreate();
             }
         });
+
+
+
+
+
+
+        Call<GroupResponse> call = RetrofitClient
+                .getInstance()
+                .getApi()
+                .getGroup(kakaoUserID);
+
+        call.enqueue(new Callback<GroupResponse>() {
+            @Override
+            public void onResponse(Call<GroupResponse> call, Response<GroupResponse> response) {
+                int groupNum = response.body().getTotalCount();
+                GroupResponse groupResponse = response.body();
+
+                List<Integer> groupIDs = groupResponse.getIdList();
+                List<Integer> groupManagers = groupResponse.getManagerList();
+                List<String> groupTags = groupResponse.gettagList();
+                List<String> groupTitles = groupResponse.getTitleList();
+
+                for(int i = 0; i < groupNum; i++){
+                    GroupEntity groupEntity = new GroupEntity(
+                            groupIDs.get(i)
+                            ,groupTitles.get(i)
+                            ,groupTags.get(i)
+                            ,groupManagers.get(i));
+                    groupEntities.add(groupEntity);
+                }
+
+
+
+                for(GroupEntity curGroup : groupEntities){
+                    Call<UserByGroupIdResponse> call_ = RetrofitClient
+                            .getInstance()
+                            .getApi()
+                            .getUserByGroupId(curGroup.getGroupID());
+
+                    call_.enqueue(new Callback<UserByGroupIdResponse>() {
+                        @Override
+                        public void onResponse(Call<UserByGroupIdResponse> call, Response<UserByGroupIdResponse> response) {
+
+                            List<Kakao> members = response.body().getKakaoList();
+
+                            List<AppFriendInfo> groupMembers = new ArrayList<>();
+                            for(Kakao member : members){
+//                                AppFriendInfo addMember = new AppFriendInfo(
+//                                        member.getUserId(), member.getProfileNickname(), member.ge );
+                            }
+
+//                            curGroup.setGroupMembers();
+
+                        }
+
+                        @Override
+                        public void onFailure(Call<UserByGroupIdResponse> call, Throwable t) {
+
+                        }
+                    });
+                }
+
+
+
+
+
+
+            }
+            @Override
+            public void onFailure(Call<GroupResponse> call, Throwable t) {
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         updateGroupListView();
 

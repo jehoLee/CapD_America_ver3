@@ -4,7 +4,7 @@ public class User {
 
     private int id, member;
     private long kakaoid;
-    private String name, place;
+    private String name;
 
     public User(int id, long kakaoid, String name, int member) {
         this.id = id;

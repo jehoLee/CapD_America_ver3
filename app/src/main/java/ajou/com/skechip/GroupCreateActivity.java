@@ -16,6 +16,7 @@ public class GroupCreateActivity extends AppCompatActivity {
     private FragmentManager fragmentManager;
     private SelectFriendsFragment selectFriendsFragment;
     private GroupInfoEnterFragment groupInfoEnterFragment;
+    private Long kakaoUserID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +25,7 @@ public class GroupCreateActivity extends AppCompatActivity {
         Bundle bundle = new Bundle();
         if (getIntent() != null) {
             bundle = getIntent().getBundleExtra("kakaoBundle");
+            kakaoUserID = bundle.getLong("kakaoUserID");
         }
 
         fragmentManager = getSupportFragmentManager();
@@ -38,6 +40,7 @@ public class GroupCreateActivity extends AppCompatActivity {
     }
 
     public void replaceFragment(Bundle bundle){
+        bundle.putLong("kakaoUserID", kakaoUserID);
         groupInfoEnterFragment = GroupInfoEnterFragment.newInstance(bundle);
 
         fragmentManager.beginTransaction()

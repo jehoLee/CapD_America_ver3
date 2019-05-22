@@ -9,12 +9,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupEntity implements Parcelable {
+    private Integer groupID;
+    private Integer groupManager;
     private String groupTitle;
     //    private int groupImg;
     private String groupTag;
     private int groupMemberNum;
     private List<AppFriendInfo> groupMembers;
     private List<MeetingEntity> meetingEntities = new ArrayList<>();
+
+    public GroupEntity(Integer groupID, String groupTitle, String groupTag, Integer groupManager){
+        this.groupID = groupID;
+        this.groupTitle = groupTitle;
+        this.groupTag = groupTag;
+        this.groupManager = groupManager;
+    }
 
     public GroupEntity(String groupTitle, String groupTag, int groupMemberNum, List<AppFriendInfo> groupMembers){
         this.groupTitle = groupTitle;
@@ -38,6 +47,23 @@ public class GroupEntity implements Parcelable {
 //    public void setGroupImg(int groupImg) {
 //        this.groupImg = groupImg;
 //    }
+
+
+    public Integer getGroupID() {
+        return groupID;
+    }
+
+    public void setGroupID(Integer groupID) {
+        this.groupID = groupID;
+    }
+
+    public Integer getGroupManager() {
+        return groupManager;
+    }
+
+    public void setGroupManager(Integer groupManager) {
+        this.groupManager = groupManager;
+    }
 
     public String getGroupTag() {
         return groupTag;

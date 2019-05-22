@@ -16,11 +16,14 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.Tasks;
 import com.kakao.friends.response.model.AppFriendInfo;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import ajou.com.skechip.Adapter.EP_CustomAdapter;
+import ajou.com.skechip.Event.AppointmentCreationEvent;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.ColTitle;
 import ajou.com.skechip.Fragment.bean.FriendEntity;
@@ -311,6 +314,7 @@ public class FriendDetailActivity extends AppCompatActivity {
                                 final Button all_delete_Button = (Button) dialog_view.findViewById(R.id.delete_all_timetable);
                                 final AlertDialog dialog = builder.create();
                                 dialog.setCancelable(false);
+                                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
                                 dialog.show();
                                 delete_Button.setVisibility(View.INVISIBLE);
                                 all_delete_Button.setVisibility(View.INVISIBLE);
@@ -358,6 +362,9 @@ public class FriendDetailActivity extends AppCompatActivity {
                                         }
                                         conn.append_server(SELECTED_CELLS, friendEntity.getUserID(),'m');
                                         conn.append_server(SELECTED_CELLS, kakaoUserID,'m');
+
+                                        EventBus.getDefault().post(new AppointmentCreationEvent(SELECTED_CELLS));
+
                                         SELECTED_CELLS.clear();
                                         dialog.dismiss();
                                         initData();
@@ -418,6 +425,7 @@ public class FriendDetailActivity extends AppCompatActivity {
                             textviewLogo.setText("추가");
                             final AlertDialog dialog = builder.create();
                             dialog.setCancelable(false);
+                            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
                             dialog.show();
                             delete_Button.setVisibility(View.INVISIBLE);
                             all_delete_Button.setVisibility(View.INVISIBLE);
@@ -606,6 +614,7 @@ public class FriendDetailActivity extends AppCompatActivity {
                         builder1.show();
                     }
                 });
+                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
                 dialog.show();
             }
         }

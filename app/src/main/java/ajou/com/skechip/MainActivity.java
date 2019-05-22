@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
         ArrayList<Cell> cells = (ArrayList<Cell>)event.getAppointmentTimeCells();
 
+//        onTimeTableUploadedChangeEPfragment();
         epFragment.onTimeCellsCreateEvent(cells);
     }
 
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         GroupEntity groupWithNewMeeting = event.getGroupEntityWithNewMeeting();
         ArrayList<Cell> cells = (ArrayList<Cell>) groupWithNewMeeting.getMeetingEntities().get(0).getMeetingTimeCells();
 
+//        onTimeTableUploadedChangeEPfragment();
         epFragment.onTimeCellsCreateEvent(cells);
 
         groupListFragment.updateGroupEntityOnMeetingCreate(groupWithNewMeeting);
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
     private Long kakaoUserID;
     private String kakaoUserImg;
     private String kakaoUserName;
-    private MeV2Response kakaoUserInfo;
+    public MeV2Response kakaoUserInfo;
 
     private Boolean timeTableUploaded = false;
 
@@ -300,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void onTimeTableUploadedChangeEPfragment(){
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.remove(epFragment);
+        transaction.remove(epFragment).commitAllowingStateLoss();
         epFragment = null;
 
         Bundle bundle = new Bundle();
@@ -309,11 +311,10 @@ public class MainActivity extends AppCompatActivity {
         bundle.putLong("kakaoUserID", kakaoUserInfo.getId());
         bundle.putParcelableArrayList("kakaoFriends", (ArrayList<? extends Parcelable>) kakaoFriends);
         bundle.putStringArrayList("friendsNickname_list", (ArrayList<String>) friendsNickname_list);
-        bundle.putBoolean("timeTableUploaded", timeTableUploaded);
+        bundle.putBoolean("timeTableUploaded", true);
 
         epFragment = EP_Fragment.newInstance(bundle);
-        transaction.add(R.id.frame_layout, epFragment);
-        transaction.commit();
+        fragmentManager.beginTransaction().add(R.id.frame_layout, epFragment).commitAllowingStateLoss();
 
         curActivatedFragment = epFragment;
 

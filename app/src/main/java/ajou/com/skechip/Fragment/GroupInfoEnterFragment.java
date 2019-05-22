@@ -6,7 +6,11 @@ import android.graphics.Color;
 import android.os.Bundle;
 
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
+import ajou.com.skechip.MainActivity;
+import ajou.com.skechip.Retrofit.conn.CallMethod;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +32,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import ajou.com.skechip.Event.GroupCreationEvent;
@@ -44,6 +49,9 @@ public class GroupInfoEnterFragment extends Fragment {
 
     private AppFriendInfo curFriend;
     private Bitmap bitmap;
+    private CallMethod conn = new CallMethod();
+    private Long kakaoUserID;
+
 
     public static GroupInfoEnterFragment newInstance(Bundle bundle) {
         GroupInfoEnterFragment fragment = new GroupInfoEnterFragment();
@@ -61,6 +69,7 @@ public class GroupInfoEnterFragment extends Fragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             selectedFriends = bundle.getParcelableArrayList("selectedFriends");
+            kakaoUserID = bundle.getLong("kakaoUserID");
         }
         groupMemberNum = selectedFriends.size();
     }
@@ -85,8 +94,13 @@ public class GroupInfoEnterFragment extends Fragment {
                 //TODO - UI : 필수 입력 사항 체크하고 dialog 띄워서 최종 확인시키기
                 groupName = groupNameText.getText().toString();//제목 썼는지 체크하기
 
-
                 //TODO - DB/server : 모임 생성 API 호출 + 모임 정보 DB 저장
+                List<Long> memberIDs = new ArrayList<>();
+                memberIDs.add(kakaoUserID);
+                for(AppFriendInfo friend : selectedFriends){
+                    memberIDs.add(friend.getId());
+                }
+                conn.createGroup_server(memberIDs, kakaoUserID, groupName, groupTag);
 
                 GroupEntity newGroup = new GroupEntity(groupName, groupTag, groupMemberNum, selectedFriends);
 

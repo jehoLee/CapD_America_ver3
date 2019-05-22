@@ -5,8 +5,11 @@ import java.util.List;
 import ajou.com.skechip.Retrofit.models.AsManyUserAsAvailableResponse;
 import ajou.com.skechip.Retrofit.models.AvailableMeetingTimesResponse;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
+import ajou.com.skechip.Retrofit.models.GroupResponse;
+import ajou.com.skechip.Retrofit.models.Kakao;
 import ajou.com.skechip.Retrofit.models.TimeTableResponse;
 import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
+import ajou.com.skechip.Retrofit.models.UserByGroupIdResponse;
 import ajou.com.skechip.Retrofit.models.UserResponse;
 import retrofit2.Call;
 import retrofit2.http.DELETE;
@@ -45,6 +48,15 @@ public interface Api {
             @Field("cellPosition") int cellPosition
     );
 
+    @FormUrlEncoded
+    @POST("createGroup")
+    Call<DefaultResponse> createGroup(
+            @Query("kakaoIdList") String kakaoIdList,
+            @Field("manager") Long manager,
+            @Field("title") String title,
+            @Field("tag") String tag
+    );
+
     @GET("getuser")
     Call<UserResponse> getUser(
             @Query("kakaoId") long kakaoId
@@ -54,6 +66,17 @@ public interface Api {
     Call<TimeTablesResponse> getTimeTables(
             @Query("kakaoId") long kakaoId
     );
+
+    @GET("getGroup")
+    Call<GroupResponse> getGroup(
+            @Query("kakaoId") long kakaoId
+    );
+
+    @GET("getUserByGroupId")
+    Call<UserByGroupIdResponse> getUserByGroupId(
+            @Query("groupId") long groupId
+    );
+
 
     @GET("getAvailableMeetingTimes")
     Call<AvailableMeetingTimesResponse> getAvailableMeetingTimes(
@@ -79,6 +102,11 @@ public interface Api {
     Call<TimeTableResponse> deleteTimeTable(
             @Path("kakaoId") long kakaoId,
             @Path("cellPosition") int cellPosition
+    );
+
+    @DELETE("deleteAllTimeTable/{kakaoId}/{cellPosition}")
+    Call<DefaultResponse> deleteAllTimeTable(
+            @Path("kakaoId") long kakaoId
     );
 
 }
