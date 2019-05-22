@@ -19,8 +19,11 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigation"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
+        android:background="@color/CapD_color_background"
+        app:itemHorizontalTranslationEnabled="false"
+        app:itemIconTint="@drawable/navi_item"
         app:menu="@menu/navigation" />
     <!--android:background="?android:attr/windowBackground"-->
 

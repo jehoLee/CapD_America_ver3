@@ -7,15 +7,25 @@
     <RelativeLayout
         android:id="@+id/appbarLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingLeft="14dp"
+        android:paddingRight="14dp">
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_centerHorizontal="false"
+            android:layout_centerVertical="true"
+            android:elevation="10dp"
+            android:src="@mipmap/ic_launcher_foreground" />
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/white"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
-            />
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         <TextView
             android:id="@+id/center_desc_text"

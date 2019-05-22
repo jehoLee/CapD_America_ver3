@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Fragment.SelectFriendsFragment">
 
     <RelativeLayout
@@ -52,7 +52,11 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/appbarLayout"
         android:layout_alignParentBottom="true"
-        android:background="@color/white">
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/card_white_shape">
 
 
         <RelativeLayout
@@ -80,17 +84,18 @@
                 <LinearLayout
                     android:id="@+id/friends_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="80dp"
                     android:divider="@drawable/divider"
                     android:orientation="horizontal"
+                    android:paddingLeft="10dp"
                     android:paddingTop="10dp"
+                    android:paddingRight="10dp"
                     android:showDividers="middle" />
 
             </HorizontalScrollView>
 
 
         </RelativeLayout>
-
 
 
         <RelativeLayout
@@ -135,17 +140,19 @@
                 android:text="모임 태그" />
 
             <!--<AutoCompleteTextView-->
-                <!--android:id="@+id/group_tag_edit"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_below="@+id/desc_text_2"-->
-                <!--android:text="#" />-->
+            <!--android:id="@+id/group_tag_edit"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@+id/desc_text_2"-->
+            <!--android:text="#" />-->
 
             <Spinner
                 android:id="@+id/group_tag_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/desc2"
+                android:layout_centerHorizontal="false"
+                android:layout_centerVertical="false"
                 android:spinnerMode="dropdown" />
 
 
@@ -153,11 +160,6 @@
 
 
     </RelativeLayout>
-
-
-
-
-
 
 
 </RelativeLayout>
