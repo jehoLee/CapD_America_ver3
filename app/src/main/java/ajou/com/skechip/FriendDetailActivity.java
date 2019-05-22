@@ -307,8 +307,8 @@ public class FriendDetailActivity extends AppCompatActivity {
                                 final Button submit_one = (Button) dialog_view.findViewById(R.id.revise_one_plan);
                                 final EditText subject = (EditText) dialog_view.findViewById(R.id.timetable_subject);
                                 final EditText place = (EditText) dialog_view.findViewById(R.id.timetable_place);
-                                final ImageButton delete_Button = (ImageButton) dialog_view.findViewById(R.id.delete_timetable);
-                                final ImageButton all_delete_Button = (ImageButton) dialog_view.findViewById(R.id.delete_all_timetable);
+                                final Button delete_Button = (Button) dialog_view.findViewById(R.id.delete_timetable);
+                                final Button all_delete_Button = (Button) dialog_view.findViewById(R.id.delete_all_timetable);
                                 final AlertDialog dialog = builder.create();
                                 dialog.setCancelable(false);
                                 dialog.show();
@@ -412,8 +412,8 @@ public class FriendDetailActivity extends AppCompatActivity {
                             final Button submit_one = (Button) dialog_view.findViewById(R.id.revise_one_plan);
                             final EditText subject = (EditText) dialog_view.findViewById(R.id.timetable_subject);
                             final EditText place = (EditText) dialog_view.findViewById(R.id.timetable_place);
-                            final ImageButton delete_Button = (ImageButton) dialog_view.findViewById(R.id.delete_timetable);
-                            final ImageButton all_delete_Button = (ImageButton) dialog_view.findViewById(R.id.delete_all_timetable);
+                            final Button delete_Button = (Button) dialog_view.findViewById(R.id.delete_timetable);
+                            final Button all_delete_Button = (Button) dialog_view.findViewById(R.id.delete_all_timetable);
                             final TextView textviewLogo = (TextView) dialog_view.findViewById(R.id.textviewLogo);
                             textviewLogo.setText("추가");
                             final AlertDialog dialog = builder.create();
@@ -491,8 +491,8 @@ public class FriendDetailActivity extends AppCompatActivity {
             final EditText subject = (EditText) dialog_view.findViewById(R.id.timetable_subject);
             final EditText place = (EditText) dialog_view.findViewById(R.id.timetable_place);
             final TextView textviewLogo = (TextView) dialog_view.findViewById(R.id.textviewLogo);
-            final ImageButton delete_Button = (ImageButton) dialog_view.findViewById(R.id.delete_timetable);
-            final ImageButton all_delete_Button = (ImageButton) dialog_view.findViewById(R.id.delete_all_timetable);
+            final Button delete_Button = (Button) dialog_view.findViewById(R.id.delete_timetable);
+            final Button all_delete_Button = (Button) dialog_view.findViewById(R.id.delete_all_timetable);
             final AlertDialog dialog = builder.create();
             if(cell.getStatus() == -2){
                 Toast.makeText(getApplicationContext(),"선택불가",Toast.LENGTH_LONG).show();
