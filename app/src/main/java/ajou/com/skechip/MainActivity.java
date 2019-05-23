@@ -131,7 +131,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.loading_screen);
+//        setContentView(R.layout.activity_main);
 
         EventBus.getDefault().register(this);
 
@@ -245,7 +246,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initiateFragmentsAndNavigation() {
-        //for 8 between MainActivity <-> Fragments
+        setContentView(R.layout.activity_main);
+
         Bundle bundle = new Bundle();
 
         bundle.putString("kakaoUserProfileImg", kakaoUserInfo.getProfileImagePath());
