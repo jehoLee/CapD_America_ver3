@@ -10,9 +10,9 @@ public class DefaultResponse {
     @SerializedName("message")
     private String msg;
 
-    public DefaultResponse(boolean err, String msg) {
-        this.err = err;
-        this.msg = msg;
+    public DefaultResponse(boolean error, String message) {
+        this.err = error;
+        this.msg = message;
     }
 
     public boolean isErr() {

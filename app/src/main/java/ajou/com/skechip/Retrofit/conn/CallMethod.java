@@ -12,15 +12,25 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CallMethod {
-    public void append_server(List<Cell> cell, Long kakaoUserID, char type){
-        for(Cell c : cell){
+    public void append_server(List<Cell> cell, Long kakaoUserID, char type) {
+        for (Cell c : cell) {
             Call<DefaultResponse> call = RetrofitClient
                     .getInstance()
                     .getApi()
                     .createTimeTable(kakaoUserID, type, c.getSubjectName(), c.getPlaceName(), c.getPosition());
+            call.enqueue(new Callback<DefaultResponse>() {
+                @Override
+                public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
 
-            callEnqueue(call);
+                }
+
+                @Override
+                public void onFailure(Call<DefaultResponse> call, Throwable t) {
+
+                }
+            });
         }
+
     }
 
     public void append_server(List<Cell> cells, ArrayList<Long> kakaoUserIDs, char type) {
@@ -34,39 +44,7 @@ public class CallMethod {
                 .getInstance()
                 .getApi()
                 .updateTimeTable(kakaoUserID, 'c', cell.getSubjectName(), cell.getPlaceName(), cell.getPosition());
-        callEnqueue(call);
-    }
 
-    public void delete_server(List<Cell> cell, Long kakaoUserID){
-        for(Cell c : cell){
-            Call<TimeTableResponse> call = RetrofitClient
-                    .getInstance()
-                    .getApi()
-                    .deleteTimeTable(kakaoUserID, c.getPosition());
-            callEnqueue(call);
-        }
-    }
-
-    public void createGroup_server(List<Long> kakaoIdList, Long manager, String title, String tag) {
-        Call<DefaultResponse> call = RetrofitClient
-                .getInstance()
-                .getApi()
-                .createGroup(kakaoIdList.toString(), manager, title, tag);
-
-        call.enqueue(new Callback<DefaultResponse>() {
-            @Override
-            public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-
-            }
-
-            @Override
-            public void onFailure(Call<DefaultResponse> call, Throwable t) {
-
-            }
-        });
-    }
-
-    private void callEnqueue(Call call){
         call.enqueue(new Callback<TimeTableResponse>() {
             @Override
             public void onResponse(Call<TimeTableResponse> call, Response<TimeTableResponse> response) {
@@ -78,5 +56,26 @@ public class CallMethod {
 
             }
         });
+    }
+
+    public void delete_server(List<Cell> cell, Long kakaoUserID) {
+        for (Cell c : cell) {
+            Call<TimeTableResponse> call = RetrofitClient
+                    .getInstance()
+                    .getApi()
+                    .deleteTimeTable(kakaoUserID, c.getPosition());
+
+            call.enqueue(new Callback<TimeTableResponse>() {
+                @Override
+                public void onResponse(Call<TimeTableResponse> call, Response<TimeTableResponse> response) {
+
+                }
+
+                @Override
+                public void onFailure(Call<TimeTableResponse> call, Throwable t) {
+
+                }
+            });
+        }
     }
 }

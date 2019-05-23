@@ -10,7 +10,7 @@ public class GroupResponse {
     private List<Integer> managerList;
     private List<String> titleList;
     private List<String> tagList;
-    private  Integer totalCount;
+    private Integer totalCount;
 
     public GroupResponse(boolean error, List<Integer> idList, List<Integer> managerList, List<String> titleList, List<String> tagList, Integer totalCount) {
         this.error = error;
@@ -37,7 +37,7 @@ public class GroupResponse {
         return titleList;
     }
 
-    public List<String> gettagList() {
+    public List<String> getTagList() {
         return tagList;
     }
 
