@@ -70,7 +70,7 @@ public class GroupEntity_Recycler_Adapter extends RecyclerView.Adapter<GroupEnti
 
         holder.groupNameTextView.setText(curGroup.getGroupTitle());
         holder.groupTagText.setText(curGroup.getGroupTag());
-        holder.groupMemberNumText.setText(Integer.toString(curGroup.getGroupMemberNum()+1));
+        holder.groupMemberNumText.setText(Integer.toString(curGroup.getGroupMemberNum()));
 //        holder.mImageView.setImageResource(groupEntities.get(position).getGroupImg());
 
         if(!curGroup.getMeetingEntities().isEmpty()){
@@ -85,8 +85,10 @@ public class GroupEntity_Recycler_Adapter extends RecyclerView.Adapter<GroupEnti
             holder.meetingNameText.setText(meetingEntity.getTitle());
             holder.meetingLocText.setText(meetingEntity.getLocation());
 
-            String time = meetingEntity.getMeetingTimeCells().get(0).getWeekofday() + " " + meetingEntity.getMeetingTimeCells().get(0).getStartTime();
-            holder.meetingTimeText.setText(time);
+            if(!meetingEntity.getMeetingTimeCells().isEmpty()){
+                String time = meetingEntity.getMeetingTimeCells().get(0).getWeekofday() + " " + meetingEntity.getMeetingTimeCells().get(0).getStartTime();
+                holder.meetingTimeText.setText(time);
+            }
 
         }
 

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ajou.com.skechip.R;
+import ajou.com.skechip.Retrofit.models.Kakao;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class FriendListAdapter extends BaseAdapter{
@@ -33,12 +34,12 @@ public class FriendListAdapter extends BaseAdapter{
     private Context activityContext;
     private Bitmap bitmap;
 
-    public List<AppFriendInfo> getSelectedFriends() {
+    public List<Kakao> getSelectedFriends() {
         return selectedFriends;
     }
 
-    private List<AppFriendInfo> friendEntities;
-    private List<AppFriendInfo> selectedFriends = new ArrayList<>();
+    private List<Kakao> friendEntities;
+    private List<Kakao> selectedFriends = new ArrayList<>();
 
 
     private int selectedFriendsNum = 0;
@@ -48,7 +49,7 @@ public class FriendListAdapter extends BaseAdapter{
     private List<TextView> selectedNames = new ArrayList<>();
     private List<LinearLayout> selectedView = new ArrayList<>();
 
-    public FriendListAdapter(Context activityContext, List<AppFriendInfo> friendEntities, RelativeLayout layout) {
+    public FriendListAdapter(Context activityContext, List<Kakao> friendEntities, RelativeLayout layout) {
         this.activityContext = activityContext;
         this.friendEntities = friendEntities;
 //        LayoutInflater mInflater = (LayoutInflater)
@@ -87,7 +88,7 @@ public class FriendListAdapter extends BaseAdapter{
             convertView = mInflater.inflate(R.layout.friend_entity_block, null);
         }
 
-        final AppFriendInfo friendEntity = friendEntities.get(position);
+        final Kakao friendEntity = friendEntities.get(position);
 
         TextView friendName = convertView.findViewById(R.id.friend_name);
         friendName.setText(friendEntity.getProfileNickname());
@@ -102,7 +103,6 @@ public class FriendListAdapter extends BaseAdapter{
                     addSelectedFriendToView(friendEntity);
                 }else{
                     removeSelectedFriendFromView(friendEntity);
-
                 }
             }
         });
@@ -110,7 +110,7 @@ public class FriendListAdapter extends BaseAdapter{
         return convertView;
     }
 
-    private void addSelectedFriendToView(final AppFriendInfo friendEntity) {
+    private void addSelectedFriendToView(final Kakao friendEntity) {
         selectedFriends.add(friendEntity);
         selectedFriendsNumberText.setText(Integer.toString(++selectedFriendsNum));
 
@@ -160,7 +160,7 @@ public class FriendListAdapter extends BaseAdapter{
         }
     }
 
-    private void removeSelectedFriendFromView(AppFriendInfo friendEntity) {
+    private void removeSelectedFriendFromView(Kakao friendEntity) {
         selectedFriends.remove(friendEntity);
         selectedFriendsNumberText.setText(Integer.toString(--selectedFriendsNum));
         for(LinearLayout target : selectedView){
