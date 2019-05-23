@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/CapD_color_main"
     tools:context=".MeetingCreateActivity">
 
 
@@ -50,10 +50,11 @@
     <RelativeLayout
         android:id="@+id/info_enter_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@+id/appbarLayout"
         android:layout_alignParentBottom="false"
-        android:background="@color/white"
+        android:layout_margin="10dp"
+        android:background="@drawable/card_white_shape"
         android:visibility="visible">
 
 
@@ -125,7 +126,7 @@
                 <LinearLayout
                     android:id="@+id/participants_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="80dp"
                     android:divider="@drawable/divider"
                     android:orientation="horizontal"
                     android:paddingTop="10dp"
@@ -279,17 +280,20 @@
             <RelativeLayout
                 android:id="@+id/selected_time_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="80dp"
                 android:layout_below="@+id/desc3"
-                android:visibility="visible">
+                android:visibility="gone">
 
 
                 <TextView
-                android:id="@+id/selected_time_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="TextView" />
+                    android:id="@+id/selected_time_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="TextView"
+                    android:textColor="@color/CapD_color_main"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
 
 
             </RelativeLayout>
