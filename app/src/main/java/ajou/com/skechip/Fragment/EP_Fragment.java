@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.os.Bundle;
 
 //import ajou.com.skechip.SettingActivity;
+import ajou.com.skechip.Retrofit.models.Kakao;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,7 +73,7 @@ public class EP_Fragment extends Fragment {
     private String kakaoUserImg;
     private String kakaoUserName;
     private Long kakaoUserID;
-    private List<AppFriendInfo> kakaoFriendInfo_list;
+    private List<Kakao> kakaoFriendInfo_list;
     private List<FriendEntity> friendEntities = new ArrayList<>();
     private Boolean timeTableUploaded;
     private CallMethod conn= new CallMethod();
@@ -132,6 +134,7 @@ public class EP_Fragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(getActivity(), CalendarActivity.class);
+                    intent.putParcelableArrayListExtra("Timetable",(ArrayList<? extends Parcelable>)cells1);
                     startActivity(intent);
                 }
             });

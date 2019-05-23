@@ -7,7 +7,10 @@ import android.os.Bundle;
 
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
 import ajou.com.skechip.MainActivity;
+import ajou.com.skechip.Retrofit.api.RetrofitClient;
 import ajou.com.skechip.Retrofit.conn.CallMethod;
+import ajou.com.skechip.Retrofit.models.DefaultResponse;
+import ajou.com.skechip.Retrofit.models.Kakao;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -40,14 +43,17 @@ import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.GroupCreateActivity;
 import ajou.com.skechip.R;
 import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class GroupInfoEnterFragment extends Fragment {
-    private List<AppFriendInfo> selectedFriends;
+    private List<Kakao> selectedFriends;
     private String groupName;
     private String groupTag;
     private int groupMemberNum;
 
-    private AppFriendInfo curFriend;
+    private Kakao curFriend;
     private Bitmap bitmap;
     private CallMethod conn = new CallMethod();
     private Long kakaoUserID;
@@ -97,14 +103,33 @@ public class GroupInfoEnterFragment extends Fragment {
                 //TODO - DB/server : 모임 생성 API 호출 + 모임 정보 DB 저장
                 List<Long> memberIDs = new ArrayList<>();
                 memberIDs.add(kakaoUserID);
-                for(AppFriendInfo friend : selectedFriends){
-                    memberIDs.add(friend.getId());
+                for(Kakao friend : selectedFriends){
+                    memberIDs.add(friend.getUserId());
                 }
-                conn.createGroup_server(memberIDs, kakaoUserID, groupName, groupTag);
+//                conn.createGroup_server(memberIDs, kakaoUserID, groupName, groupTag);
 
-                GroupEntity newGroup = new GroupEntity(groupName, groupTag, groupMemberNum, selectedFriends);
+                Call<DefaultResponse> call = RetrofitClient
+                        .getInstance()
+                        .getApi()
+                        .createGroup(memberIDs.toString(), kakaoUserID, groupName, groupTag);
 
-                EventBus.getDefault().postSticky(new GroupCreationEvent(newGroup));
+                call.enqueue(new Callback<DefaultResponse>() {
+                    @Override
+                    public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+                        GroupEntity newGroup = new GroupEntity(groupName, groupTag, groupMemberNum, selectedFriends);
+
+                        EventBus.getDefault().postSticky(new GroupCreationEvent(newGroup));
+                    }
+
+                    @Override
+                    public void onFailure(Call<DefaultResponse> call, Throwable t) {
+
+                    }
+                });
+
+//                GroupEntity newGroup = new GroupEntity(groupName, groupTag, groupMemberNum, selectedFriends);
+//
+//                EventBus.getDefault().postSticky(new GroupCreationEvent(newGroup));
                 ((GroupCreateActivity)getActivity()).finishActivity();
             }
         });
@@ -182,7 +207,7 @@ public class GroupInfoEnterFragment extends Fragment {
         selectedFriendsNum.setText(text);
 
 
-        for(AppFriendInfo friendEntity : selectedFriends){
+        for(Kakao friendEntity : selectedFriends){
             curFriend = friendEntity;
             bitmap = null;
             final TextView name = new TextView(getActivity());
@@ -232,7 +257,7 @@ public class GroupInfoEnterFragment extends Fragment {
         }
 
 
-//        for(AppFriendInfo friendEntity : selectedFriends){
+//        for(Kakao friendEntity : selectedFriends){
 //            final TextView name = new TextView(getActivity());
 //            name.setText(friendEntity.getProfileNickname());
 //            name.setTextColor(getResources().getColor(R.color.text_dark1));

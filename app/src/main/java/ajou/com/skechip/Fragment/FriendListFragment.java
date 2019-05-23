@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import ajou.com.skechip.Fragment.bean.FriendEntity;
 import ajou.com.skechip.FriendDetailActivity;
+import ajou.com.skechip.Retrofit.models.Kakao;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -31,7 +32,7 @@ public class FriendListFragment extends Fragment {
     private String kakaoUserImg;
     private String kakaoUserName;
     private Long kakaoUserID;
-    private List<AppFriendInfo> kakaoFriends;
+    private List<Kakao> kakaoFriends;
     private FriendEntity friendEntity;
     private Bundle bundle;
 
@@ -73,7 +74,7 @@ public class FriendListFragment extends Fragment {
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        friendEntity= new FriendEntity(kakaoFriends.get(position).getId(),kakaoFriends.get(position).getProfileNickname(),kakaoFriends.get(position).getProfileThumbnailImage());
+                        friendEntity= new FriendEntity(kakaoFriends.get(position).getUserId(),kakaoFriends.get(position).getProfileNickname(),kakaoFriends.get(position).getProfileThumbnailImage());
                         Intent intent = new Intent(getActivity(), FriendDetailActivity.class);
                         intent.putExtra("kakaoBundle", bundle);
                         intent.putExtra("friendEntity", friendEntity);

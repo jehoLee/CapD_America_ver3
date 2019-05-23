@@ -14,6 +14,7 @@ import ajou.com.skechip.Fragment.bean.RowTitle;
 import ajou.com.skechip.MeetingCreateActivity;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
 import ajou.com.skechip.Retrofit.models.AvailableMeetingTimesResponse;
+import ajou.com.skechip.Retrofit.models.Kakao;
 import ajou.com.skechip.Retrofit.models.TimeTable;
 import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
 import androidx.appcompat.app.AlertDialog;
@@ -70,7 +71,7 @@ public class SelectMeetingTimeFragment extends Fragment {
     private View view;
     private ProgressBar progress;
 
-    private List<AppFriendInfo> selectedMembers;
+    private List<Kakao> selectedMembers;
     private List<Long> selectedMemberIds = new ArrayList<>();
 
     public static SelectMeetingTimeFragment newInstance(Bundle bundle) {
@@ -93,8 +94,8 @@ public class SelectMeetingTimeFragment extends Fragment {
 
             if (selectedMembers != null) {
                 selectedMemberIds.add(myId);
-                for(AppFriendInfo friend : selectedMembers){
-                    selectedMemberIds.add(friend.getId());
+                for(Kakao friend : selectedMembers){
+                    selectedMemberIds.add(friend.getUserId());
                 }
             }
 

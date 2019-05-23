@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.MeetingCreateActivity;
+import ajou.com.skechip.Retrofit.models.Kakao;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -16,7 +17,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.kakao.friends.response.model.AppFriendInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +27,8 @@ import ajou.com.skechip.GroupCreateActivity;
 import ajou.com.skechip.R;
 
 public class SelectFriendsFragment extends Fragment {
-    private List<AppFriendInfo> kakaoFriends;
-    private List<AppFriendInfo> groupMembers;
+    private List<Kakao> kakaoFriends;
+    private List<Kakao> groupMembers;
     private FriendListAdapter friendListAdapter;
 
     private Boolean isForMeetingCreate;
@@ -61,6 +61,12 @@ public class SelectFriendsFragment extends Fragment {
             if(isForMeetingCreate){
                 GroupEntity groupEntity = bundle.getParcelable("groupEntity");
                 groupMembers = groupEntity.getGroupMembers();
+//                for(Kakao member : groupMembers){
+                for(int i = groupMembers.size()-1; i >= 0 ; i--){
+                    Kakao member = groupMembers.get(i);
+                    if(member.getUserId().equals(kakaoUserID))
+                        groupMembers.remove(i);
+                }
             }
         }
 
@@ -98,10 +104,9 @@ public class SelectFriendsFragment extends Fragment {
         confirmFriendsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<AppFriendInfo> selectedMembers = friendListAdapter.getSelectedFriends();
+                List<Kakao> selectedMembers = friendListAdapter.getSelectedFriends();
                 if(selectedMembers.size() == 0){
                     Toast.makeText(getActivity(), "모임 일정을 생성하려면 적어도 2명 이상은 선택해야 합니다", Toast.LENGTH_LONG).show();
-
                 }else if(selectedMembers.size() == 1){
                     Toast.makeText(getActivity(), "1명의 친구와 일정을 생성하려면 친구 탭에서 친구와 약속을 잡으세요!", Toast.LENGTH_LONG).show();
                 }else{
@@ -118,7 +123,7 @@ public class SelectFriendsFragment extends Fragment {
         confirmFriendsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<AppFriendInfo> selectedFriends = friendListAdapter.getSelectedFriends();
+                List<Kakao> selectedFriends = friendListAdapter.getSelectedFriends();
 //                Toast.makeText(getActivity(), selectedFriends + "is selected!", Toast.LENGTH_SHORT).show();
                 if(selectedFriends.size() == 0){
                     Toast.makeText(getActivity(), "모임을 생성하려면 적어도 2명 이상은 선택해야 합니다", Toast.LENGTH_LONG).show();
