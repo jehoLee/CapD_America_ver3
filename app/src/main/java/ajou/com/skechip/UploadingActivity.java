@@ -52,7 +52,7 @@ public class UploadingActivity extends AppCompatActivity {
 
     private Mat img_input;
     private Mat img_output;
-
+    ImageView imageVIewOuput;
     int[][] Schedul;
     private List<Cell> scheduleCells;
     private CallMethod con =  new CallMethod();
@@ -72,7 +72,7 @@ public class UploadingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_uploading);
         bundle = getIntent().getBundleExtra("kakaoBundle");
         kakaoUserID = bundle.getLong("kakaoUserID");
-
+        imageVIewOuput = (ImageView)findViewById(R.id.imageView);
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
@@ -91,7 +91,12 @@ public class UploadingActivity extends AppCompatActivity {
 
     private void imageprocess_and_showResult() {
         scheduleCells = new ArrayList<Cell>();
-
+        int k = 0;
+        int pastheight=0;
+        int pastweight=0;
+        int enoughpoit = 0;
+        int cellhighpoint=0;
+        int celllowpoint=0;
         if (isReady==false) return;
 
         if (img_output == null)
@@ -99,19 +104,61 @@ public class UploadingActivity extends AppCompatActivity {
         imageprocessing(img_input.getNativeObjAddr(), img_output.getNativeObjAddr());
         Schedul = new int[7][5];
 
-        Log.e("1","cols "+img_output.height()+" img lows "+img_output.width());
-
         Bitmap bitmapOutput = Bitmap.createBitmap(img_output.cols(), img_output.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(img_output, bitmapOutput);
+        //imageVIewOuput.setImageBitmap(bitmapOutput);
+
+        for(int j=0 ;j<bitmapOutput.getWidth();j++){
+            for(int i= 0;i<bitmapOutput.getHeight();i++){
+                if ((bitmapOutput.getPixel(j,i) & 0x00ff00) >> 8==0) {
+                    Log.e("1", "no " + i + " value " + j);
+                    k++;
+
+                    if (i-pastheight==1)
+                        enoughpoit++;
+                    if (enoughpoit>3){
+                        enoughpoit = 0 ;
+                        pastweight = j+1;
+                        k=20;
+
+                        break;
+                    }
+                    pastheight = i;
+
+                }
+                if (i == bitmapOutput.getHeight()/2) {
+                    break;
+                }
+            }
+            if (k==20)
+                break;
+        }
+        for (int i = pastheight+100; i>pastheight;i--){
+            if ((bitmapOutput.getPixel(pastweight+2,i) & 0x00ff00) >> 8==0){
+                celllowpoint = i;
+                break;
+            }
+        }
+        for (int i = pastheight+100; i<pastheight+200;i++){
+            if ((bitmapOutput.getPixel(pastweight+2,i) & 0x00ff00) >> 8==0){
+                cellhighpoint = i;
+                break;
+            }
+        }
+
+        int cellheight = cellhighpoint - celllowpoint;
+        Log.e("1",  " cell " + cellheight );
+        Log.e("1","height " + pastheight);
         for(int i=0;i<6;i++) {
             for(int j=0;j<5;j++){
-                if ((bitmapOutput.getPixel(100+200*j,232+100*i ) & 0xff0000) >> 16 != 255 ){
+               if ((bitmapOutput.getPixel((3*pastweight)+
+                                ((bitmapOutput.getWidth()
+                                        -(3*pastweight))/10)*(2*j+1),
+                        pastheight+((((cellheight)/2)+(cellheight))/2)*(2*i+1) ) & 0x00ff00) >> 8 != 255 ){
                     Schedul[i][j]= 1;
                     Cell cell = new Cell();
-                    Log.e("1"," "+(5*i+j));
                     cell.setPosition(5*i+j);
                     cell.setPlaceName("");
-                    cell.setStatus((j*i)%5+1);
                     scheduleCells.add(cell);
                 }
                 else
@@ -150,9 +197,10 @@ public class UploadingActivity extends AppCompatActivity {
                         int orientation = getOrientationOfImage(path); // 런타임 퍼미션 필요
                         Bitmap temp = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                         Bitmap bitmap = getRotatedBitmap(temp, orientation);
+                        imageVIewOuput.setImageBitmap(bitmap);
                         img_input = new Mat();
                         Bitmap bmp32 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                        Utils.bitmapToMat(bmp32, img_input);
+                        Utils.bitmapToMat(temp, img_input);
 
                     } catch (Exception e) {
                         e.printStackTrace();
