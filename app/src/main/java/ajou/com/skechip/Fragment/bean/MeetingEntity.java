@@ -3,17 +3,29 @@ package ajou.com.skechip.Fragment.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.kakao.friends.response.model.AppFriendInfo;
 import java.util.List;
+
+import ajou.com.skechip.Retrofit.models.Kakao;
 
 public class MeetingEntity implements Parcelable {
     private String title;
     private String location;
-    private String type;
+    private Integer type;
     private List<Cell> meetingTimeCells;
-    private List<AppFriendInfo> selectedMembers;
+    private List<Kakao> selectedMembers;
+    private Integer meetingID;
+    private Integer meetingManager;
 
-    public MeetingEntity(String title, String location, String type, List<Cell> meetingTimeCells, List<AppFriendInfo> selectedMembers) {
+    public MeetingEntity(String title, String location, Integer type, Integer Id, Integer managerId, List<Cell> meetingTimeCells) {
+        this.title = title;
+        this.location = location;
+        this.type = type;
+        this.meetingID = Id;
+        this.meetingManager = managerId;
+        this.meetingTimeCells = meetingTimeCells;
+    }
+
+    public MeetingEntity(String title, String location, Integer type, List<Cell> meetingTimeCells, List<Kakao> selectedMembers) {
         this.title = title;
         this.location = location;
         this.type = type;
@@ -37,11 +49,11 @@ public class MeetingEntity implements Parcelable {
         this.location = location;
     }
 
-    public String getType() {
+    public Integer getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(Integer type) {
         this.type = type;
     }
 
@@ -53,38 +65,86 @@ public class MeetingEntity implements Parcelable {
         this.meetingTimeCells = meetingTimeCells;
     }
 
-    public List<AppFriendInfo> getSelectedMembers() {
+    public List<Kakao> getSelectedMembers() {
         return selectedMembers;
     }
 
-    public void setSelectedMembers(List<AppFriendInfo> selectedMembers) {
+    public void setSelectedMembers(List<Kakao> selectedMembers) {
         this.selectedMembers = selectedMembers;
     }
 
+    public Integer getMeetingID() {
+        return meetingID;
+    }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public void setMeetingID(Integer meetingID) {
+        this.meetingID = meetingID;
+    }
+
+    public Integer getMeetingManager() {
+        return meetingManager;
+    }
+
+    public void setMeetingManager(Integer meetingManager) {
+        this.meetingManager = meetingManager;
+    }
+
+
+
+    protected MeetingEntity(Parcel in) {
+        title = in.readString();
+        location = in.readString();
+        if (in.readByte() == 0) {
+            type = null;
+        } else {
+            type = in.readInt();
+        }
+        meetingTimeCells = in.createTypedArrayList(Cell.CREATOR);
+        selectedMembers = in.createTypedArrayList(Kakao.CREATOR);
+        if (in.readByte() == 0) {
+            meetingID = null;
+        } else {
+            meetingID = in.readInt();
+        }
+        if (in.readByte() == 0) {
+            meetingManager = null;
+        } else {
+            meetingManager = in.readInt();
+        }
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(title);
         dest.writeString(location);
-        dest.writeString(type);
+        if (type == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(type);
+        }
         dest.writeTypedList(meetingTimeCells);
         dest.writeTypedList(selectedMembers);
+        if (meetingID == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(meetingID);
+        }
+        if (meetingManager == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(meetingManager);
+        }
     }
 
-    protected MeetingEntity(Parcel in) {
-        title = in.readString();
-        location = in.readString();
-        type = in.readString();
-        meetingTimeCells = in.createTypedArrayList(Cell.CREATOR);
-        selectedMembers = in.createTypedArrayList(AppFriendInfo.CREATOR);
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public static final Parcelable.Creator<MeetingEntity> CREATOR = new Parcelable.Creator<MeetingEntity>() {
+    public static final Creator<MeetingEntity> CREATOR = new Creator<MeetingEntity>() {
         @Override
         public MeetingEntity createFromParcel(Parcel in) {
             return new MeetingEntity(in);
@@ -95,7 +155,6 @@ public class MeetingEntity implements Parcelable {
             return new MeetingEntity[size];
         }
     };
-
 
 
 

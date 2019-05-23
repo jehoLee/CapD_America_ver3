@@ -3,20 +3,22 @@ package ajou.com.skechip.Fragment.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.kakao.friends.response.model.AppFriendInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import ajou.com.skechip.Retrofit.models.Kakao;
 
 public class GroupEntity implements Parcelable {
     private Integer groupID;
     private Integer groupManager;
     private String groupTitle;
-    //    private int groupImg;
     private String groupTag;
     private int groupMemberNum;
-    private List<AppFriendInfo> groupMembers;
+    private List<Kakao> groupMembers;
     private List<MeetingEntity> meetingEntities = new ArrayList<>();
+
+    //    private int groupImg;
 
     public GroupEntity(Integer groupID, String groupTitle, String groupTag, Integer groupManager){
         this.groupID = groupID;
@@ -25,12 +27,14 @@ public class GroupEntity implements Parcelable {
         this.groupManager = groupManager;
     }
 
-    public GroupEntity(String groupTitle, String groupTag, int groupMemberNum, List<AppFriendInfo> groupMembers){
+    public GroupEntity(String groupTitle, String groupTag, int groupMemberNum, List<Kakao> groupMembers){
         this.groupTitle = groupTitle;
         this.groupTag = groupTag;
         this.groupMemberNum = groupMemberNum;
         this.groupMembers = groupMembers;
     }
+
+
 
     public String getGroupTitle() {
         return groupTitle;
@@ -81,12 +85,13 @@ public class GroupEntity implements Parcelable {
         this.groupMemberNum = groupMemberNum;
     }
 
-    public List<AppFriendInfo> getGroupMembers() {
+    public List<Kakao> getGroupMembers() {
         return groupMembers;
     }
 
-    public void setGroupMembers(List<AppFriendInfo> groupMembers) {
+    public void setGroupMembers(List<Kakao> groupMembers) {
         this.groupMembers = groupMembers;
+        this.groupMemberNum = groupMembers.size();
     }
 
     public List<MeetingEntity> getMeetingEntities() {
@@ -101,12 +106,48 @@ public class GroupEntity implements Parcelable {
         this.meetingEntities.add(meetingEntity);
     }
 
-    public GroupEntity(Parcel in) {
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (groupID == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(groupID);
+        }
+        if (groupManager == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(groupManager);
+        }
+        dest.writeString(groupTitle);
+        dest.writeString(groupTag);
+        dest.writeInt(groupMemberNum);
+        dest.writeTypedList(groupMembers);
+        dest.writeTypedList(meetingEntities);
+    }
+    protected GroupEntity(Parcel in) {
+        if (in.readByte() == 0) {
+            groupID = null;
+        } else {
+            groupID = in.readInt();
+        }
+        if (in.readByte() == 0) {
+            groupManager = null;
+        } else {
+            groupManager = in.readInt();
+        }
         groupTitle = in.readString();
-//        groupImg = in.readInt();
         groupTag = in.readString();
         groupMemberNum = in.readInt();
-        groupMembers = in.createTypedArrayList(AppFriendInfo.CREATOR);
+        groupMembers = in.createTypedArrayList(Kakao.CREATOR);
+        meetingEntities = in.createTypedArrayList(MeetingEntity.CREATOR);
     }
 
     public static final Creator<GroupEntity> CREATOR = new Creator<GroupEntity>() {
@@ -121,19 +162,9 @@ public class GroupEntity implements Parcelable {
         }
     };
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(groupTitle);
-//        dest.writeInt(groupImg);
-        dest.writeString(groupTag);
-        dest.writeInt(groupMemberNum);
-        dest.writeTypedList(groupMembers);
-    }
+
+
 }
 
 //

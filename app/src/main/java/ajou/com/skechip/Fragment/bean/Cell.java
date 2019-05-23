@@ -21,6 +21,15 @@ public class Cell implements Parcelable {
 
     public Cell() {}
 
+    protected Cell(Parcel in) {
+        status = in.readInt();
+        position = in.readInt();
+        PlaceName = in.readString();
+        SubjectName = in.readString();
+        startTime = in.readString();
+        weekofday = in.readString();
+    }
+
     public int getStatus() {
         return status;
     }
@@ -57,28 +66,21 @@ public class Cell implements Parcelable {
 
 
     @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(status);
+        dest.writeInt(position);
         dest.writeString(PlaceName);
         dest.writeString(SubjectName);
         dest.writeString(startTime);
         dest.writeString(weekofday);
     }
 
-    protected Cell(Parcel in) {
-        status = in.readInt();
-        PlaceName = in.readString();
-        SubjectName = in.readString();
-        startTime = in.readString();
-        weekofday = in.readString();
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public static final Parcelable.Creator<Cell> CREATOR = new Parcelable.Creator<Cell>() {
+    public static final Creator<Cell> CREATOR = new Creator<Cell>() {
         @Override
         public Cell createFromParcel(Parcel in) {
             return new Cell(in);
