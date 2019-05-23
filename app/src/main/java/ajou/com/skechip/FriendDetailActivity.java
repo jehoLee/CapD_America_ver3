@@ -31,6 +31,7 @@ import ajou.com.skechip.Fragment.bean.RowTitle;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
 import ajou.com.skechip.Retrofit.conn.CallMethod;
 import ajou.com.skechip.Retrofit.models.AvailableMeetingTimesResponse;
+import ajou.com.skechip.Retrofit.models.Kakao;
 import ajou.com.skechip.Retrofit.models.TimeTable;
 import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
 
@@ -69,7 +70,7 @@ public class FriendDetailActivity extends AppCompatActivity {
     private String kakaoUserImg;
     private String kakaoUserName;
     private Long kakaoUserID;
-    private List<AppFriendInfo> kakaoFriendInfo_list;
+    private List<Kakao> kakaoFriendInfo_list;
     private List<TimeTable> timeTableList;
     private List<Cell> cells1;
     private CallMethod conn = new CallMethod();

@@ -3,6 +3,9 @@ package ajou.com.skechip;
 import ajou.com.skechip.Event.MeetingCreationEvent;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
+import ajou.com.skechip.Retrofit.api.RetrofitClient;
+import ajou.com.skechip.Retrofit.models.Kakao;
+import ajou.com.skechip.Retrofit.models.UserByGroupIdResponse;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -14,6 +17,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kakao.util.helper.log.Logger;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -22,12 +27,15 @@ import org.w3c.dom.Text;
 import java.util.List;
 
 import ajou.com.skechip.Fragment.bean.GroupEntity;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class GroupDetailActivity extends AppCompatActivity {
     private final String TAG = "GroupDetailActivity";
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onMeetingCreationEvent(MeetingCreationEvent event){
+    public void onMeetingCreationEvent(MeetingCreationEvent event) {
         Log.d(TAG, "미팅 생성 이벤트 발생!");
 
         updateGroupEntity(event.getGroupEntityWithNewMeeting());
@@ -59,7 +67,7 @@ public class GroupDetailActivity extends AppCompatActivity {
         meetingAddView = findViewById(R.id.initial_meeting_card);
         meetingView = findViewById(R.id.meeting_view);
 
-        if(meetingEntities.isEmpty()){
+        if (meetingEntities.isEmpty()) {
             meetingAddView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -73,10 +81,16 @@ public class GroupDetailActivity extends AppCompatActivity {
                     startCreateMeeting();
                 }
             });
-        }
-        else{
+        } else {
             updateMeetingAndRelatedView();
         }
+
+
+
+
+    }
+
+
 
 
 
@@ -104,9 +118,8 @@ public class GroupDetailActivity extends AppCompatActivity {
 
 
 
-    }
 
-    public void updateGroupEntity(GroupEntity newGroup){
+    public void updateGroupEntity(GroupEntity newGroup) {
         groupEntity = newGroup;
         meetingEntities = groupEntity.getMeetingEntities();
     }
@@ -124,15 +137,17 @@ public class GroupDetailActivity extends AppCompatActivity {
         meetingNameText.setText(meetingEntity.getTitle());
         meetingLocText.setText(meetingEntity.getLocation());
 
-        String time = meetingEntity.getMeetingTimeCells().get(0).getWeekofday() + " " + meetingEntity.getMeetingTimeCells().get(0).getStartTime();
-        meetingTimeText.setText(time);
+        if(!meetingEntity.getMeetingTimeCells().isEmpty()) {
+            String time = meetingEntity.getMeetingTimeCells().get(0).getWeekofday() + " " + meetingEntity.getMeetingTimeCells().get(0).getStartTime();
+            meetingTimeText.setText(time);
+        }
 
         meetingAddView.setVisibility(View.GONE);
         meetingView.setVisibility(View.VISIBLE);
     }
 
 
-    public void startCreateMeeting(){
+    public void startCreateMeeting() {
         Intent intent = new Intent(this, MeetingCreateActivity.class);
 
         intent.putExtra("kakaoBundle", bundle);
@@ -157,9 +172,6 @@ public class GroupDetailActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
     }
-
-
-
 
 
 }

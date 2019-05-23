@@ -32,13 +32,22 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
+import ajou.com.skechip.Adapter.Calendar_Recycler_Adapter;
+import ajou.com.skechip.Fragment.EP_Fragment;
+import ajou.com.skechip.Fragment.bean.Cell;
 import androidx.annotation.NonNull;
+
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -47,6 +56,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -57,35 +68,61 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
     private com.google.api.services.calendar.Calendar mService = null;
 
     //Google Calendar API 호출 관련 메커니즘 및 AsyncTask을 재사용하기 위해 사용
-    private  int mID;
+    private int mID;
 
     GoogleAccountCredential mCredential;
     ProgressDialog mProgress;
     private TextView mStatusText;
     private TextView mResultText;
-    private Button mGetEventButton;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
     private Button mAddEventButton;
-    private Switch useGoogleCalendar;
-    private Switch ReflectPlanner;
-    private boolean UseGC=true;
+    private ArrayList<Cell> cells = new ArrayList<>();
+    private ArrayList<Cell> tmpcells;
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
     private static final String PREF_ACCOUNT_NAME = "accountName";
+    public static final long ONE_DAY = 24 * 3600 * 1000;
+
     private static final String[] SCOPES = {CalendarScopes.CALENDAR};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        tmpcells = getIntent().getParcelableArrayListExtra("Timetable");
+        for (Cell tmp : tmpcells) {
+            if (tmp.getStatus() != 0) {
+                cells.add(tmp);
+            }
+        }
         setContentView(R.layout.activity_calendar_setting);
         mAddEventButton = (Button) findViewById(R.id.button_main_add_event);
 //        mGetEventButton = (Button) findViewById(R.id.button_main_get_event);
-        useGoogleCalendar = (Switch) findViewById(R.id.use_google_calendar);
-        ReflectPlanner = (Switch) findViewById(R.id.reflect_to_planner);
         mStatusText = (TextView) findViewById(R.id.textview_main_status);
         mResultText = (TextView) findViewById(R.id.textview_main_result);
 
+        mRecyclerView = findViewById(R.id.calendar_card_list_view);
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new Calendar_Recycler_Adapter(cells);
+        mRecyclerView.setAdapter(mAdapter);
+
+//        mRecyclerView.addOnItemTouchListener (new RecyclerItemClickListener(this, mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(View view, int position) {
+////                Toast.makeText(getApplicationContext(), position + "번 째 아이템 클릭 : " + cells.get(position).getSubjectName(), Toast.LENGTH_SHORT).show();
+//
+//            }
+//
+//            @Override
+//            public void onLongItemClick(View view, int position) {
+//                Toast.makeText(getApplicationContext(), position + "번 째 아이템 롱 클릭", Toast.LENGTH_SHORT).show();
+//            }
+//        }));
         // Google Calendar API의 호출 결과를 표시하는 TextView를 준비
         mResultText.setVerticalScrollBarEnabled(true);
         mResultText.setMovementMethod(new ScrollingMovementMethod());
@@ -101,38 +138,41 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
         mAddEventButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (useGoogleCalendar.isChecked()) {
-                    // Google Calendar API 사용하기 위해 필요한 인증 초기화( 자격 증명 credentials, 서비스 객체 )
-                    // OAuth 2.0를 사용하여 구글 계정 선택 및 인증하기 위한 준비
-                    mCredential = GoogleAccountCredential.usingOAuth2(
-                            getApplicationContext(),
-                            Arrays.asList(SCOPES)
-                    ).setBackOff(new ExponentialBackOff()); // I/O 예외 상황을 대비해서 백오프 정책 사용
-                    //로딩중, 캘린더 생성/불러오기 완료
-                    mStatusText.setText("");
-                    mID = 1;           //캘린더 생성
-                    getResultsFromApi();
+//                for(int i=0;i<mAdapter.getItemCount();i++) {
+//                    View vw = mLayoutManager.findViewByPosition(i);
+//                    androidx.recyclerview.widget.RecyclerView.ViewHolder vt= mRecyclerView.findViewHolderForLayoutPosition(i);
+//                    Log.e("test",""+vw+vt);
+//                }
+                // Google Calendar API 사용하기 위해 필요한 인증 초기화( 자격 증명 credentials, 서비스 객체 )
+                // OAuth 2.0를 사용하여 구글 계정 선택 및 인증하기 위한 준비
+                mCredential = GoogleAccountCredential.usingOAuth2(
+                        getApplicationContext(),
+                        Arrays.asList(SCOPES)
+                ).setBackOff(new ExponentialBackOff()); // I/O 예외 상황을 대비해서 백오프 정책 사용
+                //로딩중, 캘린더 생성/불러오기 완료
+                mStatusText.setText("");
+                mID = 1;           //캘린더
+                Log.e("Event", "1");
+                getResultsFromApi();
 
-                    if(ReflectPlanner.isChecked()) {
-                        mAddEventButton.setEnabled(false);
-                        mStatusText.setText("");
-                        mID = 2;        // 이벤트 생성 프로세스. 즉, 내 시간표를 구글캘린더에 전부 저장하는 모드
-                        getResultsFromApi();
-                        mAddEventButton.setEnabled(true);
-                    }
-                    if (getPackageList()) {
-                        Intent intent = getPackageManager().getLaunchIntentForPackage("com.google.android.calendar");
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    } else {
-                        String url = "market://details?id=" + "com.google.android.calendar";
-                        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        startActivity(i);
-                    }
-                }
-                else{   //excel panel을 여기에 쓸까 생각중
+                mAddEventButton.setEnabled(false);
+                mStatusText.setText("");
+                Log.e("Event", "2");
 
+                mID = 2;        // 이벤트 생성 프로세스. 즉, 내 시간표를 구글캘린더에 전부 저장하는 모드
+                getResultsFromApi();
+                mAddEventButton.setEnabled(true);
+
+                if (getPackageList()) {
+                    Intent intent = getPackageManager().getLaunchIntentForPackage("com.google.android.calendar");
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } else {
+                    String url = "market://details?id=" + "com.google.android.calendar";
+                    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(i);
                 }
+                Log.e("Event", "3");
             }
         });
 
@@ -147,6 +187,7 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
 //            }
 //        });
     }
+
     public boolean getPackageList() {
         boolean isExist = false;
 
@@ -158,41 +199,44 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
 
         try {
             for (int i = 0; i < mApps.size(); i++) {
-                if(mApps.get(i).activityInfo.packageName.startsWith("com.google.android.calendar")){
+                if (mApps.get(i).activityInfo.packageName.startsWith("com.google.android.calendar")) {
                     isExist = true;
                     break;
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             isExist = false;
         }
         return isExist;
     }
+
     /**
      * 다음 사전 조건을 모두 만족해야 Google Calendar API를 사용할 수 있다.
-     *
+     * <p>
      * 사전 조건
-     *     - Google Play Services 설치
-     *     - 유효한 구글 계정 선택
-     *     - 안드로이드 디바이스에서 인터넷 사용 가능
-     *
+     * - Google Play Services 설치
+     * - 유효한 구글 계정 선택
+     * - 안드로이드 디바이스에서 인터넷 사용 가능
+     * <p>
      * 하나라도 만족하지 않으면 해당 사항을 사용자에게 알림.
      */
-    private String getResultsFromApi() {
+    private void getResultsFromApi() {
+        Log.e("Event", "22");
+
         if (!isGooglePlayServicesAvailable()) { // Google Play Services를 사용할 수 없는 경우
             acquireGooglePlayServices();
-        }
-        else if (mCredential.getSelectedAccountName() == null) { // 유효한 Google 계정이 선택되어 있지 않은 경우
+            Log.e("Event", "22-1");
+
+        } else if (mCredential.getSelectedAccountName() == null) { // 유효한 Google 계정이 선택되어 있지 않은 경우
+            Log.e("Event", "22-2");
             chooseAccount();
-        }
-        else if (!isDeviceOnline()) {    // 인터넷을 사용할 수 없는 경우
+        } else if (!isDeviceOnline()) {    // 인터넷을 사용할 수 없는 경우
             mStatusText.setText("No network connection available.");
-        }
-        else {
+            Log.e("Event", "22-3");
+        } else {
+            Log.e("Event", "23");
             new MakeRequestTask(this, mCredential).execute(); // Google Calendar API 호출
         }
-        return null;
     }
 
     //안드로이드 디바이스에 최신 버전의 Google Play Services가 설치되어 있는지 확인
@@ -226,7 +270,7 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
 
     /**
      * Google Calendar API의 자격 증명( credentials ) 에 사용할 구글 계정을 설정한다.
-     *
+     * <p>
      * 전에 사용자가 구글 계정을 선택한 적이 없다면 다이얼로그에서 사용자를 선택하도록 한다.
      * GET_ACCOUNTS 퍼미션이 필요하다.
      */
@@ -244,10 +288,9 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
                         mCredential.newChooseAccountIntent(),
                         REQUEST_ACCOUNT_PICKER);
             }
-        }
-        else {             // GET_ACCOUNTS 권한을 가지고 있지 않다면
+        } else {             // GET_ACCOUNTS 권한을 가지고 있지 않다면
             EasyPermissions.requestPermissions(              // 사용자에게 GET_ACCOUNTS 권한을 요구하는 다이얼로그를 보여준다.(주소록 권한 요청함)
-                    (Activity)this,
+                    (Activity) this,
                     "This app needs to access your Google account (via Contacts).",
                     REQUEST_PERMISSION_GET_ACCOUNTS,
                     Manifest.permission.GET_ACCOUNTS);
@@ -265,10 +308,11 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
         switch (requestCode) {
             case REQUEST_GOOGLE_PLAY_SERVICES:
                 if (resultCode != RESULT_OK) {
-                    mStatusText.setText( " 앱을 실행시키려면 구글 플레이 서비스가 필요합니다."
-                            + "구글 플레이 서비스를 설치 후 다시 실행하세요." );
+                    mStatusText.setText(" 앱을 실행시키려면 구글 플레이 서비스가 필요합니다."
+                            + "구글 플레이 서비스를 설치 후 다시 실행하세요.");
+                } else {
+                    getResultsFromApi();
                 }
-                else { getResultsFromApi(); }
                 break;
 
             case REQUEST_ACCOUNT_PICKER:
@@ -286,7 +330,9 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
                 break;
 
             case REQUEST_AUTHORIZATION:
-                if (resultCode == RESULT_OK) { getResultsFromApi(); }
+                if (resultCode == RESULT_OK) {
+                    getResultsFromApi();
+                }
                 break;
         }
     }
@@ -304,11 +350,13 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
 
     //EasyPermissions 라이브러리를 사용하여 요청한 권한을 사용자가 승인한 경우 호출된다.
     @Override
-    public void onPermissionsGranted(int requestCode, List<String> requestPermissionList) {}
+    public void onPermissionsGranted(int requestCode, List<String> requestPermissionList) {
+    }
 
     //EasyPermissions 라이브러리를 사용하여 요청한 권한을 사용자가 거부한 경우 호출된다.
     @Override
-    public void onPermissionsDenied(int requestCode, List<String> requestPermissionList) {}
+    public void onPermissionsDenied(int requestCode, List<String> requestPermissionList) {
+    }
 
     //안드로이드 디바이스가 인터넷 연결되어 있는지 확인한다. 연결되어 있다면 True 리턴, 아니면 False 리턴
     private boolean isDeviceOnline() {
@@ -318,7 +366,7 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
     }
 
     //캘린더 이름에 대응하는 캘린더 ID를 리턴
-    private String getCalendarID(String calendarTitle){
+    private String getCalendarID(String calendarTitle) {
         String id = null;
         // Iterate through entries in calendar list
         String pageToken = null;
@@ -328,12 +376,12 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
                 calendarList = mService.calendarList().list().setPageToken(pageToken).execute();
             } catch (UserRecoverableAuthIOException e) {
                 startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
-            }catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             List<CalendarListEntry> items = calendarList.getItems();
             for (CalendarListEntry calendarListEntry : items) {
-                if ( calendarListEntry.getSummary().equals(calendarTitle)) {
+                if (calendarListEntry.getSummary().equals(calendarTitle)) {
                     id = calendarListEntry.getId();
                 }
             }
@@ -352,7 +400,7 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
         List<String> eventStrings = new ArrayList<String>();
 
         public MakeRequestTask(CalendarActivity activity, GoogleAccountCredential credential) {
-
+            Log.e("Event", "10");
             mActivity = activity;
 
             HttpTransport transport = AndroidHttp.newCompatibleTransport();
@@ -376,11 +424,11 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
         @Override
         protected String doInBackground(Void... params) {
             try {
-                if ( mID == 1) {
+                if (mID == 1) {
                     return createCalendar();
-                }
-                else if (mID == 2) {
-                    return addEvent();
+                } else if (mID == 2) {
+                    Log.e("Event", "11");
+                    return addEvent(cells.get(0));
                 }
 //                else if (mID == 3) {
 //                    return getEvent();
@@ -421,7 +469,7 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
         private String createCalendar() throws IOException {
             String ids = getCalendarID("CalendarTitle");
 
-            if ( ids != null ){
+            if (ids != null) {
                 return "기존의 캘린더를 불러왔습니다. ";
             }
 
@@ -486,31 +534,42 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
             }
         }
 
-        private String addEvent() {
+        private String addEvent(Cell cell) {
+            Log.e("Event", "12");
             String calendarID = getCalendarID("CalendarTitle");
-
             Event event = new Event()
-                    .setSummary("구글 캘린더 테스트")
-                    .setLocation("서울시")
-                    .setDescription("캘린더에 이벤트 추가하는 것을 테스트합니다.");
+                    .setSummary(cell.getSubjectName())
+                    .setLocation(cell.getPlaceName())
+                    .setDescription("모임일정에서 생성된 일정입니다.");
             java.util.Calendar calander;
 
             calander = java.util.Calendar.getInstance();
+            int time = calander.get(java.util.Calendar.DAY_OF_WEEK);
+            time--;
             SimpleDateFormat simpledateformat;
             //simpledateformat = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssZ", Locale.KOREA);
             // Z에 대응하여 +0900이 입력되어 문제 생겨 수작업으로 입력
-            simpledateformat = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss+09:00", Locale.KOREA);
+            simpledateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.KOREA);
             String datetime = simpledateformat.format(calander.getTime());
-
             DateTime startDateTime = new DateTime(datetime);
+            long currtime = startDateTime.getValue();
+            long startDate, endDate;
+            if (time > cell.getPosition() % 5){
+                startDate = (currtime / (ONE_DAY * 7)+1) * (ONE_DAY * 7) + (time - cell.getPosition()-4) * ONE_DAY + 9 * 60 * 60 * 1000 + cell.getPosition() / 5 * 90 * 60 * 1000;
+                endDate = (currtime / (ONE_DAY * 7)+1) * (ONE_DAY * 7) + (time - cell.getPosition()-4) * ONE_DAY + 9 * 60 * 60 * 1000 + (cell.getPosition() / 5 + 1) * 90 * 60 * 1000;
+            }else{
+                startDate = (currtime / (ONE_DAY * 7)) * (ONE_DAY * 7) + (time - cell.getPosition()-4) * ONE_DAY + 9 * 60 * 60 * 1000 + cell.getPosition() / 5 * 90 * 60 * 1000;
+                endDate = (currtime / (ONE_DAY * 7)) * (ONE_DAY * 7) + (time - cell.getPosition()-4) * ONE_DAY + 9 * 60 * 60 * 1000 + (cell.getPosition() / 5 + 1) * 90 * 60 * 1000;
+            }
+            DateTime nstartDateTime = new DateTime(startDate);
+            DateTime nendDateTime = new DateTime(endDate);
             EventDateTime start = new EventDateTime()
-                    .setDateTime(startDateTime)
+                    .setDateTime(nstartDateTime)
                     .setTimeZone("Asia/Seoul");
             event.setStart(start);
 
-            DateTime endDateTime = new  DateTime(datetime);
             EventDateTime end = new EventDateTime()
-                    .setDateTime(endDateTime)
+                    .setDateTime(nendDateTime)
                     .setTimeZone("Asia/Seoul");
             event.setEnd(end);
 

@@ -7,11 +7,27 @@ import ajou.com.skechip.Fragment.SelectMeetingTimeFragment;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
+import ajou.com.skechip.Retrofit.api.RetrofitClient;
 import ajou.com.skechip.Retrofit.conn.CallMethod;
+import ajou.com.skechip.Retrofit.models.DefaultResponse;
+import ajou.com.skechip.Retrofit.models.GroupResponse;
+import ajou.com.skechip.Retrofit.models.Kakao;
+import ajou.com.skechip.Retrofit.models.MeetingResponse;
+import ajou.com.skechip.Retrofit.models.UserByGroupIdResponse;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.POST;
+import retrofit2.http.Query;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -30,9 +46,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kakao.friends.response.model.AppFriendInfo;
+import com.kakao.util.helper.log.Logger;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -41,13 +63,13 @@ public class MeetingCreateActivity extends AppCompatActivity {
 
     private GroupEntity groupEntity;
     private List<Cell> meetingTimeCells;
-    private List<AppFriendInfo> selectedMembers;
+    private List<Kakao> selectedMembers;
 
     private Bundle bundle;
     private SelectMeetingTimeFragment selectMeetingTimeFragment;
     private SelectFriendsFragment selectFriendsFragment;
 
-    private String meetingType;
+    private Integer meetingType;
 
     private RelativeLayout infoEnterView;
     private FrameLayout frameLayout;
@@ -57,6 +79,9 @@ public class MeetingCreateActivity extends AppCompatActivity {
 
     private CallMethod conn= new CallMethod();
     private Long kakaoUserID;
+
+    private Kakao curFriend;
+    private Bitmap bitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +136,7 @@ public class MeetingCreateActivity extends AppCompatActivity {
     }
 
 
-    public void onSelectMembersFinishedEvent(List<AppFriendInfo> members){
+    public void onSelectMembersFinishedEvent(List<Kakao> members){
         selectedMembers = members;
 
         LinearLayout selectedParticipantsView = findViewById(R.id.participants_layout);
@@ -120,11 +145,60 @@ public class MeetingCreateActivity extends AppCompatActivity {
         String text = "일정에 참여하는 " + Integer.toString(selectedMembers.size()) + "명의 친구";
         selectedParticipantsNum.setText(text);
 
-        for(AppFriendInfo friendEntity : selectedMembers){
+//        for(Kakao friendEntity : selectedMembers){
+//            final TextView name = new TextView(this);
+//            name.setText(friendEntity.getProfileNickname());
+//            name.setTextColor(getResources().getColor(R.color.text_dark1));
+//            selectedParticipantsView.addView(name);
+//        }
+
+        for(Kakao friendEntity : selectedMembers){
+            curFriend = friendEntity;
+            bitmap = null;
             final TextView name = new TextView(this);
             name.setText(friendEntity.getProfileNickname());
             name.setTextColor(getResources().getColor(R.color.text_dark1));
-            selectedParticipantsView.addView(name);
+
+            final CircleImageView imageView = new CircleImageView(this);
+            Thread thread = new Thread(){
+                @Override
+                public void run(){
+                    try{
+                        if(curFriend.getProfileThumbnailImage().isEmpty()){
+                            bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.defalt_thumb_nail_image);
+                        }
+                        else {
+                            URL url = new URL(curFriend.getProfileThumbnailImage());
+                            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                            connection.setDoInput(true);
+                            connection.connect();
+
+                            InputStream inputStream = connection.getInputStream();
+                            bitmap = BitmapFactory.decodeStream(inputStream);
+                        }
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+
+            thread.start();
+
+            try {
+                thread.join();
+                imageView.setImageBitmap(bitmap);
+                LinearLayout friendView = new LinearLayout(this);
+                friendView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                friendView.setOrientation(LinearLayout.VERTICAL);
+                friendView.addView(imageView);
+                friendView.addView(name);
+                selectedParticipantsView.addView(friendView);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
         }
 
         frameLayout.setVisibility(View.GONE);
@@ -177,15 +251,59 @@ public class MeetingCreateActivity extends AppCompatActivity {
 //                        , Toast.LENGTH_LONG).show();
 
                 MeetingEntity meetingEntity = new MeetingEntity(
-                        meetingTitle, meetingLocation, meetingType, meetingTimeCells, selectedMembers);
+                        meetingTitle, meetingLocation, 0, meetingTimeCells, selectedMembers);
 
                 groupEntity.addMeetingEntity(meetingEntity);
 
                 //server put
-                ArrayList<Long> memberIDs = new ArrayList<>();
-                for(AppFriendInfo member : groupEntity.getGroupMembers())
-                    memberIDs.add(member.getId());
-                conn.append_server(meetingTimeCells, memberIDs, 'm');
+//                ArrayList<Long> memberIDs = new ArrayList<>();
+//                for(Kakao member : groupEntity.getGroupMembers())
+//                    memberIDs.add(member.getUserId());
+//                conn.append_server(meetingTimeCells, memberIDs, 'm');
+
+//                Logger.e("그룹아이디 :" + groupEntity.getGroupManager().toString());
+
+                List<Long> ids = new ArrayList<>();
+                ids.add(kakaoUserID);
+                for(Kakao friend : selectedMembers){
+                    ids.add(friend.getUserId());
+                }
+
+                List<Integer> cellPositions = new ArrayList<>();
+                for(Cell cell : meetingTimeCells){
+                    cellPositions.add(cell.getPosition());
+                }
+
+//                @FormUrlEncoded
+//                @POST("createMeeting")
+//                Call<DefaultResponse> createMeeting(
+//                        @Query("kakaoIdList") String kakaoIdList,
+//                        @Field("cellPositionList") String cellPositionList,
+//                        @Field("groupId") Integer groupId,
+//                        @Field("type") Integer type,
+//                        @Field("manager") Integer manager,
+//                        @Field("title") String title,
+//                        @Field("place") String place
+
+                Call<DefaultResponse> call = RetrofitClient
+                        .getInstance()
+                        .getApi()
+                        .createMeeting(ids.toString(), cellPositions.toString(),
+                                groupEntity.getGroupID(), 0, groupEntity.getGroupManager()
+                                ,meetingTitle , meetingLocation);
+
+                call.enqueue(new Callback<DefaultResponse>() {
+                    @Override
+                    public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+                        Logger.e("리스폰스!!!!" + response.body().getMsg());
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<DefaultResponse> call, Throwable t) {
+                    }
+                });
+
 
                 //UI update
                 EventBus.getDefault().post(new MeetingCreationEvent(groupEntity));
@@ -252,11 +370,9 @@ public class MeetingCreateActivity extends AppCompatActivity {
                 // If user change the default selection
                 // First item is disable and it is used for hint
                 if (position > 0) {
-                    // Notify the selected item text
-//                    Toast.makeText
-//                            (getActivity(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT)
-//                            .show();
-                    meetingType = selectedItemText;
+
+//                    meetingType = selectedItemText;
+                    meetingType = position;
                 }
             }
 

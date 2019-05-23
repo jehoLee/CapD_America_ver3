@@ -9,6 +9,7 @@ import ajou.com.skechip.Event.MeetingCreationEvent;
 import ajou.com.skechip.Event.TimeTableImageUploadEvent;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
+import ajou.com.skechip.Retrofit.models.Kakao;
 import ajou.com.skechip.Retrofit.models.TimeTable;
 import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
 import androidx.annotation.NonNull;
@@ -27,7 +28,7 @@ import android.widget.Toast;
 import ajou.com.skechip.Event.GroupCreationEvent;
 import ajou.com.skechip.Fragment.EP_Fragment;
 import ajou.com.skechip.Fragment.FriendListFragment;
-//import ajou.com.skechip.Fragment.AlarmFragment;
+import ajou.com.skechip.Fragment.AlarmFragment;
 import ajou.com.skechip.Fragment.GroupListFragment;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
@@ -91,8 +92,9 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onGroupCreationEvent(GroupCreationEvent event) {
         Log.d(TAG, "이벤트 발생!!");
-        groupListFragment.addGroupEntity(event.getNewGroup());
-        groupListFragment.updateGroupListView();
+//        groupListFragment.addGroupEntity(event.getNewGroup());
+//        groupListFragment.updateGroupListView();
+        groupListFragment.updateGroupEntityOnMeetingCreate(event.getNewGroup());
 
         EventBus.getDefault().removeStickyEvent(event);
     }
@@ -102,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
     private FriendListFragment friendListFragment;
     private GroupListFragment groupListFragment;
     private EP_Fragment epFragment;
-//    private AlarmFragment alertFragment;
+    private AlarmFragment alertFragment;
 
     private Fragment curActivatedFragment;
 
@@ -116,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
     //for friend list
     final AppFriendContext friendContext = new AppFriendContext(true, 0, 10, "asc");
-    private List<AppFriendInfo> kakaoFriends = new ArrayList<>();
+    private List<Kakao> kakaoFriends = new ArrayList<>();
     private List<String> friendsNickname_list = new ArrayList<>();
 //    private ArrayList<FriendEntity> friendEntities = new ArrayList<>();
 
@@ -172,14 +174,15 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(AppFriendsResponse result) {
                         // 친구 목록
-                        Logger.e("onSucess " + result.getFriends().toString());
+                        Logger.e("onSucess " + result.getFriends().get(2).toString());
 
                         Iterator iter = result.getFriends().iterator();
                         while (iter.hasNext()) {
-                            AppFriendInfo next = (AppFriendInfo) iter.next();
-                            friendsNickname_list.add(next.getProfileNickname());
-                            kakaoFriends.add(next);
-//                            friendEntities.add(new FriendEntity(next.getId(), next.getProfileNickname(), next.getProfileThumbnailImage()));
+                            AppFriendInfo nextFriend = (AppFriendInfo) iter.next();
+                            friendsNickname_list.add(nextFriend.getProfileNickname());
+
+                            kakaoFriends.add(new Kakao(
+                                    nextFriend.getId(), nextFriend.getProfileNickname(), nextFriend.getProfileThumbnailImage()));
                         }
 
                         if (friendContext.hasNext()) {
@@ -207,10 +210,12 @@ public class MainActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onSuccess(MeV2Response response) {
+                                    Logger.e("onSucess " + response.getProfileImagePath());
+
                                     kakaoUserInfo = response;
                                     saveUser(kakaoUserInfo);
 
-                                    for (AppFriendInfo friend : kakaoFriends) {
+                                    for (Kakao friend : kakaoFriends) {
                                         saveUser(friend);
                                         saveFriendRelationShip(kakaoUserInfo, friend);
                                     }
@@ -252,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
 
         groupListFragment = GroupListFragment.newInstance(bundle);
         friendListFragment = FriendListFragment.newInstance(bundle);
-//        alertFragment = AlarmFragment.newInstance(bundle);
+        alertFragment = AlarmFragment.newInstance(bundle);
 
         bundle.putBoolean("timeTableUploaded", timeTableUploaded);
 
@@ -263,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(R.id.frame_layout, groupListFragment).hide(groupListFragment);
         transaction.add(R.id.frame_layout, friendListFragment).hide(friendListFragment);
-//        transaction.add(R.id.frame_layout, alertFragment).hide(alertFragment);
+        transaction.add(R.id.frame_layout, alertFragment).hide(alertFragment);
         transaction.add(R.id.frame_layout, epFragment);
         transaction.commit();
 
@@ -289,11 +294,11 @@ public class MainActivity extends AppCompatActivity {
                         transaction.commit();
                         curActivatedFragment = friendListFragment;
                         break;
-//                    case R.id.navigation_alert:
-//                        transaction.hide(curActivatedFragment).show(alertFragment);
-//                        transaction.commit();
-//                        curActivatedFragment = alertFragment;
-//                        break;
+                    case R.id.navigation_alert:
+                        transaction.hide(curActivatedFragment).show(alertFragment);
+                        transaction.commit();
+                        curActivatedFragment = alertFragment;
+                        break;
                 }
                 return true;
             }
@@ -320,11 +325,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void saveUser(final AppFriendInfo user) {
+    private void saveUser(final Kakao user) {
         Call<DefaultResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
-                .createUser(user.getId(), user.getProfileNickname(), 0);
+                .createUser(user.getUserId(), user.getProfileNickname(), 0);
 
         call.enqueue(new Callback<DefaultResponse>() {
             @Override
@@ -369,11 +374,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void saveFriendRelationShip(final MeV2Response user, final AppFriendInfo friend) {
+    public void saveFriendRelationShip(final MeV2Response user, final Kakao friend) {
         Call<DefaultResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
-                .createFriend(user.getId(), friend.getId());
+                .createFriend(user.getId(), friend.getUserId());
         call.enqueue(new Callback<DefaultResponse>() {
             @Override
             public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
