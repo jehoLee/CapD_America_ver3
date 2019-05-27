@@ -295,7 +295,6 @@ public class MeetingCreateActivity extends AppCompatActivity {
                 call.enqueue(new Callback<DefaultResponse>() {
                     @Override
                     public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-                        Logger.e("리스폰스!!!!" + response.body().getMsg());
 
                     }
 
