@@ -84,9 +84,7 @@ public class GroupInfoEnterFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view;
         view = inflater.inflate(R.layout.fragment_group_info_enter, container, false);
-
         setSelectedFriendsView(view);
-
         setGroupTagSpinner(view);
 
         final EditText groupNameText = view.findViewById(R.id.group_name_edit);
@@ -100,36 +98,28 @@ public class GroupInfoEnterFragment extends Fragment {
                 //TODO - UI : 필수 입력 사항 체크하고 dialog 띄워서 최종 확인시키기
                 groupName = groupNameText.getText().toString();//제목 썼는지 체크하기
 
-                //TODO - DB/server : 모임 생성 API 호출 + 모임 정보 DB 저장
                 List<Long> memberIDs = new ArrayList<>();
                 memberIDs.add(kakaoUserID);
                 for(Kakao friend : selectedFriends){
                     memberIDs.add(friend.getUserId());
                 }
-//                conn.createGroup_server(memberIDs, kakaoUserID, groupName, groupTag);
 
                 Call<DefaultResponse> call = RetrofitClient
                         .getInstance()
                         .getApi()
                         .createGroup(memberIDs.toString(), kakaoUserID, groupName, groupTag);
-
                 call.enqueue(new Callback<DefaultResponse>() {
                     @Override
                     public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
                         GroupEntity newGroup = new GroupEntity(groupName, groupTag, groupMemberNum, selectedFriends);
-
                         EventBus.getDefault().postSticky(new GroupCreationEvent(newGroup));
                     }
-
                     @Override
                     public void onFailure(Call<DefaultResponse> call, Throwable t) {
 
                     }
                 });
 
-//                GroupEntity newGroup = new GroupEntity(groupName, groupTag, groupMemberNum, selectedFriends);
-//
-//                EventBus.getDefault().postSticky(new GroupCreationEvent(newGroup));
                 ((GroupCreateActivity)getActivity()).finishActivity();
             }
         });
@@ -141,16 +131,12 @@ public class GroupInfoEnterFragment extends Fragment {
     private void setGroupTagSpinner(View view) {
         String[] groupTags = new String[]{"#", "#동아리", "#대외활동", "#강의팀플", "#여행", "#친목", "#기타"};
         Spinner groupTagSpinner = view.findViewById(R.id.group_tag_spinner);
-//        groupTagSpinner.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, groupTags));
-
 
         final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
                 getActivity(), android.R.layout.simple_list_item_1, groupTags) {
             @Override
             public boolean isEnabled(int position) {
                 if (position == 0) {
-                    // Disable the first item from Spinner
-                    // First item will be use for hint
                     return false;
                 } else {
                     return true;
@@ -163,7 +149,6 @@ public class GroupInfoEnterFragment extends Fragment {
                 View view = super.getDropDownView(position, convertView, parent);
                 TextView tv = (TextView) view;
                 if (position == 0) {
-                    // Set the hint text color gray
                     tv.setTextColor(Color.GRAY);
                 } else {
                     tv.setTextColor(Color.BLACK);
@@ -180,13 +165,7 @@ public class GroupInfoEnterFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedItemText = (String) parent.getItemAtPosition(position);
-                // If user change the default selection
-                // First item is disable and it is used for hint
                 if (position > 0) {
-                    // Notify the selected item text
-//                    Toast.makeText
-//                            (getActivity(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT)
-//                            .show();
                     groupTag = selectedItemText;
                 }
             }
@@ -199,13 +178,11 @@ public class GroupInfoEnterFragment extends Fragment {
     }
 
     private void setSelectedFriendsView(View view) {
-
         LinearLayout selectedFriendsView = view.findViewById(R.id.friends_layout);
         TextView selectedFriendsNum = view.findViewById(R.id.participants_num);
 
         String text = Integer.toString(selectedFriends.size()) + "명의 친구";
         selectedFriendsNum.setText(text);
-
 
         for(Kakao friendEntity : selectedFriends){
             curFriend = friendEntity;
@@ -255,14 +232,6 @@ public class GroupInfoEnterFragment extends Fragment {
             }
 
         }
-
-
-//        for(Kakao friendEntity : selectedFriends){
-//            final TextView name = new TextView(getActivity());
-//            name.setText(friendEntity.getProfileNickname());
-//            name.setTextColor(getResources().getColor(R.color.text_dark1));
-//            selectedFriendsView.addView(name);
-//        }
 
     }
 

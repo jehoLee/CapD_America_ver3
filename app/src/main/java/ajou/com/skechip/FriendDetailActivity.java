@@ -12,16 +12,11 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.tasks.Tasks;
-import com.kakao.friends.response.model.AppFriendInfo;
-
 import org.greenrobot.eventbus.EventBus;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import ajou.com.skechip.Adapter.EP_CustomAdapter;
 import ajou.com.skechip.Event.AppointmentCreationEvent;
 import ajou.com.skechip.Fragment.bean.Cell;
@@ -34,8 +29,6 @@ import ajou.com.skechip.Retrofit.models.AvailableMeetingTimesResponse;
 import ajou.com.skechip.Retrofit.models.Kakao;
 import ajou.com.skechip.Retrofit.models.TimeTable;
 import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
-
-import ajou.com.skechip.Retrofit.models.UserResponse;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -176,24 +169,8 @@ public class FriendDetailActivity extends AppCompatActivity {
     }
 
     private void checkUser() {
-//        Call< UserResponse > call = RetrofitClient
-//                .getInstance()
-//                .getApi()
-//                .getUser(friendEntity.getUserID());
-//        call.enqueue(new Callback<UserResponse>() {
-//            @Override
-//            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
-////                isUser = response.body().getmember();
-//                Log.e("userstatus",""+response.body());
         isUser = false;
         conditional_init();
-//            }
-//
-//            @Override
-//            public void onFailure(Call<UserResponse> call, Throwable t) {
-//                 Log.e("error",t.getMessage());
-//            }
-//        });
     }
 
     private List<RowTitle> genRowData() {

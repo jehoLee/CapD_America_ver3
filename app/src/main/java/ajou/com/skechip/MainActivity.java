@@ -68,77 +68,45 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onAppointmentCreationEvent(AppointmentCreationEvent event){
         Log.d(TAG, "약속 생성 이벤트 발생 !");
-
         ArrayList<Cell> cells = (ArrayList<Cell>)event.getAppointmentTimeCells();
-
-//        onTimeTableUploadedChangeEPfragment();
         epFragment.onTimeCellsCreateEvent(cells);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMeetingCreationEvent(MeetingCreationEvent event) {
         Log.d(TAG, "미팅 생성 이벤트 발생 !");
-
         GroupEntity groupWithNewMeeting = event.getGroupEntityWithNewMeeting();
         ArrayList<Cell> cells = (ArrayList<Cell>) groupWithNewMeeting.getMeetingEntities().get(0).getMeetingTimeCells();
-
-//        onTimeTableUploadedChangeEPfragment();
         epFragment.onTimeCellsCreateEvent(cells);
-
         groupListFragment.updateGroupEntityOnMeetingCreate(groupWithNewMeeting);
-//        groupListFragment.updateGroupListView();
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onGroupCreationEvent(GroupCreationEvent event) {
         Log.d(TAG, "이벤트 발생!!");
-//        groupListFragment.addGroupEntity(event.getNewGroup());
-//        groupListFragment.updateGroupListView();
         groupListFragment.updateGroupEntityOnMeetingCreate(event.getNewGroup());
-
         EventBus.getDefault().removeStickyEvent(event);
     }
 
-    //for Fragment
     private FragmentManager fragmentManager = getSupportFragmentManager();
     private FriendListFragment friendListFragment;
     private GroupListFragment groupListFragment;
     private EP_Fragment epFragment;
     private AlarmFragment alertFragment;
-
     private Fragment curActivatedFragment;
-
-    //for kakao user info
-    private Long kakaoUserID;
-    private String kakaoUserImg;
-    private String kakaoUserName;
     public MeV2Response kakaoUserInfo;
-
     private Boolean timeTableUploaded = false;
-
-    //for friend list
     final AppFriendContext friendContext = new AppFriendContext(true, 0, 10, "asc");
     private List<Kakao> kakaoFriends = new ArrayList<>();
     private List<String> friendsNickname_list = new ArrayList<>();
-//    private ArrayList<FriendEntity> friendEntities = new ArrayList<>();
-
-    //for Gallery - 충희
-    private int GET_GALLERY_IMAGE = 200;
-    private Mat img_input;
-    private Mat img_output;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.loading_screen);
-//        setContentView(R.layout.activity_main);
-
         EventBus.getDefault().register(this);
-
         init_Main();
     }
-
 
     /*
      * init_Main() 함수
@@ -157,13 +125,11 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onSessionClosed(ErrorResult errorResult) {
-                        //redirectLoginActivity();
                         Logger.e("onSessionClosed");
                     }
 
                     @Override
                     public void onNotSignedUp() {
-                        //redirectSignupActivity();
                         Logger.e("onNotSignededup");
                     }
 
@@ -190,8 +156,6 @@ public class MainActivity extends AppCompatActivity {
                             init_Main();
                         } else {
                             Logger.e("No next pages");
-                            // 모든 페이지 요청 완료.
-
                             List<String> keys = new ArrayList<>();
                             keys.add("properties.nickname");
                             keys.add("properties.profile_image");
@@ -221,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
                                         saveFriendRelationShip(kakaoUserInfo, friend);
                                     }
 
-                                    //check time table is uploaded
                                     Call<TimeTablesResponse> call = RetrofitClient
                                             .getInstance()
                                             .getApi()
@@ -265,7 +228,6 @@ public class MainActivity extends AppCompatActivity {
 
         epFragment = EP_Fragment.newInstance(bundle);
 
-        //for bottomNavigation
         BottomNavigationView bottomNavigationView = findViewById(R.id.navigation);
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(R.id.frame_layout, groupListFragment).hide(groupListFragment);
@@ -336,12 +298,7 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<DefaultResponse>() {
             @Override
             public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-//                if (response.code() == 201) {
-//                    DefaultResponse dr = response.body();
-//                    Toast.makeText(MainActivity.this, user.getProfileNickname() + " created successfully", Toast.LENGTH_LONG).show();
-//                } else if (response.code() == 422) {
-//                    Toast.makeText(MainActivity.this, user.getProfileNickname() + " already exist", Toast.LENGTH_LONG).show();
-//                }
+
             }
 
             @Override
@@ -361,12 +318,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
 
-//                if (response.code() == 201) {
-//                    DefaultResponse dr = response.body();
-//                    Toast.makeText(MainActivity.this, user.getNickname() + " created successfully", Toast.LENGTH_LONG).show();
-//                } else if (response.code() == 422) {
-//                    Toast.makeText(MainActivity.this, user.getNickname() + " already exist", Toast.LENGTH_LONG).show();
-//                }
             }
 
             @Override
@@ -384,12 +335,7 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<DefaultResponse>() {
             @Override
             public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-//                if (response.code() == 201) {
-//                    DefaultResponse dr = response.body();
-//                    Toast.makeText(MainActivity.this, user.getNickname() + "과"+ friend.getProfileNickname() + "의 Friend relationship created successfully", Toast.LENGTH_LONG).show();
-//                } else if (response.code() == 422) {
-//                    Toast.makeText(MainActivity.this, user.getNickname() + "과"+ friend.getProfileNickname() + "의 Friend relationship already exist", Toast.LENGTH_LONG).show();
-//                }
+
             }
 
             @Override
@@ -398,7 +344,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
 
     public void savePreferencesBoolean(String key, boolean value) {
         SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
@@ -415,27 +360,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        //다른 액티비티가 main 액티비티 위에 올라갔을 때
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
-        //다시 main 액티비티가 화면에 보일 때
-
     }
 
     @Override
     public void onStart() {
         super.onStart();
-//        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-//        EventBus.getDefault().unregister(this);
     }
 
 

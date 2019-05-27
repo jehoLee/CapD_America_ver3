@@ -60,10 +60,8 @@ public class GroupDetailActivity extends AppCompatActivity {
         }
 
         EventBus.getDefault().register(this);
-
         TextView groupNameText = findViewById(R.id.group_name_text);
         groupNameText.setText(groupEntity.getGroupTitle());
-
         meetingAddView = findViewById(R.id.initial_meeting_card);
         meetingView = findViewById(R.id.meeting_view);
 
@@ -84,40 +82,7 @@ public class GroupDetailActivity extends AppCompatActivity {
         } else {
             updateMeetingAndRelatedView();
         }
-
-
-
-
     }
-
-
-
-
-
-
-//        InboxRecyclerView recyclerView = findViewById(R.id.inbox_recyclerview);
-//
-//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-//        recyclerView.setLayoutManager(layoutManager);
-
-//        RecyclerView.Adapter mAdapter = new GroupDetailAdapter(groupEntities);
-//
-//        recyclerView.setAdapter(mAdapter);
-//        recyclerView.addOnItemTouchListener(
-//                new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
-//                    @Override
-//                    public void onItemClick(View view, int position) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onLongItemClick(View view, int position) {
-//
-//                    }
-//                }));
-
-
-
 
     public void updateGroupEntity(GroupEntity newGroup) {
         groupEntity = newGroup;
@@ -125,7 +90,6 @@ public class GroupDetailActivity extends AppCompatActivity {
     }
 
     public void updateMeetingAndRelatedView() {
-        //TODO : 일단 카드뷰 하나 박아놓고 모임일정 띄워준다. 추후 모임일정 리스트 구현할 때 어댑터로 리사이클러뷰 구현하자
         //임시: 첫번째꺼만 보여줌
         MeetingEntity meetingEntity = meetingEntities.get(0);
 
@@ -149,10 +113,8 @@ public class GroupDetailActivity extends AppCompatActivity {
 
     public void startCreateMeeting() {
         Intent intent = new Intent(this, MeetingCreateActivity.class);
-
         intent.putExtra("kakaoBundle", bundle);
         intent.putExtra("groupEntity", groupEntity);
-
         startActivity(intent);
     }
 

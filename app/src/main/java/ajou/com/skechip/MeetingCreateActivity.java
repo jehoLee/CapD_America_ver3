@@ -145,13 +145,6 @@ public class MeetingCreateActivity extends AppCompatActivity {
         String text = "일정에 참여하는 " + Integer.toString(selectedMembers.size()) + "명의 친구";
         selectedParticipantsNum.setText(text);
 
-//        for(Kakao friendEntity : selectedMembers){
-//            final TextView name = new TextView(this);
-//            name.setText(friendEntity.getProfileNickname());
-//            name.setTextColor(getResources().getColor(R.color.text_dark1));
-//            selectedParticipantsView.addView(name);
-//        }
-
         for(Kakao friendEntity : selectedMembers){
             curFriend = friendEntity;
             bitmap = null;
@@ -210,10 +203,6 @@ public class MeetingCreateActivity extends AppCompatActivity {
     public void onSelectTimesFinishedEvent(List<Cell> SELECTED_CELLS){
         meetingTimeCells = SELECTED_CELLS;
 
-        //Do somethin with meetingTimeCells
-
-        //update selected time view
-
         TextView selectedTimeText = findViewById(R.id.selected_time_text);
         selectedTimeText.setText(meetingTimeCells.get(0).getWeekofday() + " " + meetingTimeCells.get(0).getStartTime());
 
@@ -243,25 +232,10 @@ public class MeetingCreateActivity extends AppCompatActivity {
                     cell.setPlaceName(meetingLocation);
                 }
 
-//                Toast.makeText(getApplicationContext(), meetingTitle +
-//                                "\n" + meetingLocation + "\n" + meetingType + "\n" +
-//                                meetingTimeCells.get(0).getSubjectName() + "에서\n" +
-//                                meetingTimeCells.get(0).getStartTime() + meetingTimeCells.get(0).getWeekofday() + "에\n" +
-//                                selectedMembers.get(0).getProfileNickname() + "와 함께"
-//                        , Toast.LENGTH_LONG).show();
-
                 MeetingEntity meetingEntity = new MeetingEntity(
                         meetingTitle, meetingLocation, 0, meetingTimeCells, selectedMembers);
 
                 groupEntity.addMeetingEntity(meetingEntity);
-
-                //server put
-//                ArrayList<Long> memberIDs = new ArrayList<>();
-//                for(Kakao member : groupEntity.getGroupMembers())
-//                    memberIDs.add(member.getUserId());
-//                conn.append_server(meetingTimeCells, memberIDs, 'm');
-
-//                Logger.e("그룹아이디 :" + groupEntity.getGroupManager().toString());
 
                 List<Long> ids = new ArrayList<>();
                 ids.add(kakaoUserID);
@@ -273,17 +247,6 @@ public class MeetingCreateActivity extends AppCompatActivity {
                 for(Cell cell : meetingTimeCells){
                     cellPositions.add(cell.getPosition());
                 }
-
-//                @FormUrlEncoded
-//                @POST("createMeeting")
-//                Call<DefaultResponse> createMeeting(
-//                        @Query("kakaoIdList") String kakaoIdList,
-//                        @Field("cellPositionList") String cellPositionList,
-//                        @Field("groupId") Integer groupId,
-//                        @Field("type") Integer type,
-//                        @Field("manager") Integer manager,
-//                        @Field("title") String title,
-//                        @Field("place") String place
 
                 Call<DefaultResponse> call = RetrofitClient
                         .getInstance()
@@ -303,7 +266,6 @@ public class MeetingCreateActivity extends AppCompatActivity {
                     }
                 });
 
-
                 //UI update
                 EventBus.getDefault().post(new MeetingCreationEvent(groupEntity));
 
@@ -312,21 +274,6 @@ public class MeetingCreateActivity extends AppCompatActivity {
         });
 
     }
-
-
-
-//    private void setCreateMeetingBtnClickListener(){
-//        createMeetingBtn.setTextColor(getResources().getColor(R.color.black));
-//        createMeetingBtn.setClickable(true);
-//        createMeetingBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//            }
-//        });
-//    }
-
-
 
 
     private void setMeetingTypeSpinner() {
@@ -366,11 +313,7 @@ public class MeetingCreateActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedItemText = (String) parent.getItemAtPosition(position);
-                // If user change the default selection
-                // First item is disable and it is used for hint
                 if (position > 0) {
-
-//                    meetingType = selectedItemText;
                     meetingType = position;
                 }
             }
@@ -390,11 +333,6 @@ public class MeetingCreateActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-//        if(){
-//            infoEnterView.setVisibility(View.VISIBLE);
-//            frameLayout.setVisibility(View.GONE);
-//            fragmentManager.beginTransaction().remove(selectMeetingTimeFragment).commit();
-//        }
         if(frameLayout.getVisibility() == View.VISIBLE){
             if(Objects.equals(fragmentManager.findFragmentById(R.id.frame_layout), selectMeetingTimeFragment)){
                 infoEnterView.setVisibility(View.VISIBLE);

@@ -109,21 +109,6 @@ public class SelectMeetingTimeFragment extends Fragment {
 
         progress = view.findViewById(R.id.progress);
 
-        //임시
-        PLACE_NAME.add("");
-        PLACE_NAME.add("팔달325");
-        PLACE_NAME.add("팔달409");
-        PLACE_NAME.add("팔달410");
-        PLACE_NAME.add("팔달309");
-        PLACE_NAME.add("팔달409");
-
-        SUBJECT_NAME.add("");
-        SUBJECT_NAME.add("정보보호");
-        SUBJECT_NAME.add("이산수학");
-        SUBJECT_NAME.add("확률통계");
-        SUBJECT_NAME.add("캡디");
-        SUBJECT_NAME.add("컴파일러");
-
         excelPanel = view.findViewById(R.id.content_container);
         timeTableAdapter = new EP_CustomAdapter(getActivity(), blockListener);
         excelPanel.setAdapter(timeTableAdapter);

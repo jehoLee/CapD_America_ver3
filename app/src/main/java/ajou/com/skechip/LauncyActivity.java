@@ -35,12 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 public class LauncyActivity extends AppCompatActivity {
-
     private final String TAG = "ssss.LaunchActivity";
-
-    private Long kakaoUserID;
-    private String kakaoUserProfileImg;
-    private String kakaoUserName;
 
     //for kakao API
     private SessionCallback callback;
@@ -92,13 +87,10 @@ public class LauncyActivity extends AppCompatActivity {
         }
     }
 
-    //로그인 완료 후 시작할 액티비티
     protected void startMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
-
         startActivity(intent);
         finish();
-
     }
 
     private void onClickSignup() {
@@ -128,7 +120,6 @@ public class LauncyActivity extends AppCompatActivity {
 
     protected void showErrorDialog(String message) { }
 
-    // 값(Key Data) 삭제하기
     private void removePreferences(){
         SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();

@@ -52,13 +52,7 @@ public class FriendListAdapter extends BaseAdapter{
     public FriendListAdapter(Context activityContext, List<Kakao> friendEntities, RelativeLayout layout) {
         this.activityContext = activityContext;
         this.friendEntities = friendEntities;
-//        LayoutInflater mInflater = (LayoutInflater)
-//                activityContext.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-//        View view = mInflater.inflate(R.layout.fragment_select_friends, null);
-//        selectedFriendsNumberText = view.findViewById(R.id.selected_friends_number);
-
         selectedFriendsNumberText = layout.findViewById(R.id.selected_friends_number);
-//        selectedFriendsScrollView = layout.findViewById(R.id.friends_scroll_view);
         selectedFriendsView = layout.findViewById(R.id.selected_friends_view);
     }
 
