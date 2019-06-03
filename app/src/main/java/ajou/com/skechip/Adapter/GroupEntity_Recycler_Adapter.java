@@ -36,7 +36,6 @@ public class GroupEntity_Recycler_Adapter extends RecyclerView.Adapter<GroupEnti
 
         public ViewHolder(View view) {
             super(view);
-//            mImageView = view.findViewById(R.id.image);
             groupNameTextView = view.findViewById(R.id.group_name_edit_text);
             groupTagText = view.findViewById(R.id.group_tag_edit_text);
             groupMemberNumText = view.findViewById(R.id.member_num);
@@ -47,8 +46,6 @@ public class GroupEntity_Recycler_Adapter extends RecyclerView.Adapter<GroupEnti
             meetingNameText = view.findViewById(R.id.meeting_name_text);
             meetingTimeText = view.findViewById(R.id.meeting_time_text);
             meetingLocText = view.findViewById(R.id.meeting_location_text);
-
-//            mListView = view.findViewById(R.id.meeting_schedule_list);
         }
     }
 
@@ -71,11 +68,8 @@ public class GroupEntity_Recycler_Adapter extends RecyclerView.Adapter<GroupEnti
         holder.groupNameTextView.setText(curGroup.getGroupTitle());
         holder.groupTagText.setText(curGroup.getGroupTag());
         holder.groupMemberNumText.setText(Integer.toString(curGroup.getGroupMemberNum()));
-//        holder.mImageView.setImageResource(groupEntities.get(position).getGroupImg());
 
         if(!curGroup.getMeetingEntities().isEmpty()){
-            //TODO : 모임 일정 1개 이상 리스트로 둘 수 있게 했을 때, 어댑터로 리스트뷰 설정하기
-
             holder.emptyView.setVisibility(View.GONE);
             holder.meetingView.setVisibility(View.VISIBLE);
 

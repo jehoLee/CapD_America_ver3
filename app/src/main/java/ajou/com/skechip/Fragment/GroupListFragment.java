@@ -309,7 +309,7 @@ public class GroupListFragment extends Fragment {
 
                     @Override
                     public void onLongItemClick(View view, int position) {
-
+                        //TODO : 나가기 버튼만 구현 수정은 모임디테일 내부에서 수행
                     }
                 }));
     }

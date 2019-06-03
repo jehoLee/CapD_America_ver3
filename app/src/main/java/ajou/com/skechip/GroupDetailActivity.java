@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,9 +46,9 @@ public class GroupDetailActivity extends AppCompatActivity {
     private Bundle bundle;
     private GroupEntity groupEntity;
     private List<MeetingEntity> meetingEntities;
-
     private RelativeLayout meetingAddView;
     private RelativeLayout meetingView;
+    private ImageButton groupSettingButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +66,8 @@ public class GroupDetailActivity extends AppCompatActivity {
         meetingAddView = findViewById(R.id.initial_meeting_card);
         meetingView = findViewById(R.id.meeting_view);
 
+        groupSettingButton = findViewById(R.id.group_setting_button);
+
         if (meetingEntities.isEmpty()) {
             meetingAddView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -79,14 +82,34 @@ public class GroupDetailActivity extends AppCompatActivity {
                     startCreateMeeting();
                 }
             });
+            setClickListenerForSettingBtn(false);
         } else {
             updateMeetingAndRelatedView();
+            setClickListenerForSettingBtn(true);
         }
     }
 
     public void updateGroupEntity(GroupEntity newGroup) {
         groupEntity = newGroup;
         meetingEntities = groupEntity.getMeetingEntities();
+    }
+
+    private void setClickListenerForSettingBtn(Boolean isMeetingAdded){
+        if(isMeetingAdded){
+            groupSettingButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //TODO : 모임과 일정 모두 수정 가능
+                }
+            });
+        }else{
+            groupSettingButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //TODO : 모임만 수정 가능
+                }
+            });
+        }
     }
 
     public void updateMeetingAndRelatedView() {

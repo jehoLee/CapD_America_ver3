@@ -1,6 +1,5 @@
 package ajou.com.skechip;
 
-import ajou.com.skechip.Event.GroupCreationEvent;
 import ajou.com.skechip.Event.MeetingCreationEvent;
 import ajou.com.skechip.Fragment.SelectFriendsFragment;
 import ajou.com.skechip.Fragment.SelectMeetingTimeFragment;
@@ -8,24 +7,14 @@ import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
-import ajou.com.skechip.Retrofit.conn.CallMethod;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
-import ajou.com.skechip.Retrofit.models.GroupResponse;
 import ajou.com.skechip.Retrofit.models.Kakao;
-import ajou.com.skechip.Retrofit.models.MeetingResponse;
-import ajou.com.skechip.Retrofit.models.UserByGroupIdResponse;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import de.hdodenhof.circleimageview.CircleImageView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.POST;
-import retrofit2.http.Query;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -38,18 +27,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.kakao.friends.response.model.AppFriendInfo;
-import com.kakao.util.helper.log.Logger;
-
 import org.greenrobot.eventbus.EventBus;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -60,26 +44,18 @@ import java.util.List;
 import java.util.Objects;
 
 public class MeetingCreateActivity extends AppCompatActivity {
-
     private GroupEntity groupEntity;
     private List<Cell> meetingTimeCells;
     private List<Kakao> selectedMembers;
-
     private Bundle bundle;
     private SelectMeetingTimeFragment selectMeetingTimeFragment;
     private SelectFriendsFragment selectFriendsFragment;
-
     private Integer meetingType;
-
     private RelativeLayout infoEnterView;
     private FrameLayout frameLayout;
     private Button createMeetingBtn;
-
     private FragmentManager fragmentManager;
-
-    private CallMethod conn= new CallMethod();
     private Long kakaoUserID;
-
     private Kakao curFriend;
     private Bitmap bitmap;
 
@@ -109,7 +85,6 @@ public class MeetingCreateActivity extends AppCompatActivity {
                 .commit();
 
         createMeetingBtn = findViewById(R.id.create_meeting_button);
-
         createMeetingBtn.setTextColor(getResources().getColor(R.color.trans_gray));
         createMeetingBtn.setClickable(false);
 
@@ -117,34 +92,23 @@ public class MeetingCreateActivity extends AppCompatActivity {
         getAvailableTimeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 infoEnterView.setVisibility(View.GONE);
                 frameLayout.setVisibility(View.VISIBLE);
-
                 bundle.putParcelableArrayList("selectedMembers", (ArrayList<? extends Parcelable>) selectedMembers);
                 selectMeetingTimeFragment = SelectMeetingTimeFragment.newInstance(bundle);
-
                 fragmentManager.beginTransaction()
                         .add(R.id.frame_layout, selectMeetingTimeFragment)
                         .commit();
             }
         });
-
-
-
-
     }
-
 
     public void onSelectMembersFinishedEvent(List<Kakao> members){
         selectedMembers = members;
-
         LinearLayout selectedParticipantsView = findViewById(R.id.participants_layout);
         TextView selectedParticipantsNum = findViewById(R.id.participants_num);
-
         String text = "일정에 참여하는 " + Integer.toString(selectedMembers.size()) + "명의 친구";
         selectedParticipantsNum.setText(text);
-
         for(Kakao friendEntity : selectedMembers){
             curFriend = friendEntity;
             bitmap = null;
@@ -193,10 +157,8 @@ public class MeetingCreateActivity extends AppCompatActivity {
             }
 
         }
-
         frameLayout.setVisibility(View.GONE);
         fragmentManager.beginTransaction().remove(selectFriendsFragment).commit();
-
     }
 
 
@@ -219,57 +181,57 @@ public class MeetingCreateActivity extends AppCompatActivity {
         createMeetingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //멤버들, 제목, 타입, 장소, 일정시간
-
                 EditText meetingTitleEdit = findViewById(R.id.meeting_title_edit);
                 String meetingTitle = meetingTitleEdit.getText().toString();
-
                 EditText meetingLocEdit = findViewById(R.id.meeting_location_edit);
                 String meetingLocation = meetingLocEdit.getText().toString();
 
-                for(Cell cell : meetingTimeCells){
-                    cell.setSubjectName(meetingTitle);
-                    cell.setPlaceName(meetingLocation);
-                }
-
-                MeetingEntity meetingEntity = new MeetingEntity(
-                        meetingTitle, meetingLocation, 0, meetingTimeCells, selectedMembers);
-
-                groupEntity.addMeetingEntity(meetingEntity);
-
-                List<Long> ids = new ArrayList<>();
-                ids.add(kakaoUserID);
-                for(Kakao friend : selectedMembers){
-                    ids.add(friend.getUserId());
-                }
-
-                List<Integer> cellPositions = new ArrayList<>();
-                for(Cell cell : meetingTimeCells){
-                    cellPositions.add(cell.getPosition());
-                }
-
-                Call<DefaultResponse> call = RetrofitClient
-                        .getInstance()
-                        .getApi()
-                        .createMeeting(ids.toString(), cellPositions.toString(),
-                                groupEntity.getGroupID(), 0, groupEntity.getGroupManager()
-                                ,meetingTitle , meetingLocation);
-
-                call.enqueue(new Callback<DefaultResponse>() {
-                    @Override
-                    public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-
+                if(meetingTitle.isEmpty())
+                    Toast.makeText(getApplicationContext(), "모임 일정의 제목을 입력해주세요", Toast.LENGTH_LONG).show();
+                else if(meetingLocation.isEmpty())
+                    Toast.makeText(getApplicationContext(), "모임 일정의 장소를 입력해주세요", Toast.LENGTH_LONG).show();
+                else {
+                    for (Cell cell : meetingTimeCells) {
+                        cell.setSubjectName(meetingTitle);
+                        cell.setPlaceName(meetingLocation);
                     }
 
-                    @Override
-                    public void onFailure(Call<DefaultResponse> call, Throwable t) {
+                    MeetingEntity meetingEntity = new MeetingEntity(
+                            meetingTitle, meetingLocation, 0, meetingTimeCells, selectedMembers);
+
+                    groupEntity.addMeetingEntity(meetingEntity);
+
+                    List<Long> ids = new ArrayList<>();
+                    ids.add(kakaoUserID);
+                    for (Kakao friend : selectedMembers) {
+                        ids.add(friend.getUserId());
                     }
-                });
 
-                //UI update
-                EventBus.getDefault().post(new MeetingCreationEvent(groupEntity));
+                    List<Integer> cellPositions = new ArrayList<>();
+                    for (Cell cell : meetingTimeCells) {
+                        cellPositions.add(cell.getPosition());
+                    }
 
-                finish();
+                    Call<DefaultResponse> call = RetrofitClient
+                            .getInstance()
+                            .getApi()
+                            .createMeeting(ids.toString(), cellPositions.toString(),
+                                    groupEntity.getGroupID(), 0, groupEntity.getGroupManager()
+                                    , meetingTitle, meetingLocation);
+                    call.enqueue(new Callback<DefaultResponse>() {
+                        @Override
+                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+
+                        }
+
+                        @Override
+                        public void onFailure(Call<DefaultResponse> call, Throwable t) {
+                        }
+                    });
+
+                    EventBus.getDefault().post(new MeetingCreationEvent(groupEntity));
+                    finish();
+                }
             }
         });
 

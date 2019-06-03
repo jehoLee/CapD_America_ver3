@@ -93,34 +93,36 @@ public class GroupInfoEnterFragment extends Fragment {
         createGroupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "생성버튼클릭드", Toast.LENGTH_SHORT).show();
+                groupName = groupNameText.getText().toString();
 
-                //TODO - UI : 필수 입력 사항 체크하고 dialog 띄워서 최종 확인시키기
-                groupName = groupNameText.getText().toString();//제목 썼는지 체크하기
+                if(groupName.isEmpty())
+                    Toast.makeText(getActivity(), "모임의 제목을 입력해주세요", Toast.LENGTH_LONG).show();
+                else if(groupTag==null)
+                    Toast.makeText(getActivity(), "모임의 태그를 선택해주세요", Toast.LENGTH_LONG).show();
+                else {
+                    List<Long> memberIDs = new ArrayList<>();
+                    memberIDs.add(kakaoUserID);
+                    for (Kakao friend : selectedFriends) {
+                        memberIDs.add(friend.getUserId());
+                    }
 
-                List<Long> memberIDs = new ArrayList<>();
-                memberIDs.add(kakaoUserID);
-                for(Kakao friend : selectedFriends){
-                    memberIDs.add(friend.getUserId());
+                    Call<DefaultResponse> call = RetrofitClient
+                            .getInstance()
+                            .getApi()
+                            .createGroup(memberIDs.toString(), kakaoUserID, groupName, groupTag);
+                    call.enqueue(new Callback<DefaultResponse>() {
+                        @Override
+                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+                            GroupEntity newGroup = new GroupEntity(groupName, groupTag, groupMemberNum, selectedFriends);
+                            EventBus.getDefault().postSticky(new GroupCreationEvent(newGroup));
+                        }
+                        @Override
+                        public void onFailure(Call<DefaultResponse> call, Throwable t) {
+
+                        }
+                    });
+                    ((GroupCreateActivity) getActivity()).finishActivity();
                 }
-
-                Call<DefaultResponse> call = RetrofitClient
-                        .getInstance()
-                        .getApi()
-                        .createGroup(memberIDs.toString(), kakaoUserID, groupName, groupTag);
-                call.enqueue(new Callback<DefaultResponse>() {
-                    @Override
-                    public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-                        GroupEntity newGroup = new GroupEntity(groupName, groupTag, groupMemberNum, selectedFriends);
-                        EventBus.getDefault().postSticky(new GroupCreationEvent(newGroup));
-                    }
-                    @Override
-                    public void onFailure(Call<DefaultResponse> call, Throwable t) {
-
-                    }
-                });
-
-                ((GroupCreateActivity)getActivity()).finishActivity();
             }
         });
 
@@ -156,7 +158,6 @@ public class GroupInfoEnterFragment extends Fragment {
                 return view;
             }
         };
-
 
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_list_item_1);
         groupTagSpinner.setAdapter(spinnerArrayAdapter);
