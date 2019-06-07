@@ -19,12 +19,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import com.kakao.friends.response.model.AppFriendInfo;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
+
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -70,14 +74,18 @@ public class UploadingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_uploading);
+
         bundle = getIntent().getBundleExtra("kakaoBundle");
         kakaoUserID = bundle.getLong("kakaoUserID");
-        imageVIewOuput = (ImageView)findViewById(R.id.imageView);
+        //imageVIewOuput = (ImageView)findViewById(R.id.imageView);
+        /*
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
         startActivityForResult(intent, GET_GALLERY_IMAGE);
-        imageprocess_and_showResult();
+        */
+        CropImage.activity(null).setGuidelines(CropImageView.Guidelines.ON).start(this);
+        //imageprocess_and_showResult();
     }
 
     @Override
@@ -181,12 +189,23 @@ public class UploadingActivity extends AppCompatActivity {
         //2. 시간표 업데이트
 
         EventBus.getDefault().post(new TimeTableImageUploadEvent());
-        finish();
+        //finish();
     }
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                ((ImageView) findViewById(R.id.imageView)).setImageURI(result.getUri());
+                Toast.makeText(
+                        this, "Cropping successful, Sample: " + result.getSampleSize(), Toast.LENGTH_LONG)
+                        .show();
+            }
+        }
+        //imageprocess_and_showResult();
+        /*
         if(resultCode == RESULT_OK) {
             if (requestCode == GET_GALLERY_IMAGE) {
                 if (data.getData() != null) {
@@ -213,6 +232,7 @@ public class UploadingActivity extends AppCompatActivity {
         else {
             finish();
         }
+        */
     }
 
     @Override
