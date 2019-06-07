@@ -6,11 +6,14 @@ import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.Retrofit.conn.CallMethod;
 import androidx.appcompat.app.AppCompatActivity;
 import ajou.com.skechip.Fragment.bean.Cell;
+
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -66,7 +69,7 @@ public class UploadingActivity extends AppCompatActivity {
     private Long kakaoUserID;
     private static final String TAG = "sdk";
     private final int GET_GALLERY_IMAGE = 200;
-
+    private Bitmap temp;
     boolean isReady = false;
 
 
@@ -77,7 +80,7 @@ public class UploadingActivity extends AppCompatActivity {
 
         bundle = getIntent().getBundleExtra("kakaoBundle");
         kakaoUserID = bundle.getLong("kakaoUserID");
-        //imageVIewOuput = (ImageView)findViewById(R.id.imageView);
+        imageVIewOuput = (ImageView)findViewById(R.id.imageView);
         /*
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -85,7 +88,7 @@ public class UploadingActivity extends AppCompatActivity {
         startActivityForResult(intent, GET_GALLERY_IMAGE);
         */
         CropImage.activity(null).setGuidelines(CropImageView.Guidelines.ON).start(this);
-        //imageprocess_and_showResult();
+
     }
 
     @Override
@@ -98,7 +101,85 @@ public class UploadingActivity extends AppCompatActivity {
     public native void imageprocessing(long inputImage, long outputImage);
 
     private void imageprocess_and_showResult() {
+        Log.e("1", "1: "+ temp.getWidth());
         scheduleCells = new ArrayList<Cell>();
+        Log.e("1", "2 "+temp.getHeight());
+        Schedul = new int[7][5];
+        Log.e("1", "3");
+        for(int i=0;i<6;i++) {
+            for(int j=0;j<5;j++){
+                if (((temp.getPixel(((temp.getWidth()/10)*(2*j+1)),
+                        (temp.getHeight()/12)*(2*i+1))& 0x00ff00) >> 8 != 255)&&((temp.getPixel(((temp.getWidth()/10)*(2*j+1)),
+                        (temp.getHeight()/12)*(2*i+1))& 0xff0000) >> 16 != 255)&&((temp.getPixel(((temp.getWidth()/10)*(2*j+1)),
+                        (temp.getHeight()/12)*(2*i+1))& 0x0000ff) >> 0 != 255) ){
+                    Schedul[i][j]= 1;
+                    Cell cell = new Cell();
+                    cell.setPosition(5*i+j);
+                    cell.setPlaceName("");
+                    scheduleCells.add(cell);
+                }
+
+//                else if ((temp.getPixel(((temp.getWidth()/10)*(2*j+1)+4),
+//                        (temp.getHeight()/12)*(2*i+1)-4)& 0x00ff00) >> 8 != 255 ){
+//                    Schedul[i][j]= 1;
+//                    Cell cell = new Cell();
+//                    cell.setPosition(5*i+j);
+//                    cell.setPlaceName("");
+//                    scheduleCells.add(cell);
+//                }
+//                else if ((temp.getPixel(((temp.getWidth()/10)*(2*j+1))-4,
+//                        (temp.getHeight()/12)*(2*i+1))& 0x00ff00) >> 8 != 255 ){
+//                    Schedul[i][j]= 1;
+//                    Cell cell = new Cell();
+//                    cell.setPosition(5*i+j);
+//                    cell.setPlaceName("");
+//                    scheduleCells.add(cell);
+//                }
+//                else if ((temp.getPixel(((temp.getWidth()/10)*(2*j+1))-4,
+//                        (temp.getHeight()/12)*(2*i+1)+4)& 0x00ff00) >> 8 != 255 ){
+//                    Schedul[i][j]= 1;
+//                    Cell cell = new Cell();
+//                    cell.setPosition(5*i+j);
+//                    cell.setPlaceName("");
+//                    scheduleCells.add(cell);
+//                }
+//                else if ((temp.getPixel(((temp.getWidth()/10)*(2*j+1))-4,
+//                        (temp.getHeight()/12)*(2*i+1)-4)& 0x00ff00) >> 8 != 255 ){
+//                    Schedul[i][j]= 1;
+//                    Cell cell = new Cell();
+//                    cell.setPosition(5*i+j);
+//                    cell.setPlaceName("");
+//                    scheduleCells.add(cell);
+//                }
+//                else if ((temp.getPixel(((temp.getWidth()/10)*(2*j+1)),
+//                        (temp.getHeight()/12)*(2*i+1)+4)& 0x00ff00) >> 8 != 255 ){
+//                    Schedul[i][j]= 1;
+//                    Cell cell = new Cell();
+//                    cell.setPosition(5*i+j);
+//                    cell.setPlaceName("");
+//                    scheduleCells.add(cell);
+//                }
+//                else if ((temp.getPixel(((temp.getWidth()/10)*(2*j+1)),
+//                        (temp.getHeight()/12)*(2*i+1)-4)& 0x00ff00) >> 8 != 255 ){
+//                    Schedul[i][j]= 1;
+//                    Cell cell = new Cell();
+//                    cell.setPosition(5*i+j);
+//                    cell.setPlaceName("");
+//                    scheduleCells.add(cell);
+//                }
+                else
+                    Schedul[i][j]= 0;
+
+            }
+        }
+        con.append_server(scheduleCells,kakaoUserID,'c');
+        Log.e("1"," "+ Schedul[0][0]+" "+ Schedul[0][1]+" "+ Schedul[0][2]+" "+ Schedul[0][3]+" "+ Schedul[0][4]);
+        Log.e("1"," "+ Schedul[1][0]+" "+ Schedul[1][1]+" "+ Schedul[1][2]+" "+ Schedul[1][3]+" "+ Schedul[1][4]);
+        Log.e("1"," "+ Schedul[2][0]+" "+ Schedul[2][1]+" "+ Schedul[2][2]+" "+ Schedul[2][3]+" "+ Schedul[2][4]);
+        Log.e("1"," "+ Schedul[3][0]+" "+ Schedul[3][1]+" "+ Schedul[3][2]+" "+ Schedul[3][3]+" "+ Schedul[3][4]);
+        Log.e("1"," "+ Schedul[4][0]+" "+ Schedul[4][1]+" "+ Schedul[4][2]+" "+ Schedul[4][3]+" "+ Schedul[4][4]);
+        Log.e("1"," "+ Schedul[5][0]+" "+ Schedul[5][1]+" "+ Schedul[5][2]+" "+ Schedul[5][3]+" "+ Schedul[5][4]);
+        /*
         int k = 0;
         int pastheight=0;
         int pastweight=0;
@@ -184,7 +265,7 @@ public class UploadingActivity extends AppCompatActivity {
         Log.e("1"," "+ Schedul[5][0]+" "+ Schedul[5][1]+" "+ Schedul[5][2]+" "+ Schedul[5][3]+" "+ Schedul[5][4]);
         //con.delete_server(scheduleCells,kakaoUserID);
         con.append_server(scheduleCells,kakaoUserID,'c');
-
+        */
         //TODO : UI update
         //2. 시간표 업데이트
 
@@ -195,10 +276,15 @@ public class UploadingActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.e("1","activtResult");
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
+
             if (resultCode == RESULT_OK) {
-                ((ImageView) findViewById(R.id.imageView)).setImageURI(result.getUri());
+                imageVIewOuput.setImageURI(result.getUri());
+                imageVIewOuput.invalidate();
+                BitmapDrawable drawable = (BitmapDrawable)imageVIewOuput.getDrawable();
+                temp= drawable.getBitmap();
                 Toast.makeText(
                         this, "Cropping successful, Sample: " + result.getSampleSize(), Toast.LENGTH_LONG)
                         .show();
@@ -233,6 +319,8 @@ public class UploadingActivity extends AppCompatActivity {
             finish();
         }
         */
+        imageprocess_and_showResult();
+
     }
 
     @Override
