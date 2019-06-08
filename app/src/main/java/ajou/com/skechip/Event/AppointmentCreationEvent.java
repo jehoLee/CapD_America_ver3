@@ -8,8 +8,15 @@ public class AppointmentCreationEvent {
 
     private List<Cell> appointmentTimeCells;
 
-    public AppointmentCreationEvent(List<Cell> appointmentTimeCells) {
+    public Long getFriendID() {
+        return friendID;
+    }
+
+    private Long friendID;
+
+    public AppointmentCreationEvent(List<Cell> appointmentTimeCells, Long friendID) {
         this.appointmentTimeCells = appointmentTimeCells;
+        this.friendID = friendID;
     }
 
     public List<Cell> getAppointmentTimeCells() {
