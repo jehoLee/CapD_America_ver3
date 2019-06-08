@@ -30,6 +30,7 @@ public interface Api {
     Call<DefaultResponse> createUser(
             @Field("kakaoId") Long kakaoId,
             @Field("name") String name,
+            @Field("profileImagePath") String profileImagePath,
             @Field("member") Integer member
     );
 
@@ -66,7 +67,7 @@ public interface Api {
             @Field("cellPositionList") String cellPositionList,
             @Field("groupId") Integer groupId,
             @Field("type") Integer type,
-            @Field("manager") Integer manager,
+            @Field("manager") Long manager,
             @Field("title") String title,
             @Field("place") String place
     );
@@ -147,5 +148,23 @@ public interface Api {
     Call<DefaultResponse> deleteAlarm(
             @Path("id") Integer id
     );
+
+    @DELETE("deleteMeeting/{id}/{cellPositionList}")
+    Call<DefaultResponse> deleteMeeting(
+            @Path("id") Integer groupId,
+            @Path("cellPositionList") String cellPositionList
+    );
+
+    @DELETE("deleteGroup/{id}/{cellPositionList}")
+    Call<DefaultResponse> deleteGroup(
+            @Path("id") Integer groupId,
+            @Path("cellPositionList") String cellPositionList
+    );
+
+    @DELETE("deleteGroupWithNoMeeting/{id}")
+    Call<DefaultResponse> deleteGroupWithNoMeeting(
+            @Path("id") Integer groupId
+    );
+
 
 }

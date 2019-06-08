@@ -78,13 +78,13 @@ public class MainActivity extends AppCompatActivity {
         GroupEntity groupWithNewMeeting = event.getGroupEntityWithNewMeeting();
         ArrayList<Cell> cells = (ArrayList<Cell>) groupWithNewMeeting.getMeetingEntities().get(0).getMeetingTimeCells();
         epFragment.onTimeCellsCreateEvent(cells);
-        groupListFragment.updateGroupEntityOnMeetingCreate(groupWithNewMeeting);
+        groupListFragment.updateGroupEntities();
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onGroupCreationEvent(GroupCreationEvent event) {
-        Log.d(TAG, "이벤트 발생!!");
-        groupListFragment.updateGroupEntityOnMeetingCreate(event.getNewGroup());
+        Log.d(TAG, "모임 생성 이벤트 발생!!");
+        groupListFragment.updateGroupEntities();
         EventBus.getDefault().removeStickyEvent(event);
     }
 
@@ -293,7 +293,7 @@ public class MainActivity extends AppCompatActivity {
         Call<DefaultResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
-                .createUser(user.getUserId(), user.getProfileNickname(), 0);
+                .createUser(user.getUserId(), user.getProfileNickname(), user.getProfileThumbnailImage(), 0);
 
         call.enqueue(new Callback<DefaultResponse>() {
             @Override
@@ -312,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
         Call<DefaultResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
-                .createUser(user.getId(), user.getNickname(), 1);
+                .createUser(user.getId(), user.getNickname(), user.getProfileImagePath(), 1);
 
         call.enqueue(new Callback<DefaultResponse>() {
             @Override

@@ -14,7 +14,7 @@ import java.util.List;
 import ajou.com.skechip.Adapter.Alarm_Recycler_Adapter;
 import ajou.com.skechip.Fragment.bean.AlarmEntity;
 import ajou.com.skechip.R;
-import ajou.com.skechip.RecyclerItemClickListener;
+import ajou.com.skechip.Adapter.RecyclerItemClickListener;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;

@@ -78,7 +78,7 @@
                     android:paddingLeft="5dp"
                     android:text="캡스톤 디자인"
                     android:textColor="@color/white"
-                    android:textSize="28sp"
+                    android:textSize="26sp"
                     android:textStyle="bold" />
 
             </RelativeLayout>
@@ -104,7 +104,6 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="캡디팀플 뒤풀이 회식"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -113,9 +112,9 @@
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/meeting_name_text"
+                    android:layout_toRightOf="@+id/location_desc"
                     android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@학생식당" />
+                    android:maxLines="1" />
 
                 <!--<TextView-->
                 <!--android:id="@+id/meeting_date_text"-->
@@ -125,12 +124,18 @@
                 <!--android:text="2019년 10월 26일" />-->
 
                 <TextView
+                    android:id="@+id/location_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/meeting_name_text"
+                    android:text="@" />
+
+                <TextView
                     android:id="@+id/meeting_time_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:text="월요일 오후 2시 40분"
                     android:textColor="@color/Subject11"
                     android:textSize="15sp" />
 

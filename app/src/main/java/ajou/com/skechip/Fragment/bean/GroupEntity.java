@@ -11,7 +11,7 @@ import ajou.com.skechip.Retrofit.models.Kakao;
 
 public class GroupEntity implements Parcelable {
     private Integer groupID;
-    private Integer groupManager;
+    private Long groupManager;
     private String groupTitle;
     private String groupTag;
     private int groupMemberNum;
@@ -20,7 +20,7 @@ public class GroupEntity implements Parcelable {
 
     //    private int groupImg;
 
-    public GroupEntity(Integer groupID, String groupTitle, String groupTag, Integer groupManager){
+    public GroupEntity(Integer groupID, String groupTitle, String groupTag, Long groupManager){
         this.groupID = groupID;
         this.groupTitle = groupTitle;
         this.groupTag = groupTag;
@@ -33,8 +33,6 @@ public class GroupEntity implements Parcelable {
         this.groupMemberNum = groupMemberNum;
         this.groupMembers = groupMembers;
     }
-
-
 
     public String getGroupTitle() {
         return groupTitle;
@@ -61,11 +59,11 @@ public class GroupEntity implements Parcelable {
         this.groupID = groupID;
     }
 
-    public Integer getGroupManager() {
+    public Long getGroupManager() {
         return groupManager;
     }
 
-    public void setGroupManager(Integer groupManager) {
+    public void setGroupManager(Long groupManager) {
         this.groupManager = groupManager;
     }
 
@@ -124,7 +122,7 @@ public class GroupEntity implements Parcelable {
             dest.writeByte((byte) 0);
         } else {
             dest.writeByte((byte) 1);
-            dest.writeInt(groupManager);
+            dest.writeLong(groupManager);
         }
         dest.writeString(groupTitle);
         dest.writeString(groupTag);
@@ -132,6 +130,7 @@ public class GroupEntity implements Parcelable {
         dest.writeTypedList(groupMembers);
         dest.writeTypedList(meetingEntities);
     }
+
     protected GroupEntity(Parcel in) {
         if (in.readByte() == 0) {
             groupID = null;
@@ -141,7 +140,7 @@ public class GroupEntity implements Parcelable {
         if (in.readByte() == 0) {
             groupManager = null;
         } else {
-            groupManager = in.readInt();
+            groupManager = in.readLong();
         }
         groupTitle = in.readString();
         groupTag = in.readString();
@@ -161,8 +160,6 @@ public class GroupEntity implements Parcelable {
             return new GroupEntity[size];
         }
     };
-
-
 
 
 }

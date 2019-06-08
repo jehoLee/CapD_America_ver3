@@ -7,12 +7,12 @@ public class GroupResponse {
     private boolean error;
 
     private List<Integer> idList;
-    private List<Integer> managerList;
+    private List<Long> managerList;
     private List<String> titleList;
     private List<String> tagList;
     private Integer totalCount;
 
-    public GroupResponse(boolean error, List<Integer> idList, List<Integer> managerList, List<String> titleList, List<String> tagList, Integer totalCount) {
+    public GroupResponse(boolean error, List<Integer> idList, List<Long> managerList, List<String> titleList, List<String> tagList, Integer totalCount) {
         this.error = error;
         this.idList = idList;
         this.managerList = managerList;
@@ -29,7 +29,7 @@ public class GroupResponse {
         return idList;
     }
 
-    public List<Integer> getManagerList() {
+    public List<Long> getManagerList() {
         return managerList;
     }
 

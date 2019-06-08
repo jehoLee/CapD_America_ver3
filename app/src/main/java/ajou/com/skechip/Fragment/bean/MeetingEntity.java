@@ -14,9 +14,9 @@ public class MeetingEntity implements Parcelable {
     private List<Cell> meetingTimeCells;
     private List<Kakao> selectedMembers;
     private Integer meetingID;
-    private Integer meetingManager;
+    private Long meetingManager;
 
-    public MeetingEntity(String title, String location, Integer type, Integer Id, Integer managerId, List<Cell> meetingTimeCells) {
+    public MeetingEntity(String title, String location, Integer type, Integer Id, Long managerId, List<Cell> meetingTimeCells) {
         this.title = title;
         this.location = location;
         this.type = type;
@@ -81,36 +81,18 @@ public class MeetingEntity implements Parcelable {
         this.meetingID = meetingID;
     }
 
-    public Integer getMeetingManager() {
+    public Long getMeetingManager() {
         return meetingManager;
     }
 
-    public void setMeetingManager(Integer meetingManager) {
+    public void setMeetingManager(Long meetingManager) {
         this.meetingManager = meetingManager;
     }
 
 
-
-    protected MeetingEntity(Parcel in) {
-        title = in.readString();
-        location = in.readString();
-        if (in.readByte() == 0) {
-            type = null;
-        } else {
-            type = in.readInt();
-        }
-        meetingTimeCells = in.createTypedArrayList(Cell.CREATOR);
-        selectedMembers = in.createTypedArrayList(Kakao.CREATOR);
-        if (in.readByte() == 0) {
-            meetingID = null;
-        } else {
-            meetingID = in.readInt();
-        }
-        if (in.readByte() == 0) {
-            meetingManager = null;
-        } else {
-            meetingManager = in.readInt();
-        }
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override
@@ -135,13 +117,30 @@ public class MeetingEntity implements Parcelable {
             dest.writeByte((byte) 0);
         } else {
             dest.writeByte((byte) 1);
-            dest.writeInt(meetingManager);
+            dest.writeLong(meetingManager);
         }
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    protected MeetingEntity(Parcel in) {
+        title = in.readString();
+        location = in.readString();
+        if (in.readByte() == 0) {
+            type = null;
+        } else {
+            type = in.readInt();
+        }
+        meetingTimeCells = in.createTypedArrayList(Cell.CREATOR);
+        selectedMembers = in.createTypedArrayList(Kakao.CREATOR);
+        if (in.readByte() == 0) {
+            meetingID = null;
+        } else {
+            meetingID = in.readInt();
+        }
+        if (in.readByte() == 0) {
+            meetingManager = null;
+        } else {
+            meetingManager = in.readLong();
+        }
     }
 
     public static final Creator<MeetingEntity> CREATOR = new Creator<MeetingEntity>() {
@@ -155,8 +154,5 @@ public class MeetingEntity implements Parcelable {
             return new MeetingEntity[size];
         }
     };
-
-
-
 
 }
