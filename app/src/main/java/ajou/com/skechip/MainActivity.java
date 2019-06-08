@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         GroupEntity groupWithNewMeeting = event.getGroupEntityWithNewMeeting();
         ArrayList<Cell> cells = (ArrayList<Cell>) groupWithNewMeeting.getMeetingEntities().get(0).getMeetingTimeCells();
         epFragment.onTimeCellsCreateEvent(cells);
-        groupListFragment.updateGroupEntityOnMeetingCreate(groupWithNewMeeting);
+        groupListFragment.updateGroupEntities();
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)

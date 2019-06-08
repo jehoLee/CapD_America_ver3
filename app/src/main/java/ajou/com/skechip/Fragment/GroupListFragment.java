@@ -5,26 +5,32 @@ import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.ColTitle;
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
+import ajou.com.skechip.Retrofit.models.DefaultResponse;
 import ajou.com.skechip.Retrofit.models.GroupResponse;
 import ajou.com.skechip.Retrofit.models.Kakao;
 import ajou.com.skechip.Retrofit.models.MeetingResponse;
 import ajou.com.skechip.Retrofit.models.UserByGroupIdResponse;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Toast;
+
 import com.kakao.util.helper.log.Logger;
 import ajou.com.skechip.Adapter.GroupEntity_Recycler_Adapter;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.GroupCreateActivity;
 import ajou.com.skechip.GroupDetailActivity;
 import ajou.com.skechip.R;
-import ajou.com.skechip.RecyclerItemClickListener;
+import ajou.com.skechip.Adapter.RecyclerItemClickListener;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,7 +42,7 @@ import static ajou.com.skechip.Fragment.EP_Fragment.ROW_SIZE;
 public class GroupListFragment extends Fragment {
     private final String TAG = "GroupListFragment";
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.Adapter mAdapter = null;
     private RecyclerView.LayoutManager mLayoutManager;
     public ArrayList<GroupEntity> groupEntities = new ArrayList<>();
     private Button groupCreateBtn;
@@ -82,11 +88,13 @@ public class GroupListFragment extends Fragment {
                 startGroupCreate();
             }
         });
-        updateGroupList();
+        updateGroupEntities();
+
         return view;
     }
 
-    private void updateGroupList() {
+    public void updateGroupEntities() {
+        groupEntities.clear();
         Call<GroupResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
@@ -101,7 +109,7 @@ public class GroupListFragment extends Fragment {
                     GroupResponse groupResponse = response.body();
 
                     List<Integer> groupIDs = groupResponse.getIdList();
-                    List<Integer> groupManagers = groupResponse.getManagerList();
+                    List<Long> groupManagers = groupResponse.getManagerList();
                     List<String> groupTags = groupResponse.getTagList();
                     List<String> groupTitles = groupResponse.getTitleList();
 
@@ -151,7 +159,7 @@ public class GroupListFragment extends Fragment {
 
                                         if (!meetingResponse.getIdList().isEmpty()) {
                                             Integer meetingID = meetingResponse.getIdList().get(0);
-                                            Integer meetingManager = meetingResponse.getManagerList().get(0);
+                                            Long meetingManager = meetingResponse.getManagerList().get(0);
                                             String meetingPlace = meetingResponse.getPlaceList().get(0);
                                             String meetingTitle = meetingResponse.getTitleList().get(0);
                                             Integer meetingType = meetingResponse.getTypeList().get(0);
@@ -192,7 +200,13 @@ public class GroupListFragment extends Fragment {
                                 });
                                 calledGroupCount++;
                                 if (calledGroupCount == groupEntities.size()) {
-                                    updateGroupListView();
+
+                                    if(mAdapter==null){
+                                        updateGroupListView();
+                                    }else {
+                                        mAdapter.notifyDataSetChanged();
+                                    }
+
                                     calledGroupCount = 0;
                                 }
                             }
@@ -218,7 +232,171 @@ public class GroupListFragment extends Fragment {
             public void onFailure(Call<GroupResponse> call, Throwable t) {
             }
         });
+
     }
+
+    private void updateGroupListView() {
+        view.findViewById(R.id.initial_card).setVisibility(View.GONE);
+        mRecyclerView = view.findViewById(R.id.group_card_list_view);
+        mRecyclerView.setHasFixedSize(false);
+        mLayoutManager = new LinearLayoutManager(getContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new GroupEntity_Recycler_Adapter(groupEntities);
+        mAdapter.setHasStableIds(true);
+        mAdapter.registerAdapterDataObserver(observer);
+        mRecyclerView.setAdapter(mAdapter);
+
+        mRecyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(getActivity(), mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        Intent intent = new Intent(getActivity(), GroupDetailActivity.class);
+                        intent.putExtra("kakaoBundle", bundle);
+                        intent.putExtra("groupEntity", groupEntities.get(position));
+                        intent.putParcelableArrayListExtra("meetingEntities",
+                                (ArrayList<? extends Parcelable>) groupEntities.get(position).getMeetingEntities());
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onLongItemClick(View view, final int position) {
+
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        LayoutInflater inflater = getLayoutInflater();
+                        View dialog_view = inflater.inflate(R.layout.dialog_delete_group, null);
+                        builder.setView(dialog_view);
+                        final Button delete_Button = (Button) dialog_view.findViewById(R.id.delete_group);
+                        final AlertDialog dialog = builder.create();
+                        dialog.setCancelable(true);
+                        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                        dialog.show();
+
+                        delete_Button.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                if(groupEntities.get(position).getMeetingEntities().isEmpty()) {
+                                    Call<DefaultResponse> call = RetrofitClient
+                                            .getInstance()
+                                            .getApi()
+                                            .deleteGroupWithNoMeeting(groupEntities.get(position).getGroupID());
+
+                                    call.enqueue(new Callback<DefaultResponse>() {
+                                        @Override
+                                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+
+                                            groupEntities.remove(position);
+                                            mAdapter.notifyItemRemoved(position);
+//                                            mAdapter.notifyDataSetChanged();
+//                                            updateGroupEntities();
+
+                                            dialog.dismiss();
+//                                            updateGroupEntities();
+
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<DefaultResponse> call, Throwable t) {
+
+                                        }
+                                    });
+                                }
+                                else {
+                                    List<MeetingEntity> meetingEntities = groupEntities.get(position).getMeetingEntities();
+                                    List<Cell> cells = new ArrayList<>();
+                                    List<Integer> positions = new ArrayList<>();
+                                    for(MeetingEntity meetingEntity : meetingEntities){
+                                        for(Cell cell : meetingEntity.getMeetingTimeCells()){
+                                            positions.add(cell.getPosition());
+                                        }
+                                    }
+                                    String cellPositions = positions.toString();
+
+                                    Call<DefaultResponse> call = RetrofitClient
+                                            .getInstance()
+                                            .getApi()
+                                            .deleteGroup(groupEntities.get(position).getGroupID(), cellPositions);
+
+                                    call.enqueue(new Callback<DefaultResponse>() {
+                                        @Override
+                                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+
+                                            groupEntities.remove(position);
+                                            mAdapter.notifyItemRemoved(position);
+//                                            updateGroupListAdapter();
+//                                            updateGroupEntities();
+
+                                            dialog.dismiss();
+//                                            updateGroupEntities();
+
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<DefaultResponse> call, Throwable t) {
+
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }));
+    }
+
+//    public void updateGroupListAdapter() {
+//        mAdapter = new GroupEntity_Recycler_Adapter(groupEntities);
+//        mAdapter.setHasStableIds(true);
+//        mAdapter.registerAdapterDataObserver(observer);
+//        mRecyclerView.setAdapter(mAdapter);
+////      mAdapter.notifyDataSetChanged();
+//    }
+
+    private void startGroupCreate() {
+        Intent intent = new Intent(getActivity(), GroupCreateActivity.class);
+        intent.putExtra("kakaoBundle", bundle);
+        startActivity(intent);
+    }
+
+
+    private RecyclerView.AdapterDataObserver observer = new RecyclerView.AdapterDataObserver() {
+        @Override
+        public void onChanged() {
+            Log.e(TAG, "onChanged");
+            super.onChanged();
+        }
+
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount) {
+            Log.e(TAG, "onItemRangeChanged");
+            super.onItemRangeChanged(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+            Log.e(TAG, "onItemRangeChanged");
+            super.onItemRangeChanged(positionStart, itemCount, payload);
+        }
+
+        @Override
+        public void onItemRangeInserted(int positionStart, int itemCount) {
+            Log.e(TAG, "onItemRangeInserted");
+            super.onItemRangeInserted(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeRemoved(int positionStart, int itemCount) {
+            Log.e(TAG, "onItemRangeRemoved");
+            super.onItemRangeRemoved(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            Log.e(TAG, "onItemRangeMoved");
+            super.onItemRangeMoved(fromPosition, toPosition, itemCount);
+        }
+    };
+
+
 
     private void setAppUsersProfileImg(List<Kakao> members) {
         for (int i = 0; i < members.size(); i++) {
@@ -278,47 +456,9 @@ public class GroupListFragment extends Fragment {
     }
 
 
-    public void addGroupEntity(GroupEntity groupEntity) {
-        groupEntities.add(groupEntity);
-    }
 
-    public void updateGroupEntityOnMeetingCreate(GroupEntity groupEntity) {
-        groupEntities.clear();
-        updateGroupList();
-    }
 
-    public void updateGroupListView() {
-        view.findViewById(R.id.initial_card).setVisibility(View.GONE);
-        mRecyclerView = view.findViewById(R.id.group_card_list_view);
-        mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(getContext());
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new GroupEntity_Recycler_Adapter(groupEntities);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.addOnItemTouchListener(
-                new RecyclerItemClickListener(getActivity(), mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view, int position) {
-                        Intent intent = new Intent(getActivity(), GroupDetailActivity.class);
-                        intent.putExtra("kakaoBundle", bundle);
-                        intent.putExtra("groupEntity", groupEntities.get(position));
-                        intent.putParcelableArrayListExtra("meetingEntities",
-                                (ArrayList<? extends Parcelable>) groupEntities.get(position).getMeetingEntities());
-                        startActivity(intent);
-                    }
 
-                    @Override
-                    public void onLongItemClick(View view, int position) {
-                        //TODO : 나가기 버튼만 구현 수정은 모임디테일 내부에서 수행
-                    }
-                }));
-    }
-
-    private void startGroupCreate() {
-        Intent intent = new Intent(getActivity(), GroupCreateActivity.class);
-        intent.putExtra("kakaoBundle", bundle);
-        startActivity(intent);
-    }
 
 
 }

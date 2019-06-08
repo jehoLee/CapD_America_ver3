@@ -1,4 +1,4 @@
-package ajou.com.skechip;
+package ajou.com.skechip.Adapter;
 
 import android.content.Context;
 

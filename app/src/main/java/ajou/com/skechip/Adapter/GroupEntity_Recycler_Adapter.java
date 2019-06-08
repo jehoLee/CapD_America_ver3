@@ -53,6 +53,10 @@ public class GroupEntity_Recycler_Adapter extends RecyclerView.Adapter<GroupEnti
         groupEntities = myDataset;
     }
 
+    public void setGroupEntities(ArrayList<GroupEntity> groupEntities) {
+        this.groupEntities = groupEntities;
+    }
+
     @NotNull
     @Override
     public GroupEntity_Recycler_Adapter.ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
@@ -91,6 +95,11 @@ public class GroupEntity_Recycler_Adapter extends RecyclerView.Adapter<GroupEnti
     @Override
     public int getItemCount() {
         return groupEntities.size();
+    }
+
+    @Override
+    public long getItemId(int position){
+        return groupEntities.get(position).getGroupID();
     }
 }
 
