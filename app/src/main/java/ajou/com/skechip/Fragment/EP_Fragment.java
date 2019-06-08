@@ -1,5 +1,6 @@
 package ajou.com.skechip.Fragment;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -116,7 +117,7 @@ public class EP_Fragment extends Fragment {
             view = inflater.inflate(R.layout.fragment_time_table, container, false);
             calendar = view.findViewById(R.id.calendar);
             change = view.findViewById(R.id.change_timetable);
-            setting = view.findViewById(R.id.timetable_setting);
+            setting = view.findViewById(R.id.refresh);
             excelPanel = view.findViewById(R.id.content_container);
             progress = view.findViewById(R.id.progress);
             adapter = new EP_CustomAdapter(getActivity(), blockListener);
@@ -223,6 +224,10 @@ public class EP_Fragment extends Fragment {
                             public void onClick(View v) {
                                 String strSubject = subject.getText().toString();
                                 String strPlace = place.getText().toString();
+                                if(strSubject.isEmpty()){
+                                    Toast.makeText(getContext(),"일정명을 입력해주세요",Toast.LENGTH_LONG).show();
+                                    return;
+                                }
                                 boolean newone = true;
 
                                 if(SUBJECT_NAME.contains(strSubject)) {

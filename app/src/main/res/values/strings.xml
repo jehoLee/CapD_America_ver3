@@ -1,4 +1,5 @@
 <resources>
+    <string name="msg_token_fmt">알림 도착!</string>
     <string name="app_name">ssss</string>
     <string name="title_home">홈</string>
     <string name="title_meeting">모임</string>

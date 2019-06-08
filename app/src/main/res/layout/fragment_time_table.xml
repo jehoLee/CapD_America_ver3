@@ -84,13 +84,13 @@
             tools:visibility="invisible" />
 
         <ImageButton
-            android:id="@+id/timetable_setting"
+            android:id="@+id/refresh"
             android:layout_width="wrap_content"
             android:layout_height="56dip"
             android:layout_alignParentRight="true"
             android:layout_marginRight="15dp"
             android:background="@color/white"
-            android:src="@drawable/ic_setting" />
+            android:src="@drawable/ic_refresh" />
 
         <Button
             android:id="@+id/append_timetable_button"

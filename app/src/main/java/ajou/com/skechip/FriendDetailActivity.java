@@ -47,7 +47,7 @@ public class FriendDetailActivity extends AppCompatActivity {
     private ImageButton change;
     private ImageButton compare;
     private ImageButton calendar;
-    private ImageButton setting;
+    private ImageButton refresh;
     private ImageButton compare_selected;
     private ExcelPanel excelPanel;
     private ProgressBar progress;
@@ -224,6 +224,9 @@ public class FriendDetailActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     //TODO : 업로드 액티비티 띄우고 갤러리 이미지 불러온 뒤 선택하게 하기
                     Intent intent = new Intent(getApplicationContext(), UploadingActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putLong("kakaoUserID",kakaoUserID);
+                    intent.putExtra("kakaoBundle",bundle);
                     startActivity(intent);
                 }
             });
@@ -234,7 +237,7 @@ public class FriendDetailActivity extends AppCompatActivity {
             calendar = findViewById(R.id.calendar);
             calendar.setVisibility(View.GONE);
             change = findViewById(R.id.change_timetable);
-            setting = findViewById(R.id.timetable_setting);
+            refresh = findViewById(R.id.refresh);
             excelPanel = findViewById(R.id.content_container);
             adapter = new EP_CustomAdapter(this, blockListener);
             excelPanel.setAdapter(adapter);
@@ -248,6 +251,12 @@ public class FriendDetailActivity extends AppCompatActivity {
 
             append = findViewById(R.id.append_timetable_button);
             append.setVisibility(View.INVISIBLE);
+            refresh.setOnClickListener(new Button.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
             compare_selected.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -317,6 +326,10 @@ public class FriendDetailActivity extends AppCompatActivity {
                                     public void onClick(View v) {
                                         String strSubject = subject.getText().toString();
                                         String strPlace = place.getText().toString();
+                                        if(strSubject.isEmpty()){
+                                            Toast.makeText(getApplicationContext(),"일정명을 입력해주세요",Toast.LENGTH_LONG).show();
+                                            return;
+                                        }
                                         boolean newone = true;
                                         for (int i = 0; i < SUBJECT_NAME.size(); i++) {
                                             if (SUBJECT_NAME.get(i).equals(strSubject)) {
@@ -428,6 +441,10 @@ public class FriendDetailActivity extends AppCompatActivity {
                                 public void onClick(View v) {
                                     String strSubject = subject.getText().toString();
                                     String strPlace = place.getText().toString();
+                                    if(strSubject.isEmpty()){
+                                        Toast.makeText(getApplicationContext(),"일정명을 입력해주세요",Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
                                     boolean newone = true;
                                     for (int i = 0; i < SUBJECT_NAME.size(); i++) {
                                         if (SUBJECT_NAME.get(i).equals(strSubject)) {
