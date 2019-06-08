@@ -4,11 +4,11 @@ import java.util.List;
 
 public class AlarmResponse {
     private Boolean error;
-    private List<Alarm> alarms;
+    private List<Alarm> alarmList;
 
-    public AlarmResponse(boolean error, List<Alarm> alarms) {
+    public AlarmResponse(boolean error, List<Alarm> alarmList) {
         this.error = error;
-        this.alarms = alarms;
+        this.alarmList = alarmList;
     }
 
     public boolean isError() {
@@ -16,6 +16,6 @@ public class AlarmResponse {
     }
 
     public List<Alarm> getAlarmList() {
-        return alarms;
+        return alarmList;
     }
 }
