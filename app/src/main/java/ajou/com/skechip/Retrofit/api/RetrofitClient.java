@@ -10,8 +10,8 @@ public class RetrofitClient {
     private static final String BASE_URL = "http://15.164.89.139/SSSServerApi/public/";
     private static RetrofitClient mInstance;
     private Retrofit retrofit;
-    private static final String FIREBASE_URL = "http://fcm.googleapis.com/fcm/send/";
-    private Retrofit firebase_retrofit;
+    private static final String FIREBASE_URL = "http://fcm.googleapis.com/fcm/";
+    private Retrofit Firebase_retrofit;
 
     private RetrofitClient() {
 //        OkHttpClient okHttpClient = new OkHttpClient.Builder()
@@ -35,7 +35,8 @@ public class RetrofitClient {
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        firebase_retrofit = new Retrofit.Builder()
+
+        Firebase_retrofit = new Retrofit.Builder()
                 .baseUrl(FIREBASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -51,6 +52,6 @@ public class RetrofitClient {
     public Api getApi() {
         return retrofit.create(Api.class);
     }
-    public FirebaseApi getfirebaseApi(){ return firebase_retrofit.create(FirebaseApi.class); }
+    public FirebaseApi getFirebaseApi(){ return Firebase_retrofit.create(FirebaseApi.class); }
 
 }

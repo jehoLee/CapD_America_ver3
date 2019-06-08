@@ -3,6 +3,7 @@ package ajou.com.skechip.Retrofit.api;
 import java.util.List;
 
 import ajou.com.skechip.Retrofit.models.AlarmResponse;
+import ajou.com.skechip.Retrofit.models.AlarmTokenResponse;
 import ajou.com.skechip.Retrofit.models.AsManyUserAsAvailableResponse;
 import ajou.com.skechip.Retrofit.models.AvailableMeetingTimesResponse;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
@@ -30,6 +31,7 @@ public interface Api {
     Call<DefaultResponse> createUser(
             @Field("kakaoId") Long kakaoId,
             @Field("name") String name,
+            @Field("profileImagePath") String profileImagePath,
             @Field("member") Integer member
     );
 
@@ -75,8 +77,15 @@ public interface Api {
     @POST("createAlarm")
     Call<DefaultResponse> createAlarm(
             @Field("type") Character type,
-            @Field("from") String from,
-            @Field("time") String time
+            @Field("to") Long to,
+            @Field("from") Long from
+    );
+
+    @FormUrlEncoded
+    @POST("createAlarmToken")
+    Call<DefaultResponse> createAlarmToken(
+            @Field("kakaoId") Long kakaoId,
+            @Field("token") String token
     );
 
     @GET("getuser")
@@ -119,8 +128,20 @@ public interface Api {
             @Query("kakaoIds") String kakaoIdList
     );
 
-    @GET("getAllAlarm")
-    Call<AlarmResponse> getAllAlarm();
+    @GET("getDeduplicatedCellList")
+    Call<AvailableMeetingTimesResponse> getDeduplicatedCellList(
+            @Query("cellPositionList") String cellPositionList
+    );
+
+    @GET("getAlarm")
+    Call<AlarmResponse> getAlarm(
+            @Query("from") Long kakaoId
+    );
+
+    @GET("getAlarmToken")
+    Call<AlarmTokenResponse> getAlarmToken(
+            @Query("kakaoId") Long kakaoId
+    );
 
     @FormUrlEncoded
     @PUT("updatetimetable/{kakaoId}")
@@ -138,14 +159,30 @@ public interface Api {
             @Path("cellPosition") Integer cellPosition
     );
 
-    @DELETE("deleteAllTimeTable/{kakaoId}/{cellPosition}")
+    @DELETE("deleteAllTimeTable/{kakaoId}")
     Call<DefaultResponse> deleteAllTimeTable(
             @Path("kakaoId") Long kakaoId
     );
 
-    @DELETE("deleteAlarm/{id}")
-    Call<DefaultResponse> deleteAlarm(
-            @Path("id") Integer id
+    @DELETE("deleteMeeting/{id}/{cellPositionList}")
+    Call<DefaultResponse> deleteMeeting(
+            @Path("id") Integer groupId,
+            @Path("cellPositionList") String cellPositionList
     );
 
+    @DELETE("deleteGroup/{id}/{cellPositionList}")
+    Call<DefaultResponse> deleteGroup(
+            @Path("id") Integer groupId,
+            @Path("cellPositionList") String cellPositionList
+    );
+
+    @DELETE("deleteGroupWithNoMeeting/{id}")
+    Call<DefaultResponse> deleteGroupWithNoMeeting(
+            @Path("id") Integer groupId
+    );
+
+    @DELETE("deleteAlarm/{id}")
+    Call<DefaultResponse> deleteAlarm(
+            @Path("id") Integer alarmId
+    );
 }

@@ -61,13 +61,6 @@ public class AlarmFragment  extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_alarm_list, container, false);
 //        refresh_list();
-        AlarmEntity alarmEntity1 = new AlarmEntity('s',"정흠","05/21 05:05");
-        AlarmEntity alarmEntity2 = new AlarmEntity('m',"건형","05/22 12:18");
-
-        addAlarmEntity(alarmEntity1);
-        addAlarmEntity(alarmEntity2);
-
-        updateAlarmListView();
         return view;
     }
     public void addAlarmEntity(AlarmEntity alarmEntity) {

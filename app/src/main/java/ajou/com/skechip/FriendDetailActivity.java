@@ -354,7 +354,7 @@ public class FriendDetailActivity extends AppCompatActivity {
                                         conn.append_server(SELECTED_CELLS, friendEntity.getUserID(),'m');
                                         conn.append_server(SELECTED_CELLS, kakaoUserID,'m');
 
-                                        EventBus.getDefault().post(new AppointmentCreationEvent(SELECTED_CELLS));
+                                        EventBus.getDefault().post(new AppointmentCreationEvent(SELECTED_CELLS, friendEntity.getUserID()));
 
                                         SELECTED_CELLS.clear();
                                         dialog.dismiss();
