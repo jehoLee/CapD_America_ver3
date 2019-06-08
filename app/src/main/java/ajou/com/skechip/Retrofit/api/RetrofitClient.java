@@ -51,6 +51,6 @@ public class RetrofitClient {
     public Api getApi() {
         return retrofit.create(Api.class);
     }
-    public firebaseApi getfirebaseApi(){ return firebase_retrofit.create(firebaseApi.class); }
+    public FirebaseApi getfirebaseApi(){ return firebase_retrofit.create(FirebaseApi.class); }
 
 }
