@@ -159,10 +159,10 @@ public class GroupListFragment extends Fragment {
 
                                         if (!meetingResponse.getIdList().isEmpty()) {
                                             Integer meetingID = meetingResponse.getIdList().get(0);
-                                            Long meetingManager = meetingResponse.getManagerList().get(0);
                                             String meetingPlace = meetingResponse.getPlaceList().get(0);
                                             String meetingTitle = meetingResponse.getTitleList().get(0);
                                             Integer meetingType = meetingResponse.getTypeList().get(0);
+                                            Long meetingManager = meetingResponse.getManagerList().get(0);
 
                                             List<Cell> cells = new ArrayList<>();
                                             for (Integer position : cellPositions) {

@@ -50,6 +50,9 @@ public class GroupEntity implements Parcelable {
 //        this.groupImg = groupImg;
 //    }
 
+    public void setMeetingEntities(List<MeetingEntity> meetingEntities) {
+        this.meetingEntities = meetingEntities;
+    }
 
     public Integer getGroupID() {
         return groupID;

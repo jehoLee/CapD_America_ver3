@@ -166,7 +166,7 @@ public interface Api {
 
     @DELETE("deleteMeeting/{id}/{cellPositionList}")
     Call<DefaultResponse> deleteMeeting(
-            @Path("id") Integer groupId,
+            @Path("id") Integer meetingId,
             @Path("cellPositionList") String cellPositionList
     );
 

@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        groupListFragment.updateGroupEntityOnMeetingCreate(event.getNewGroup());
+        groupListFragment.updateGroupEntities();
         EventBus.getDefault().removeStickyEvent(event);
     }
 

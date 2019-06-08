@@ -35,8 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="5dp"
+            android:layout_centerVertical="false"
             android:background="@drawable/card_white_shape"
             android:src="@drawable/ic_setting" />
 
@@ -81,10 +80,7 @@
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
         android:background="@drawable/card_white_shape"
-        android:paddingLeft="5dp"
-        android:paddingTop="10dp"
-        android:paddingRight="5dp"
-        android:paddingBottom="5dp">
+        android:padding="8dp">
 
         <TextView
             android:id="@+id/meeting_desc_"
@@ -94,6 +90,16 @@
             android:layout_marginBottom="10dp"
             android:text="모임 일정"
             android:textSize="12sp" />
+
+        <ImageButton
+            android:id="@+id/meeting_setting_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="false"
+            android:background="@drawable/card_white_shape"
+            android:src="@drawable/ic_setting"
+            android:visibility="gone" />
 
         <RelativeLayout
             android:id="@+id/initial_meeting_card"
