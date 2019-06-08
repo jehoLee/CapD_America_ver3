@@ -185,23 +185,4 @@ public interface Api {
     Call<DefaultResponse> deleteAlarm(
             @Path("id") Integer alarmId
     );
-
-    @DELETE("deleteMeeting/{id}/{cellPositionList}")
-    Call<DefaultResponse> deleteMeeting(
-            @Path("id") Integer groupId,
-            @Path("cellPositionList") String cellPositionList
-    );
-
-    @DELETE("deleteGroup/{id}/{cellPositionList}")
-    Call<DefaultResponse> deleteGroup(
-            @Path("id") Integer groupId,
-            @Path("cellPositionList") String cellPositionList
-    );
-
-    @DELETE("deleteGroupWithNoMeeting/{id}")
-    Call<DefaultResponse> deleteGroupWithNoMeeting(
-            @Path("id") Integer groupId
-    );
-
-
 }
