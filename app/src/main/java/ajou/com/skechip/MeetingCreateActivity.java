@@ -7,6 +7,7 @@ import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
+import ajou.com.skechip.Retrofit.models.CreateMeetingResponse;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
 import ajou.com.skechip.Retrofit.models.Kakao;
 import androidx.appcompat.app.AppCompatActivity;
@@ -58,6 +59,7 @@ public class MeetingCreateActivity extends AppCompatActivity {
     private Long kakaoUserID;
     private Kakao curFriend;
     private Bitmap bitmap;
+    private MeetingEntity meetingEntity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -196,10 +198,8 @@ public class MeetingCreateActivity extends AppCompatActivity {
                         cell.setPlaceName(meetingLocation);
                     }
 
-                    MeetingEntity meetingEntity = new MeetingEntity(
+                    meetingEntity = new MeetingEntity(
                             meetingTitle, meetingLocation, 0, meetingTimeCells, selectedMembers);
-
-                    groupEntity.addMeetingEntity(meetingEntity);
 
                     List<Long> ids = new ArrayList<>();
                     ids.add(kakaoUserID);
@@ -212,25 +212,24 @@ public class MeetingCreateActivity extends AppCompatActivity {
                         cellPositions.add(cell.getPosition());
                     }
 
-                    Call<DefaultResponse> call = RetrofitClient
+                    Call<CreateMeetingResponse> call = RetrofitClient
                             .getInstance()
                             .getApi()
                             .createMeeting(ids.toString(), cellPositions.toString(),
                                     groupEntity.getGroupID(), 0, groupEntity.getGroupManager()
                                     , meetingTitle, meetingLocation);
-                    call.enqueue(new Callback<DefaultResponse>() {
+                    call.enqueue(new Callback<CreateMeetingResponse>() {
                         @Override
-                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-
+                        public void onResponse(Call<CreateMeetingResponse> call, Response<CreateMeetingResponse> response) {
+                            meetingEntity.setMeetingID(response.body().getMeetingId());
+                            groupEntity.addMeetingEntity(meetingEntity);
+                            EventBus.getDefault().post(new MeetingCreationEvent(groupEntity));
+                            finish();
                         }
-
                         @Override
-                        public void onFailure(Call<DefaultResponse> call, Throwable t) {
+                        public void onFailure(Call<CreateMeetingResponse> call, Throwable t) {
                         }
                     });
-
-                    EventBus.getDefault().post(new MeetingCreationEvent(groupEntity));
-                    finish();
                 }
             }
         });

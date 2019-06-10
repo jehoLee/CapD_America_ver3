@@ -1,9 +1,14 @@
 package ajou.com.skechip.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+
+import ajou.com.skechip.Event.GroupDeleteEvent;
+import ajou.com.skechip.Event.MeetingDeleteEvent;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.ColTitle;
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
+import ajou.com.skechip.MainActivity;
+import ajou.com.skechip.MeetingCreateActivity;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
 import ajou.com.skechip.Retrofit.models.GroupResponse;
@@ -22,9 +27,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kakao.util.helper.log.Logger;
+
+import org.greenrobot.eventbus.EventBus;
+
 import ajou.com.skechip.Adapter.GroupEntity_Recycler_Adapter;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.GroupCreateActivity;
@@ -37,6 +46,8 @@ import retrofit2.Response;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+
 import static ajou.com.skechip.Fragment.EP_Fragment.ROW_SIZE;
 
 public class GroupListFragment extends Fragment {
@@ -54,6 +65,7 @@ public class GroupListFragment extends Fragment {
     private Bundle bundle;
     private View view;
     private int calledGroupCount = 0;
+    private int curOpenedGroupPosition = -1;
 
     public static GroupListFragment newInstance(Bundle bundle) {
         GroupListFragment fragment = new GroupListFragment();
@@ -177,7 +189,6 @@ public class GroupListFragment extends Fragment {
                                             }
 
                                             List<MeetingEntity> meetingEntities = new ArrayList<>();
-
                                             meetingEntities.add(new MeetingEntity(meetingTitle, meetingPlace
                                                     , meetingType, meetingID, meetingManager, cells));
 
@@ -188,34 +199,23 @@ public class GroupListFragment extends Fragment {
                                                     groupEntities.set(i, groupEntity);
                                                 }
                                             }
-
                                         }
-
                                     }
-
                                     @Override
-                                    public void onFailure(Call<MeetingResponse> call, Throwable t) {
-
-                                    }
+                                    public void onFailure(Call<MeetingResponse> call, Throwable t) {}
                                 });
                                 calledGroupCount++;
                                 if (calledGroupCount == groupEntities.size()) {
-
-                                    if(mAdapter==null){
+                                    if(mAdapter==null)
                                         updateGroupListView();
-                                    }else {
+                                    else
                                         mAdapter.notifyDataSetChanged();
-                                    }
-
                                     calledGroupCount = 0;
                                 }
                             }
                             @Override
-                            public void onFailure(Call<UserByGroupIdResponse> call, Throwable t) {
-
-                            }
+                            public void onFailure(Call<UserByGroupIdResponse> call, Throwable t) {}
                         });
-
                     }
                 } else {
                     //no group entities
@@ -229,10 +229,8 @@ public class GroupListFragment extends Fragment {
                 }
             }
             @Override
-            public void onFailure(Call<GroupResponse> call, Throwable t) {
-            }
+            public void onFailure(Call<GroupResponse> call, Throwable t) {}
         });
-
     }
 
     private void updateGroupListView() {
@@ -250,6 +248,7 @@ public class GroupListFragment extends Fragment {
                 new RecyclerItemClickListener(getActivity(), mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
+                        curOpenedGroupPosition = position;
                         Intent intent = new Intent(getActivity(), GroupDetailActivity.class);
                         intent.putExtra("kakaoBundle", bundle);
                         intent.putExtra("groupEntity", groupEntities.get(position));
@@ -257,106 +256,131 @@ public class GroupListFragment extends Fragment {
                                 (ArrayList<? extends Parcelable>) groupEntities.get(position).getMeetingEntities());
                         startActivity(intent);
                     }
-
                     @Override
                     public void onLongItemClick(View view, final int position) {
-
-                        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                        LayoutInflater inflater = getLayoutInflater();
-                        View dialog_view = inflater.inflate(R.layout.dialog_delete_group, null);
-                        builder.setView(dialog_view);
-                        final Button delete_Button = (Button) dialog_view.findViewById(R.id.delete_group);
-                        final AlertDialog dialog = builder.create();
-                        dialog.setCancelable(true);
-                        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                        dialog.show();
-
-                        delete_Button.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                                if(groupEntities.get(position).getMeetingEntities().isEmpty()) {
-                                    Call<DefaultResponse> call = RetrofitClient
-                                            .getInstance()
-                                            .getApi()
-                                            .deleteGroupWithNoMeeting(groupEntities.get(position).getGroupID());
-
-                                    call.enqueue(new Callback<DefaultResponse>() {
-                                        @Override
-                                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-
-                                            groupEntities.remove(position);
-                                            mAdapter.notifyItemRemoved(position);
-//                                            mAdapter.notifyDataSetChanged();
-//                                            updateGroupEntities();
-
-                                            dialog.dismiss();
-//                                            updateGroupEntities();
-
-                                        }
-
-                                        @Override
-                                        public void onFailure(Call<DefaultResponse> call, Throwable t) {
-
-                                        }
-                                    });
-                                }
-                                else {
-                                    List<MeetingEntity> meetingEntities = groupEntities.get(position).getMeetingEntities();
-                                    List<Cell> cells = new ArrayList<>();
-                                    List<Integer> positions = new ArrayList<>();
-                                    for(MeetingEntity meetingEntity : meetingEntities){
-                                        for(Cell cell : meetingEntity.getMeetingTimeCells()){
-                                            positions.add(cell.getPosition());
-                                        }
-                                    }
-                                    String cellPositions = positions.toString();
-
-                                    Call<DefaultResponse> call = RetrofitClient
-                                            .getInstance()
-                                            .getApi()
-                                            .deleteGroup(groupEntities.get(position).getGroupID(), cellPositions);
-
-                                    call.enqueue(new Callback<DefaultResponse>() {
-                                        @Override
-                                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-
-                                            groupEntities.remove(position);
-                                            mAdapter.notifyItemRemoved(position);
-//                                            updateGroupListAdapter();
-//                                            updateGroupEntities();
-
-                                            dialog.dismiss();
-//                                            updateGroupEntities();
-
-                                        }
-
-                                        @Override
-                                        public void onFailure(Call<DefaultResponse> call, Throwable t) {
-
-                                        }
-                                    });
-                                }
-                            }
-                        });
+                        showGroupDeleteDialog(position);
                     }
                 }));
     }
 
-//    public void updateGroupListAdapter() {
-//        mAdapter = new GroupEntity_Recycler_Adapter(groupEntities);
-//        mAdapter.setHasStableIds(true);
-//        mAdapter.registerAdapterDataObserver(observer);
-//        mRecyclerView.setAdapter(mAdapter);
-////      mAdapter.notifyDataSetChanged();
-//    }
+    private void showGroupDeleteDialog(final int position) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        LayoutInflater inflater = getLayoutInflater();
+        View dialog_view = inflater.inflate(R.layout.dialog_delete_group, null);
+        builder.setView(dialog_view);
+        final Button delete_Button = dialog_view.findViewById(R.id.delete_group);
+        final AlertDialog dialog = builder.create();
+        dialog.setCancelable(true);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.show();
+
+        delete_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                showMeetingDeleteConfirmDialog(v, position);
+            }
+        });
+    }
+
+    private void showMeetingDeleteConfirmDialog(View v, final int position) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_confirmation, null);
+        builder.setView(dialogView);
+        final AlertDialog dialog = builder.create();
+        final Button deleteConfirmBtn = dialogView.findViewById(R.id.delete_confirm);
+        final Button deleteCancelBtn = dialogView.findViewById(R.id.delete_cancel);
+        final TextView dialogDescText = dialogView.findViewById(R.id.text_view);
+        String descText = "모임을 삭제하시겠습니까?";
+        dialogDescText.setText(descText);
+        deleteCancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        deleteConfirmBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(groupEntities.get(position).getMeetingEntities().isEmpty()) {
+                    callDeleteGroupWithNoMeetingAPI(position, dialog);
+                }
+                else {
+                    callDeleteGroupWithMeetingAPI(position, dialog);
+                }
+            }
+        });
+        dialog.setCancelable(true);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.show();
+    }
+
+    private void callDeleteGroupWithMeetingAPI(final int position, final AlertDialog dialog) {
+        List<MeetingEntity> meetingEntities = groupEntities.get(position).getMeetingEntities();
+        List<Integer> positions = new ArrayList<>();
+        for(MeetingEntity meetingEntity : meetingEntities){
+            for(Cell cell : meetingEntity.getMeetingTimeCells()){
+                positions.add(cell.getPosition());
+            }
+        }
+        String cellPositions = positions.toString();
+
+        Call<DefaultResponse> call = RetrofitClient
+                .getInstance()
+                .getApi()
+                .deleteGroup(groupEntities.get(position).getGroupID(), cellPositions);
+
+        call.enqueue(new Callback<DefaultResponse>() {
+            @Override
+            public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+                dialog.dismiss();
+                groupEntities.remove(position);
+                mAdapter.notifyItemRemoved(position);
+                ((MainActivity)getActivity()).refreshTimeTableFromEP();
+            }
+
+            @Override
+            public void onFailure(Call<DefaultResponse> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void callDeleteGroupWithNoMeetingAPI(final int position, final AlertDialog dialog) {
+        Call<DefaultResponse> call = RetrofitClient
+                .getInstance()
+                .getApi()
+                .deleteGroupWithNoMeeting(groupEntities.get(position).getGroupID());
+
+        call.enqueue(new Callback<DefaultResponse>() {
+            @Override
+            public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+                dialog.dismiss();
+                groupEntities.remove(position);
+                mAdapter.notifyItemRemoved(position);
+            }
+
+            @Override
+            public void onFailure(Call<DefaultResponse> call, Throwable t) {
+
+            }
+        });
+    }
+
+    public void onMeetingDeletedEvent(){
+        if(curOpenedGroupPosition != -1){
+            groupEntities.get(curOpenedGroupPosition).clearMeetingEntities();
+            mAdapter.notifyItemChanged(curOpenedGroupPosition);
+            curOpenedGroupPosition = -1;
+        }
+    }
 
     private void startGroupCreate() {
         Intent intent = new Intent(getActivity(), GroupCreateActivity.class);
         intent.putExtra("kakaoBundle", bundle);
         startActivity(intent);
     }
-
 
     private RecyclerView.AdapterDataObserver observer = new RecyclerView.AdapterDataObserver() {
         @Override
@@ -402,19 +426,15 @@ public class GroupListFragment extends Fragment {
         for (int i = 0; i < members.size(); i++) {
             Kakao member = members.get(i);
             if (member.getUserId().equals(1050039103L)) {
-                Logger.e("member는 " + member.getProfileNickname() + " " + member.getProfileThumbnailImage());
                 member.setProfileThumbnailImage("https://mud-th-p-talk.kakao.com/th/talkp/wlblmvm7er/55K9YxabmKvluvOL7w1z7K/6ex0kx_110x110_c.jpg");
                 members.set(i, member);
             } else if (member.getUserId().equals(1048797678L)) {
-                Logger.e("member는 " + member.getProfileNickname() + " " + member.getProfileThumbnailImage());
                 member.setProfileThumbnailImage("https://mud-th-p-talk.kakao.com/th/talkp/wk6F31pV9r/Ijf1TbIDAMWzOBvMkdsosk/5t27rf_110x110_c.jpg");
                 members.set(i, member);
             } else if (member.getUserId().equals(1050029407L)) {
-                Logger.e("member는 " + member.getProfileNickname() + " " + member.getProfileThumbnailImage());
                 member.setProfileThumbnailImage("https://mud-th-p-talk.kakao.com/th/talkp/wlb5J4cTjd/lmvfuiKrper0QiasA3Tbpk/p814so_110x110_c.jpg");
                 members.set(i, member);
             } else if (member.getUserId().equals(1050033491L)) {
-                Logger.e("member는 " + member.getProfileNickname() + " " + member.getProfileThumbnailImage());
                 member.setProfileThumbnailImage("");
                 members.set(i, member);
             }

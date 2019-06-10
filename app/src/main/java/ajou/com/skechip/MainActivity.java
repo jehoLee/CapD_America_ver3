@@ -4,8 +4,10 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
 
+import ajou.com.skechip.Event.AlarmReceivedEvent;
 import ajou.com.skechip.Event.AppointmentCreationEvent;
 import ajou.com.skechip.Event.MeetingCreationEvent;
+import ajou.com.skechip.Event.MeetingDeleteEvent;
 import ajou.com.skechip.Event.TimeTableImageUploadEvent;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
@@ -72,45 +74,63 @@ import org.opencv.core.Mat;
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "ssss.MainActivity";
 
+
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onTimeTableImgUploadedEvent(TimeTableImageUploadEvent event) {
-        Log.d(TAG, "업로드 이벤트 발생 !");
+    public void onAlarmReceivedEvent(AlarmReceivedEvent event){
+        Log.e(TAG, "알람 받기 이벤트 발생 !");
+//        event.getAlarmEntity();
+//        alertFragment.refresh_list();
+        alertFragment.addAlarm(event.getAlarmEntity());
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onTimeTableImgUploadedEvent(TimeTableImageUploadEvent event){
+        Log.e(TAG, "업로드 이벤트 발생 !");
         onTimeTableUploadedChangeEPfragment();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onAppointmentCreationEvent(AppointmentCreationEvent event) {
-        Log.d(TAG, "약속 생성 이벤트 발생!!");
-        ArrayList<Cell> cells = (ArrayList<Cell>) event.getAppointmentTimeCells();
-        FirebaseToServer(event.getFriendID(), 'p');
+    public void onAppointmentCreationEvent(AppointmentCreationEvent event){
+        Log.e(TAG, "약속 생성 이벤트 발생!!");
+        ArrayList<Cell> cells = (ArrayList<Cell>)event.getAppointmentTimeCells();
+        FirebaseToServer(event.getFriendID(),'p');
         epFragment.onTimeCellsCreateEvent(cells);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMeetingCreationEvent(MeetingCreationEvent event) {
-        Log.d(TAG, "그룹 미팅 생성 이벤트 발생!!");
+        Log.e(TAG, "그룹 미팅 생성 이벤트 발생!!");
         List<Kakao> members = event.getGroupEntityWithNewMeeting().getGroupMembers();
-        for (int i = 0; i < members.size(); i++) {
-            if(members.get(i).getUserId().equals(kakaoUserInfo.getId())){continue;}
-            FirebaseToServer(members.get(i).getUserId(), 's');
-        }
+        for(int i=0;i<members.size();i++) { FirebaseToServer(members.get(i).getUserId(),'m'); }
         GroupEntity groupWithNewMeeting = event.getGroupEntityWithNewMeeting();
         ArrayList<Cell> cells = (ArrayList<Cell>) groupWithNewMeeting.getMeetingEntities().get(0).getMeetingTimeCells();
         epFragment.onTimeCellsCreateEvent(cells);
         groupListFragment.updateGroupEntities();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMeetingDeleteEvent(MeetingDeleteEvent event) {
+        Log.e(TAG, "미팅 삭제 이벤트 발생!");
+        groupListFragment.onMeetingDeletedEvent();
+        refreshTimeTableFromEP();
+    }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onGroupCreationEvent(GroupCreationEvent event) {
-        Log.d(TAG, "그룹 생성 이벤트 발생!!");
+        Log.e(TAG, "그룹 생성 이벤트 발생!!");
         List<Kakao> members = event.getNewGroup().getGroupMembers();
-        for (int i = 0; i < members.size(); i++) {
-            if(members.get(i).getUserId().equals(kakaoUserInfo.getId())){continue;}
-            FirebaseToServer(members.get(i).getUserId(), 'm');
-        }
+        for(int i=0;i<members.size();i++) { FirebaseToServer(members.get(i).getUserId(),'s'); }
         groupListFragment.updateGroupEntities();
         EventBus.getDefault().removeStickyEvent(event);
     }
+
+//    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+//    public void onGroupDeleteEvent(GroupDeleteEvent event) {
+//        Log.e(TAG, "모임 삭제 이벤트 발생!");
+//        epFragment.refreshTimeTable();
+//        EventBus.getDefault().removeStickyEvent(event);
+//    }
+
 
     private FragmentManager fragmentManager = getSupportFragmentManager();
     private FriendListFragment friendListFragment;
@@ -341,6 +361,10 @@ public class MainActivity extends AppCompatActivity {
 
         curActivatedFragment = epFragment;
 
+    }
+
+    public void refreshTimeTableFromEP(){
+        epFragment.refreshTimeTable();
     }
 
     private void saveUser(final Kakao user) {

@@ -8,6 +8,11 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.greenrobot.eventbus.EventBus;
+
+import ajou.com.skechip.Event.AlarmReceivedEvent;
+import ajou.com.skechip.Event.GroupCreationEvent;
+import ajou.com.skechip.Fragment.bean.AlarmEntity;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
 import retrofit2.Call;
@@ -38,11 +43,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Character alarmType = remoteMessage.getData().get("alarmType").charAt(0);
         String toToken = remoteMessage.getData().get("toToken");
         String fromToken = remoteMessage.getData().get("fromToken");
-        Call<DefaultResponse> alarmcreate = RetrofitClient
+
+        Log.e("알람", toToken + " " + fromToken);
+
+        Call<DefaultResponse> alarmCreate = RetrofitClient
                 .getInstance()
                 .getApi()
                 .createAlarm(alarmType,toToken,fromToken);
-        alarmcreate.enqueue(new Callback<DefaultResponse>() {
+        alarmCreate.enqueue(new Callback<DefaultResponse>() {
             @Override
             public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) { Log.e("plz",response.toString());}
             @Override
@@ -52,5 +60,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
         }
+
+        AlarmEntity newAlarm = new AlarmEntity(1, remoteMessage.getData().get("alarmType").charAt(0)
+                , fromToken, toToken);
+
+        EventBus.getDefault().post(new AlarmReceivedEvent(newAlarm));
+
     }
 }

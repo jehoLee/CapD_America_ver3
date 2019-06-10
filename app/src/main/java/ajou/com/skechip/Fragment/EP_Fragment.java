@@ -420,6 +420,10 @@ public class EP_Fragment extends Fragment {
         }
     };
 
+    public void refreshTimeTable(){
+        initData();
+    }
+
     private void initData() {
         rowTitles = new ArrayList<>();
         colTitles = new ArrayList<>();

@@ -6,6 +6,7 @@ import ajou.com.skechip.Retrofit.models.AlarmResponse;
 import ajou.com.skechip.Retrofit.models.AlarmTokenResponse;
 import ajou.com.skechip.Retrofit.models.AsManyUserAsAvailableResponse;
 import ajou.com.skechip.Retrofit.models.AvailableMeetingTimesResponse;
+import ajou.com.skechip.Retrofit.models.CreateMeetingResponse;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
 import ajou.com.skechip.Retrofit.models.GroupResponse;
 import ajou.com.skechip.Retrofit.models.Kakao;
@@ -63,7 +64,7 @@ public interface Api {
 
     @FormUrlEncoded
     @POST("createMeeting")
-    Call<DefaultResponse> createMeeting(
+    Call<CreateMeetingResponse> createMeeting(
             @Query("kakaoIdList") String kakaoIdList,
             @Field("cellPositionList") String cellPositionList,
             @Field("groupId") Integer groupId,
@@ -151,6 +152,30 @@ public interface Api {
             @Field("title") String title,
             @Field("place") String place,
             @Field("cellPosition") Integer cellPosition
+    );
+
+    @FormUrlEncoded
+    @PUT("reviseGroupInfo/{id}")
+    Call<DefaultResponse> reviseGroupInfo(
+            @Path("id") Integer groupId,
+            @Field("title") String title,
+            @Field("tag") String tag
+    );
+
+    @FormUrlEncoded
+    @PUT("reviseMeetingInfo/{id}")
+    Call<DefaultResponse> reviseMeetingInfo(
+            @Path("id") Integer meetingId,
+            @Field("title") String title,
+            @Field("place") String place
+    );
+
+    @FormUrlEncoded
+    @PUT("reviseMeetingTime/{id}")
+    Call<DefaultResponse> reviseMeetingTime(
+            @Path("id") Integer meetingId,
+            @Field("deleteList") String deleteCellPositionList,
+            @Field("insertList") String insertCellPositionList
     );
 
     @DELETE("deletetimetable/{kakaoId}/{cellPosition}")

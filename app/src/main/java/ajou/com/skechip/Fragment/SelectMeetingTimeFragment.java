@@ -1,13 +1,7 @@
 package ajou.com.skechip.Fragment;
 
-
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-
 import ajou.com.skechip.Adapter.EP_CustomAdapter;
-import ajou.com.skechip.CalendarActivity;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.ColTitle;
 import ajou.com.skechip.Fragment.bean.RowTitle;
@@ -15,45 +9,25 @@ import ajou.com.skechip.MeetingCreateActivity;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
 import ajou.com.skechip.Retrofit.models.AvailableMeetingTimesResponse;
 import ajou.com.skechip.Retrofit.models.Kakao;
-import ajou.com.skechip.Retrofit.models.TimeTable;
-import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import com.kakao.friends.response.model.AppFriendInfo;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
-
 import ajou.com.skechip.R;
 import cn.zhouchaoyuan.excelpanel.ExcelPanel;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static ajou.com.skechip.Fragment.EP_Fragment.ONE_DAY;
 import static ajou.com.skechip.Fragment.EP_Fragment.PAGE_SIZE;
 import static ajou.com.skechip.Fragment.EP_Fragment.ROW_SIZE;
-import static ajou.com.skechip.Fragment.EP_Fragment.WEEK_FORMAT_PATTERN;
-
 
 public class SelectMeetingTimeFragment extends Fragment {
     private ExcelPanel excelPanel;
@@ -63,11 +37,8 @@ public class SelectMeetingTimeFragment extends Fragment {
     private SimpleDateFormat weekFormatPattern;
     private EP_CustomAdapter timeTableAdapter;
     private List<Cell> SELECTED_CELLS = new ArrayList<Cell>();
-
     public List<String> PLACE_NAME = new ArrayList<String>();
     public List<String> SUBJECT_NAME = new ArrayList<String>();
-
-    private List<TimeTable> timeTableList;
     private View view;
     private ProgressBar progress;
 
@@ -106,9 +77,7 @@ public class SelectMeetingTimeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_select_meeting_time, container, false);
-
         progress = view.findViewById(R.id.progress);
-
         excelPanel = view.findViewById(R.id.content_container);
         timeTableAdapter = new EP_CustomAdapter(getActivity(), blockListener);
         excelPanel.setAdapter(timeTableAdapter);
@@ -119,31 +88,17 @@ public class SelectMeetingTimeFragment extends Fragment {
         confirmTimeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO : 선택한거 체크하기
-
-
                 if(SELECTED_CELLS.size() == 0) {
                     Toast.makeText(getActivity(), "선택한 시간이 없습니다.", Toast.LENGTH_SHORT).show();
                 }
                 else {
-//                    Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT).show();
-
-
                     ((MeetingCreateActivity) Objects.requireNonNull(getActivity())).onSelectTimesFinishedEvent(SELECTED_CELLS);
-
                 }
-
-
-
             }
         });
-
-
         Toast.makeText(getActivity(), "일정을 생성할 시간을 선택하세요", Toast.LENGTH_LONG).show();
         return view;
     }
-
-
 
     private void initTimeTableView() {
         rowTitles = new ArrayList<>();
@@ -163,10 +118,7 @@ public class SelectMeetingTimeFragment extends Fragment {
         call.enqueue(new Callback<AvailableMeetingTimesResponse>() {
             @Override
             public void onResponse(Call<AvailableMeetingTimesResponse> call, Response<AvailableMeetingTimesResponse> response) {
-
                 List<Integer> availableCellPositions = response.body().getAvailableMeetingTimes();
-
-//                timeTableList = response.body().getAvailableMeetingTimes();
 
                 SUBJECT_NAME.add("");
                 PLACE_NAME.add("");
@@ -180,7 +132,6 @@ public class SelectMeetingTimeFragment extends Fragment {
                         cell.setStatus(0);
                         cursor++;
                     } else {
-//                        cell.setSubjectName("선택불가");
                         cell.setStatus(-2);
                     }
                     cellList.add(cell);

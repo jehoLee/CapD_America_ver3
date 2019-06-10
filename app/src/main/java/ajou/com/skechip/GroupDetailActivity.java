@@ -1,11 +1,14 @@
 package ajou.com.skechip;
 
 import ajou.com.skechip.Event.MeetingCreationEvent;
+import ajou.com.skechip.Event.MeetingDeleteEvent;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
 import ajou.com.skechip.Retrofit.models.Kakao;
+import ajou.com.skechip.Retrofit.models.TimeTable;
+import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
 import ajou.com.skechip.Retrofit.models.UserByGroupIdResponse;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,6 +53,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.http.Field;
+import retrofit2.http.Path;
 
 public class GroupDetailActivity extends AppCompatActivity {
     private final String TAG = "GroupDetailActivity";
@@ -62,13 +67,6 @@ public class GroupDetailActivity extends AppCompatActivity {
         updateMeetingAndRelatedView();
     }
 
-//    @Subscribe(threadMode = ThreadMode.MAIN)
-//    public void onMeetingDeleteEvent(MeetingDeleteEvent event) {
-//        Log.d(TAG, "미팅 삭제 이벤트 발생!");
-//        //임시 하나이므로 리스트 -> null 로
-//
-//    }
-
     private Bundle bundle;
     private GroupEntity groupEntity;
     private List<MeetingEntity> meetingEntities;
@@ -78,9 +76,15 @@ public class GroupDetailActivity extends AppCompatActivity {
     private ImageButton meetingSettingButton;
     private Bitmap bitmap;
     private Kakao memberIndex;
-
     private String updatedGroupTag;
-
+    private String updatedGroupName;
+    private String updatedMeetingName;
+    private String updatedMeetingLoc;
+    private TextView groupNameText;
+    private TextView groupTagText;
+    private TextView meetingNameText;
+    private TextView meetingLocText;
+    private TextView meetingTimeText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,8 +98,8 @@ public class GroupDetailActivity extends AppCompatActivity {
 
         EventBus.getDefault().register(this);
 
-        TextView groupNameText = findViewById(R.id.group_name_text);
-        TextView groupTagText = findViewById(R.id.group_tag_text);
+        groupNameText = findViewById(R.id.group_name_text);
+        groupTagText = findViewById(R.id.group_tag_text);
         TextView memberNumText = findViewById(R.id.member_num_text);
 
         groupNameText.setText(groupEntity.getGroupTitle());
@@ -103,10 +107,19 @@ public class GroupDetailActivity extends AppCompatActivity {
         String memberNum = String.valueOf(groupEntity.getGroupMemberNum());
         memberNumText.setText(memberNum);
 
+        setMembersView();
+
         meetingAddView = findViewById(R.id.initial_meeting_card);
         meetingView = findViewById(R.id.meeting_view);
 
         groupSettingButton = findViewById(R.id.group_setting_button);
+        groupSettingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showGroupInfoReviseDialog(v);
+            }
+        });
+
         meetingSettingButton = findViewById(R.id.meeting_setting_button);
 
         if (meetingEntities.isEmpty()) {
@@ -123,14 +136,10 @@ public class GroupDetailActivity extends AppCompatActivity {
                     startCreateMeeting();
                 }
             });
-            setClickListenerForSettingBtn(false);
         } else {
             updateMeetingAndRelatedView();
-            setClickListenerForSettingBtn(true);
+            setClickListenerMeetingSettingBtn();
         }
-
-        setMembersView();
-
     }
 
     private void setMembersView() {
@@ -174,7 +183,7 @@ public class GroupDetailActivity extends AppCompatActivity {
                 friendView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
                 friendView.setOrientation(LinearLayout.VERTICAL);
                 friendView.addView(imageView);
-
+                
                 LinearLayout name = new LinearLayout(this);
                 name.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
                 name.setOrientation(LinearLayout.VERTICAL);
@@ -201,27 +210,15 @@ public class GroupDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void setClickListenerForSettingBtn(Boolean isMeetingAdded){
-        //TODO : 모임과 일정 수정
-
-        groupSettingButton.setOnClickListener(new View.OnClickListener() {
+    private void setClickListenerMeetingSettingBtn() {
+        meetingSettingButton.setVisibility(View.VISIBLE);
+        meetingSettingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showGroupInfoReviseDialog(v);
+                showMeetingReviseDialog(v);
             }
         });
-
-        if(isMeetingAdded){
-            meetingSettingButton.setVisibility(View.VISIBLE);
-            meetingSettingButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showMeetingReviseDialog(v);
-                }
-            });
-        }
     }
-
 
     private void showMeetingReviseDialog(View v){
         final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -236,13 +233,15 @@ public class GroupDetailActivity extends AppCompatActivity {
         reviseInfoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                dialog.dismiss();
+                showMeetingInfoReviseDialog(v);
             }
         });
         reviseTimeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                dialog.dismiss();
+                showMeetingTimeReviseDialog(v);
             }
         });
         deleteMeetingBtn.setOnClickListener(new View.OnClickListener() {
@@ -256,6 +255,93 @@ public class GroupDetailActivity extends AppCompatActivity {
         dialog.setCancelable(true);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialog.show();
+    }
+
+    private void showMeetingInfoReviseDialog(View v) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+        LayoutInflater inflater = getLayoutInflater();
+        View dialog_view = inflater.inflate(R.layout.dialog_revise_meeting_info, null);
+        builder.setView(dialog_view);
+        final AlertDialog dialog = builder.create();
+
+        final Button confirmReviseBtn = dialog_view.findViewById(R.id.confirm_revise_button);
+        final Button cancelBtn = dialog_view.findViewById(R.id.cancel_button);
+        final EditText meetingNameEdit = dialog_view.findViewById(R.id.meeting_name_edit);
+        final EditText meetingLocEdit = dialog_view.findViewById(R.id.meeting_loc_edit);
+
+        meetingNameEdit.setText(meetingEntities.get(0).getTitle());
+        meetingLocEdit.setText(meetingEntities.get(0).getLocation());
+        updatedMeetingName = meetingEntities.get(0).getTitle();
+        updatedMeetingLoc = meetingEntities.get(0).getLocation();
+
+        confirmReviseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Boolean isMeetingInfoChanged = false;
+                if(!meetingNameEdit.getText().toString().equals(meetingEntities.get(0).getTitle())) {
+                    updatedMeetingName = meetingNameEdit.getText().toString();
+                    isMeetingInfoChanged = true;
+                }
+                if(!meetingLocEdit.getText().toString().equals(meetingEntities.get(0).getLocation())){
+                    updatedMeetingLoc = meetingLocEdit.getText().toString();
+                    isMeetingInfoChanged = true;
+                }
+
+                if(isMeetingInfoChanged){
+                    Call<DefaultResponse> call = RetrofitClient
+                            .getInstance()
+                            .getApi()
+                            .reviseMeetingInfo(meetingEntities.get(0).getMeetingID(), updatedMeetingName, updatedMeetingLoc);
+
+                    call.enqueue(new Callback<DefaultResponse>() {
+                        @Override
+                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+                            MeetingEntity meetingEntity = meetingEntities.get(0);
+                            meetingEntity.setTitle(updatedMeetingName);
+                            meetingEntity.setLocation(updatedMeetingLoc);
+                            meetingEntities.set(0, meetingEntity);
+
+                            meetingNameText.setText(updatedMeetingName);
+                            meetingLocText.setText(updatedMeetingLoc);
+                            dialog.dismiss();
+                        }
+                        @Override
+                        public void onFailure(Call<DefaultResponse> call, Throwable t) {
+                        }
+                    });
+                }
+            }
+        });
+
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updatedMeetingName = null;
+                updatedMeetingLoc = null;
+                dialog.dismiss();
+            }
+        });
+
+        dialog.setCancelable(true);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.show();
+    }
+
+    private void showMeetingTimeReviseDialog(View v){
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     private void showMeetingDeleteConfirmDialog(View v) {
@@ -301,10 +387,7 @@ public class GroupDetailActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
                 deleteMeetingFromView();
-
-                //TODO : 모임 탭, 시간표 탭 업데이트
-
-
+                EventBus.getDefault().post(new MeetingDeleteEvent());
             }
             @Override
             public void onFailure(Call<DefaultResponse> call, Throwable t) {
@@ -312,7 +395,6 @@ public class GroupDetailActivity extends AppCompatActivity {
             }
         });
     }
-
 
     private void showGroupInfoReviseDialog(View v) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -327,6 +409,7 @@ public class GroupDetailActivity extends AppCompatActivity {
         final Spinner groupTagSpinner = dialog_view.findViewById(R.id.group_tag_spinner2);
 
         groupNameEdit.setText(groupEntity.getGroupTitle());
+        updatedGroupName = groupEntity.getGroupTitle();
 
         String[] groupTags = new String[]{"#", "#동아리", "#대외활동", "#강의팀플", "#여행", "#친목", "#기타"};
         final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
@@ -356,7 +439,7 @@ public class GroupDetailActivity extends AppCompatActivity {
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_list_item_1);
         groupTagSpinner.setAdapter(spinnerArrayAdapter);
 
-        int index = 1;
+        int index = 0;
         int position = 1;
         for(String tag : groupTags){
             if(tag.equals(groupEntity.getGroupTag()))
@@ -383,15 +466,34 @@ public class GroupDetailActivity extends AppCompatActivity {
         confirmReviseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "name:" + groupNameEdit.getText().toString()
-                        + "\ntag : " + updatedGroupTag, Toast.LENGTH_SHORT).show();
-
+                Boolean isGroupInfoChanged = false;
                 if(!groupNameEdit.getText().toString().equals(groupEntity.getGroupTitle())) {
-                    final String newGroupName = groupNameEdit.getText().toString();
-                    //TODO: 모임 이름 업데이트
+                    updatedGroupName = groupNameEdit.getText().toString();
+                    isGroupInfoChanged = true;
                 }
                 if(!updatedGroupTag.equals(groupEntity.getGroupTag())){
-                    //TODO : updatedGroupTag로 모임 태그 업데이트
+                    isGroupInfoChanged = true;
+                }
+
+                if(isGroupInfoChanged){
+                    Call<DefaultResponse> call = RetrofitClient
+                            .getInstance()
+                            .getApi()
+                            .reviseGroupInfo(groupEntity.getGroupID(), updatedGroupName, updatedGroupTag);
+
+                    call.enqueue(new Callback<DefaultResponse>() {
+                        @Override
+                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+                            groupEntity.setGroupTitle(updatedGroupName);
+                            groupEntity.setGroupTag(updatedGroupTag);
+                            groupNameText.setText(updatedGroupName);
+                            groupTagText.setText(updatedGroupTag);
+                            dialog.dismiss();
+                        }
+                        @Override
+                        public void onFailure(Call<DefaultResponse> call, Throwable t) {
+                        }
+                    });
                 }
             }
         });
@@ -399,6 +501,7 @@ public class GroupDetailActivity extends AppCompatActivity {
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                updatedGroupName = null;
                 updatedGroupTag = null;
                 dialog.dismiss();
             }
@@ -409,14 +512,13 @@ public class GroupDetailActivity extends AppCompatActivity {
         dialog.show();
     }
 
-
     public void updateMeetingAndRelatedView() {
         //임시: 첫번째꺼만 보여줌
         MeetingEntity meetingEntity = meetingEntities.get(0);
 
-        TextView meetingNameText = findViewById(R.id.meeting_name_text);
-        TextView meetingLocText = findViewById(R.id.meeting_location_text);
-        TextView meetingTimeText = findViewById(R.id.meeting_time_text);
+        meetingNameText = findViewById(R.id.meeting_name_text);
+        meetingLocText = findViewById(R.id.meeting_location_text);
+        meetingTimeText = findViewById(R.id.meeting_time_text);
 
         //임시: 첫번째꺼만 보여줌
         meetingNameText.setText(meetingEntity.getTitle());
@@ -429,19 +531,18 @@ public class GroupDetailActivity extends AppCompatActivity {
 
         meetingAddView.setVisibility(View.GONE);
         meetingView.setVisibility(View.VISIBLE);
-        meetingSettingButton.setVisibility(View.VISIBLE);
+
+        setClickListenerMeetingSettingBtn();
     }
 
     private void deleteMeetingFromView() {
-        groupEntity.setMeetingEntities(null);
-        meetingEntities = null;
+        groupEntity.clearMeetingEntities();
+        meetingEntities.clear();
 
         meetingAddView.setVisibility(View.VISIBLE);
         meetingView.setVisibility(View.GONE);
         meetingSettingButton.setVisibility(View.GONE);
     }
-
-
 
     public void startCreateMeeting() {
         Intent intent = new Intent(this, MeetingCreateActivity.class);

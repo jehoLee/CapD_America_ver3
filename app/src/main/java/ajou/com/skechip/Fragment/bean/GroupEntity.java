@@ -54,6 +54,10 @@ public class GroupEntity implements Parcelable {
         this.meetingEntities = meetingEntities;
     }
 
+    public void clearMeetingEntities() {
+        this.meetingEntities.clear();
+    }
+
     public Integer getGroupID() {
         return groupID;
     }

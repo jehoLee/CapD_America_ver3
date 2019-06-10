@@ -1,6 +1,7 @@
 package ajou.com.skechip.Fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +43,7 @@ public class AlarmFragment  extends Fragment {
     private Bundle bundle;
     private View view;
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.Adapter mAdapter = null;
     private RecyclerView.LayoutManager mLayoutManager;
 
     public static AlarmFragment newInstance(Bundle bundle) {
@@ -81,8 +82,9 @@ public class AlarmFragment  extends Fragment {
             }
         }
     }
+
     public void updateAlarmListView() {
-        if (!alarmEntities.isEmpty()) {
+//        if (!alarmEntities.isEmpty()) {
             view.findViewById(R.id.initial_alarm_card).setVisibility(View.GONE);
 
             mRecyclerView = view.findViewById(R.id.alarm_card_list_view);
@@ -121,7 +123,9 @@ public class AlarmFragment  extends Fragment {
                                         @Override
                                         public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
                                             dialog.dismiss();
-                                            updateAlarmListView();
+//                                            updateAlarmListView();
+                                            alarmEntities.remove(position);
+                                            mAdapter.notifyItemRemoved(position);
                                         }
                                         @Override
                                         public void onFailure(Call<DefaultResponse> call, Throwable t) {}
@@ -133,9 +137,12 @@ public class AlarmFragment  extends Fragment {
                         }
                     }));
 
-        }
+//        }
     }
+
     public void refresh_list(){
+        alarmEntities.clear();
+
         Call<AlarmResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
@@ -144,14 +151,29 @@ public class AlarmFragment  extends Fragment {
             @Override
             public void onResponse(Call<AlarmResponse> call, Response<AlarmResponse> response) {
                 alarmTable = response.body().getAlarmList();
+//                Toast.makeText(getActivity(), "알람왔따!!!" + alarmTable.get(0).getId(), Toast.LENGTH_LONG).show();
+
                 for(Alarm alarm : alarmTable) {
+                    Log.e("알람 ", alarm.getId().toString() + " " + alarm.getType());
                     alarmEntities.add(new AlarmEntity(alarm.getId(),alarm.getType(),alarm.getFrom(),alarm.getTime()));
                 }
-                updateAlarmListView();
+
+                if(mAdapter==null)
+                    updateAlarmListView();
+                else
+                    mAdapter.notifyDataSetChanged();
+
             }
             @Override
             public void onFailure(Call<AlarmResponse> call, Throwable t) {}
         });
 
     }
+
+    public void addAlarm(AlarmEntity newAlarm){
+        Toast.makeText(getContext(), "newAlarm" + newAlarm.getAlarmType(), Toast.LENGTH_LONG).show();
+        alarmEntities.add(newAlarm);
+        mAdapter.notifyDataSetChanged();
+    }
+
 }
