@@ -1,12 +1,12 @@
 <resources>
     <string name="msg_token_fmt">알림 도착!</string>
-    <string name="app_name">ssss</string>
+    <string name="app_name">미유밋</string>
     <string name="title_home">홈</string>
     <string name="title_meeting">모임</string>
     <string name="time_table">시간표</string>
     <string name="title_friends">친구</string>
     <string name="title_alert">알림</string>
-    <string name="title_activity_launcy">ssss</string>
+    <string name="title_activity_launcy">미유밋</string>
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
