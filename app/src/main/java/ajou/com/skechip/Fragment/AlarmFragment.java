@@ -31,7 +31,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AlarmFragment  extends Fragment {
+public class AlarmFragment extends Fragment {
     private final String TAG = "#FriendListFragment: ";
     private List<String> friendsNickname_list = new ArrayList<>();
     private String kakaoUserImg;
@@ -55,11 +55,12 @@ public class AlarmFragment  extends Fragment {
         }
         return fragment;
     }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         bundle = getArguments();
-        if(bundle != null){
+        if (bundle != null) {
             kakaoUserID = bundle.getLong("kakaoUserID");
             kakaoUserName = bundle.getString("kakaoUserName");
             kakaoUserImg = bundle.getString("kakaoUserImg");
@@ -67,6 +68,7 @@ public class AlarmFragment  extends Fragment {
             friendsNickname_list = bundle.getStringArrayList("friendsNickname_list");
         }
     }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -75,73 +77,7 @@ public class AlarmFragment  extends Fragment {
         return view;
     }
 
-    public void updatealarmEntityOnMeetingCreate(AlarmEntity alarmEntity){
-        for(int i = 0; i < alarmEntities.size(); i++){
-            if(alarmEntities.get(i).equals(alarmEntity.getAlarmTitle())){//TODO:추후 그룹id로 변경하기
-                alarmEntities.set(i, alarmEntity);//update
-            }
-        }
-    }
-
-    public void updateAlarmListView() {
-//        if (!alarmEntities.isEmpty()) {
-            view.findViewById(R.id.initial_alarm_card).setVisibility(View.GONE);
-
-            mRecyclerView = view.findViewById(R.id.alarm_card_list_view);
-            mRecyclerView.setHasFixedSize(true);
-            mLayoutManager = new LinearLayoutManager(getContext());
-            mRecyclerView.setLayoutManager(mLayoutManager);
-            mAdapter = new Alarm_Recycler_Adapter(alarmEntities);
-
-            mRecyclerView.setAdapter(mAdapter);
-            mRecyclerView.addOnItemTouchListener(
-                    new RecyclerItemClickListener(getActivity(), mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(View view, int position) {
-                            Toast.makeText(getActivity(), position + "번 째 아이템 클릭 : " + alarmEntities.get(position).getAlarmTitle(), Toast.LENGTH_SHORT).show();
-                            //TODO : 해당 알림과 관련된 액티비티 이동
-
-                        }
-
-                        @Override
-                        public void onLongItemClick(View view, final int position) {
-                            final AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-                            LayoutInflater inflater = getLayoutInflater();
-                            View dialog_view = inflater.inflate(R.layout.dialog_delete_alarm, null);
-                            builder.setView(dialog_view);
-                            Button delete_alarm_btn= dialog_view.findViewById(R.id.delete_alarm);
-                            final AlertDialog dialog = builder.create();
-
-                            delete_alarm_btn.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Call<DefaultResponse> call = RetrofitClient
-                                            .getInstance()
-                                            .getApi()
-                                            .deleteAlarm(alarmEntities.get(position).getAlarmNum());
-                                    call.enqueue(new Callback<DefaultResponse>() {
-                                        @Override
-                                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-                                            dialog.dismiss();
-//                                            updateAlarmListView();
-                                            alarmEntities.remove(position);
-                                            mAdapter.notifyItemRemoved(position);
-                                        }
-                                        @Override
-                                        public void onFailure(Call<DefaultResponse> call, Throwable t) {}
-                                    });
-                                }
-                            });
-                            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                            dialog.show();
-                        }
-                    }));
-
-//        }
-    }
-
-    public void refresh_list(){
-        alarmEntities.clear();
+    public void refresh_list() {
 
         Call<AlarmResponse> call = RetrofitClient
                 .getInstance()
@@ -153,24 +89,86 @@ public class AlarmFragment  extends Fragment {
                 alarmTable = response.body().getAlarmList();
 //                Toast.makeText(getActivity(), "알람왔따!!!" + alarmTable.get(0).getId(), Toast.LENGTH_LONG).show();
 
-                for(Alarm alarm : alarmTable) {
+                for (Alarm alarm : alarmTable) {
                     Log.e("알람 ", alarm.getId().toString() + " " + alarm.getType());
-                    alarmEntities.add(new AlarmEntity(alarm.getId(),alarm.getType(),alarm.getFrom(),alarm.getTime()));
+                    alarmEntities.add(new AlarmEntity(alarm.getId(), alarm.getType(), alarm.getFrom(), alarm.getTime()));
                 }
 
-                if(mAdapter==null)
+                if (mAdapter == null)
                     updateAlarmListView();
                 else
                     mAdapter.notifyDataSetChanged();
 
             }
+
             @Override
-            public void onFailure(Call<AlarmResponse> call, Throwable t) {}
+            public void onFailure(Call<AlarmResponse> call, Throwable t) {
+            }
         });
 
     }
 
-    public void addAlarm(AlarmEntity newAlarm){
+    public void updateAlarmListView() {
+        if (!alarmEntities.isEmpty()) { view.findViewById(R.id.initial_alarm_card).setVisibility(View.GONE); }
+        mRecyclerView = view.findViewById(R.id.alarm_card_list_view);
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(getContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new Alarm_Recycler_Adapter(alarmEntities);
+
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(getActivity(), mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        Toast.makeText(getActivity(), position + "번 째 아이템 클릭 : " + alarmEntities.get(position).getAlarmTitle(), Toast.LENGTH_SHORT).show();
+                        //TODO : 해당 알림과 관련된 액티비티 이동
+
+                    }
+
+                    @Override
+                    public void onLongItemClick(View view, final int position) {
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                        LayoutInflater inflater = getLayoutInflater();
+                        View dialog_view = inflater.inflate(R.layout.dialog_delete_alarm, null);
+                        builder.setView(dialog_view);
+                        Button delete_alarm_btn = dialog_view.findViewById(R.id.delete_alarm);
+                        final AlertDialog dialog = builder.create();
+
+                        delete_alarm_btn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Log.e("test", "" + alarmEntities.get(position).getAlarmNum());
+                                Call<DefaultResponse> call = RetrofitClient
+                                        .getInstance()
+                                        .getApi()
+                                        .deleteAlarm(alarmEntities.get(position).getAlarmNum());
+                                call.enqueue(new Callback<DefaultResponse>() {
+                                    @Override
+                                    public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+                                        Log.e("delete","Success");
+                                        dialog.dismiss();
+                                        alarmEntities.remove(position);
+                                        mAdapter.notifyItemRemoved(position);
+                                        if (alarmEntities.isEmpty()) {
+                                            getActivity().findViewById(R.id.initial_alarm_card).setVisibility(View.VISIBLE);
+                                        }
+                                    }
+                                    @Override
+                                    public void onFailure(Call<DefaultResponse> call, Throwable t) { }
+                                });
+                            }
+                        });
+                        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                        dialog.show();
+                    }
+                }));
+
+//        }
+    }
+
+    public void addAlarm(AlarmEntity newAlarm) {
+        view.findViewById(R.id.initial_alarm_card).setVisibility(View.GONE);
         Toast.makeText(getContext(), "newAlarm" + newAlarm.getAlarmType(), Toast.LENGTH_LONG).show();
         alarmEntities.add(newAlarm);
         mAdapter.notifyDataSetChanged();
