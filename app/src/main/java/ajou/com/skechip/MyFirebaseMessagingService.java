@@ -26,7 +26,7 @@ import retrofit2.Response;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private final String TAG = "ssss.MainActivity";
     //배지 카운트 수 0이면 미표시
-    private int badgeCount = 0;
+//    private int badgeCount = 0;
 
     /**
      * Called if InstanceID token is updated. This may occur if the security of
@@ -49,16 +49,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Character alarmType = remoteMessage.getData().get("alarmType").charAt(0);
         String toToken = remoteMessage.getData().get("toToken");
         String fromToken = remoteMessage.getData().get("fromToken");
-        badgeCount++;
-        Toast.makeText(getApplicationContext(),badgeCount,Toast.LENGTH_LONG).show();
-        Intent intent = new Intent("android.intent.action.BADGE_COUNT_UPDATE");
-        intent.putExtra("badge_count", badgeCount);
-        //앱의  패키지 명
-        intent.putExtra("badge_count_package_name","com.example.test");
-        // AndroidManifest.xml에 정의된 메인 activity 명
-        intent.putExtra("badge_count_class_name", "com.example.test.MainActivity");
-        sendBroadcast(intent);
-        Log.e("알람", toToken + " " + fromToken);
+
+//        badgeCount++;
+//        Toast.makeText(getApplicationContext(),badgeCount,Toast.LENGTH_LONG).show();
+//        Intent intent = new Intent("android.intent.action.BADGE_COUNT_UPDATE");
+//        intent.putExtra("badge_count", badgeCount);
+//        //앱의  패키지 명
+//        intent.putExtra("badge_count_package_name","com.example.test");
+//        // AndroidManifest.xml에 정의된 메인 activity 명
+//        intent.putExtra("badge_count_class_name", "com.example.test.MainActivity");
+//        sendBroadcast(intent);
+//        Log.e("알람", toToken + " " + fromToken);
 
         Call<AlarmResponse> alarmCreate = RetrofitClient
                 .getInstance()
