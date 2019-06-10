@@ -12,9 +12,11 @@ import com.kakao.friends.response.model.AppFriendInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import ajou.com.skechip.Adapter.Alarm_Recycler_Adapter;
 import ajou.com.skechip.Fragment.bean.AlarmEntity;
+import ajou.com.skechip.MainActivity;
 import ajou.com.skechip.R;
 import ajou.com.skechip.Adapter.RecyclerItemClickListener;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
@@ -25,6 +27,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import retrofit2.Call;
@@ -83,14 +87,13 @@ public class AlarmFragment extends Fragment {
                 .getInstance()
                 .getApi()
                 .getAlarm(kakaoUserID);
+
         call.enqueue(new Callback<AlarmResponse>() {
             @Override
             public void onResponse(Call<AlarmResponse> call, Response<AlarmResponse> response) {
                 alarmTable = response.body().getAlarmList();
-//                Toast.makeText(getActivity(), "알람왔따!!!" + alarmTable.get(0).getId(), Toast.LENGTH_LONG).show();
 
                 for (Alarm alarm : alarmTable) {
-                    Log.e("알람 ", alarm.getId().toString() + " " + alarm.getType());
                     alarmEntities.add(new AlarmEntity(alarm.getId(), alarm.getType(), alarm.getFrom(), alarm.getTime()));
                 }
 
@@ -109,19 +112,27 @@ public class AlarmFragment extends Fragment {
     }
 
     public void updateAlarmListView() {
-        if (!alarmEntities.isEmpty()) { view.findViewById(R.id.initial_alarm_card).setVisibility(View.GONE); }
+        if (!alarmEntities.isEmpty()) {
+            view.findViewById(R.id.initial_alarm_card).setVisibility(View.GONE);
+        }
         mRecyclerView = view.findViewById(R.id.alarm_card_list_view);
         mRecyclerView.setHasFixedSize(true);
+
+
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
+
         mAdapter = new Alarm_Recycler_Adapter(alarmEntities);
+        mAdapter.setHasStableIds(true);
+        mAdapter.registerAdapterDataObserver(observer);
 
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getActivity(), mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        Toast.makeText(getActivity(), position + "번 째 아이템 클릭 : " + alarmEntities.get(position).getAlarmTitle(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), position + "번 째 아이템 클릭 : " + alarmEntities.get(position).getAlarmType(), Toast.LENGTH_SHORT).show();
+                        ((MainActivity) Objects.requireNonNull(getActivity())).ChangeFragment(alarmEntities.get(position).getAlarmType());
                         //TODO : 해당 알림과 관련된 액티비티 이동
 
                     }
@@ -146,7 +157,7 @@ public class AlarmFragment extends Fragment {
                                 call.enqueue(new Callback<DefaultResponse>() {
                                     @Override
                                     public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-                                        Log.e("delete","Success");
+                                        Log.e("delete", "Success");
                                         dialog.dismiss();
                                         alarmEntities.remove(position);
                                         mAdapter.notifyItemRemoved(position);
@@ -154,8 +165,10 @@ public class AlarmFragment extends Fragment {
                                             getActivity().findViewById(R.id.initial_alarm_card).setVisibility(View.VISIBLE);
                                         }
                                     }
+
                                     @Override
-                                    public void onFailure(Call<DefaultResponse> call, Throwable t) { }
+                                    public void onFailure(Call<DefaultResponse> call, Throwable t) {
+                                    }
                                 });
                             }
                         });
@@ -163,8 +176,6 @@ public class AlarmFragment extends Fragment {
                         dialog.show();
                     }
                 }));
-
-//        }
     }
 
     public void addAlarm(AlarmEntity newAlarm) {
@@ -174,4 +185,41 @@ public class AlarmFragment extends Fragment {
         mAdapter.notifyDataSetChanged();
     }
 
+    private RecyclerView.AdapterDataObserver observer = new RecyclerView.AdapterDataObserver() {
+        @Override
+        public void onChanged() {
+            Log.e(TAG, "onChanged");
+            super.onChanged();
+        }
+
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount) {
+            Log.e(TAG, "onItemRangeChanged");
+            super.onItemRangeChanged(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+            Log.e(TAG, "onItemRangeChanged");
+            super.onItemRangeChanged(positionStart, itemCount, payload);
+        }
+
+        @Override
+        public void onItemRangeInserted(int positionStart, int itemCount) {
+            Log.e(TAG, "onItemRangeInserted");
+            super.onItemRangeInserted(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeRemoved(int positionStart, int itemCount) {
+            Log.e(TAG, "onItemRangeRemoved");
+            super.onItemRangeRemoved(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            Log.e(TAG, "onItemRangeMoved");
+            super.onItemRangeMoved(fromPosition, toPosition, itemCount);
+        }
+    };
 }

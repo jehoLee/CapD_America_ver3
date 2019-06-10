@@ -2,8 +2,10 @@ package ajou.com.skechip;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -14,6 +16,8 @@ import ajou.com.skechip.Event.AlarmReceivedEvent;
 import ajou.com.skechip.Event.GroupCreationEvent;
 import ajou.com.skechip.Fragment.bean.AlarmEntity;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
+import ajou.com.skechip.Retrofit.models.Alarm;
+import ajou.com.skechip.Retrofit.models.AlarmResponse;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -21,6 +25,8 @@ import retrofit2.Response;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private final String TAG = "ssss.MainActivity";
+    //배지 카운트 수 0이면 미표시
+    private int badgeCount = 0;
 
     /**
      * Called if InstanceID token is updated. This may occur if the security of
@@ -43,28 +49,34 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Character alarmType = remoteMessage.getData().get("alarmType").charAt(0);
         String toToken = remoteMessage.getData().get("toToken");
         String fromToken = remoteMessage.getData().get("fromToken");
-
+        badgeCount++;
+        Toast.makeText(getApplicationContext(),badgeCount,Toast.LENGTH_LONG).show();
+        Intent intent = new Intent("android.intent.action.BADGE_COUNT_UPDATE");
+        intent.putExtra("badge_count", badgeCount);
+        //앱의  패키지 명
+        intent.putExtra("badge_count_package_name","com.example.test");
+        // AndroidManifest.xml에 정의된 메인 activity 명
+        intent.putExtra("badge_count_class_name", "com.example.test.MainActivity");
+        sendBroadcast(intent);
         Log.e("알람", toToken + " " + fromToken);
 
-        Call<DefaultResponse> alarmCreate = RetrofitClient
+        Call<AlarmResponse> alarmCreate = RetrofitClient
                 .getInstance()
                 .getApi()
                 .createAlarm(alarmType,toToken,fromToken);
-        alarmCreate.enqueue(new Callback<DefaultResponse>() {
+        alarmCreate.enqueue(new Callback<AlarmResponse>() {
             @Override
-            public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) { Log.e("plz",response.toString());}
+            public void onResponse(Call<AlarmResponse> call, Response<AlarmResponse> response) {
+                Alarm alarm = response.body().getAlarm();
+                AlarmEntity newAlarm = new AlarmEntity(alarm.getId(),alarm.getType(),alarm.getFrom(),alarm.getTime());
+                EventBus.getDefault().post(new AlarmReceivedEvent(newAlarm));
+            }
             @Override
-            public void onFailure(Call<DefaultResponse> call, Throwable t) { }
+            public void onFailure(Call<AlarmResponse> call, Throwable t) { }
         });
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
         }
-
-        AlarmEntity newAlarm = new AlarmEntity(1, remoteMessage.getData().get("alarmType").charAt(0)
-                , fromToken, toToken);
-
-        EventBus.getDefault().post(new AlarmReceivedEvent(newAlarm));
-
     }
 }

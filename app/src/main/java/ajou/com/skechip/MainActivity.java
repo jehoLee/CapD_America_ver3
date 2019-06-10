@@ -74,7 +74,6 @@ import org.opencv.core.Mat;
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "ssss.MainActivity";
 
-
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onAlarmReceivedEvent(AlarmReceivedEvent event){
         Log.e(TAG, "알람 받기 이벤트 발생 !");
@@ -144,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Kakao> kakaoFriends = new ArrayList<>();
     private List<String> friendsNickname_list = new ArrayList<>();
     private String myToken;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -341,6 +341,31 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+    }
+    public void ChangeFragment(char type){
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        BottomNavigationView bottomNavigationView = findViewById(R.id.navigation);
+        switch(type){
+            case 'p':
+                transaction.hide(curActivatedFragment).show(epFragment);
+                transaction.commit();
+                curActivatedFragment = epFragment;
+                bottomNavigationView.setSelectedItemId(R.id.navigation_timetable);
+
+                break;
+            case 'm':
+                transaction.hide(curActivatedFragment).show(groupListFragment);
+                transaction.commit();
+                curActivatedFragment = groupListFragment;
+                bottomNavigationView.setSelectedItemId(R.id.navigation_meeting);
+                break;
+            case 's':
+                transaction.hide(curActivatedFragment).show(epFragment);
+                transaction.commit();
+                curActivatedFragment = epFragment;
+                bottomNavigationView.setSelectedItemId(R.id.navigation_timetable);
+                break;
+        }
     }
 
     private void onTimeTableUploadedChangeEPfragment() {
