@@ -1,7 +1,10 @@
 package ajou.com.skechip;
 
+import ajou.com.skechip.Event.GroupInfoUpdatedEvent;
 import ajou.com.skechip.Event.MeetingCreationEvent;
 import ajou.com.skechip.Event.MeetingDeleteEvent;
+import ajou.com.skechip.Fragment.GroupListFragment;
+import ajou.com.skechip.Fragment.MeetingDetailFragment;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
@@ -26,6 +29,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -49,6 +53,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ajou.com.skechip.Fragment.bean.GroupEntity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import de.hdodenhof.circleimageview.CircleImageView;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -74,6 +80,7 @@ public class GroupDetailActivity extends AppCompatActivity {
     private RelativeLayout meetingView;
     private ImageButton groupSettingButton;
     private ImageButton meetingSettingButton;
+    private Button meetingAddBtn;
     private Bitmap bitmap;
     private Kakao memberIndex;
     private String updatedGroupTag;
@@ -85,6 +92,10 @@ public class GroupDetailActivity extends AppCompatActivity {
     private TextView meetingNameText;
     private TextView meetingLocText;
     private TextView meetingTimeText;
+    private FragmentManager fragmentManager = getSupportFragmentManager();
+    private MeetingDetailFragment meetingDetailFragment;
+    private Boolean isMeetingDetailViewClicked;
+    private FrameLayout meetingDetailLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +106,7 @@ public class GroupDetailActivity extends AppCompatActivity {
             groupEntity = getIntent().getParcelableExtra("groupEntity");
             meetingEntities = getIntent().getParcelableArrayListExtra("meetingEntities");
         }
+        isMeetingDetailViewClicked = false;
 
         EventBus.getDefault().register(this);
 
@@ -109,6 +121,7 @@ public class GroupDetailActivity extends AppCompatActivity {
 
         setMembersView();
 
+        meetingDetailLayout = findViewById(R.id.meeting_detail_layout);
         meetingAddView = findViewById(R.id.initial_meeting_card);
         meetingView = findViewById(R.id.meeting_view);
 
@@ -123,23 +136,28 @@ public class GroupDetailActivity extends AppCompatActivity {
         meetingSettingButton = findViewById(R.id.meeting_setting_button);
 
         if (meetingEntities.isEmpty()) {
-            meetingAddView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startCreateMeeting();
-                }
-            });
-            Button meetingAddBtn = findViewById(R.id.meeting_create_btn);
-            meetingAddBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startCreateMeeting();
-                }
-            });
+            setClickListenerMeetingCreateBtn();
         } else {
             updateMeetingAndRelatedView();
             setClickListenerMeetingSettingBtn();
         }
+    }
+
+
+    private void setClickListenerMeetingCreateBtn() {
+        meetingAddView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startCreateMeeting();
+            }
+        });
+        meetingAddBtn = findViewById(R.id.meeting_create_btn);
+        meetingAddBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startCreateMeeting();
+            }
+        });
     }
 
     private void setMembersView() {
@@ -288,10 +306,15 @@ public class GroupDetailActivity extends AppCompatActivity {
                 }
 
                 if(isMeetingInfoChanged){
+                    List<Integer> positions = new ArrayList<>();
+                    for (Cell cell : meetingEntities.get(0).getMeetingTimeCells())
+                        positions.add(cell.getPosition());
+                    String cellPositions = positions.toString();
+
                     Call<DefaultResponse> call = RetrofitClient
                             .getInstance()
                             .getApi()
-                            .reviseMeetingInfo(meetingEntities.get(0).getMeetingID(), updatedMeetingName, updatedMeetingLoc);
+                            .reviseMeetingInfo(meetingEntities.get(0).getMeetingID(), cellPositions, updatedMeetingName, updatedMeetingLoc);
 
                     call.enqueue(new Callback<DefaultResponse>() {
                         @Override
@@ -301,8 +324,12 @@ public class GroupDetailActivity extends AppCompatActivity {
                             meetingEntity.setLocation(updatedMeetingLoc);
                             meetingEntities.set(0, meetingEntity);
 
+                            groupEntity.setMeetingEntities(meetingEntities);
+
                             meetingNameText.setText(updatedMeetingName);
                             meetingLocText.setText(updatedMeetingLoc);
+
+                            EventBus.getDefault().post(new GroupInfoUpdatedEvent(groupEntity, true));
                             dialog.dismiss();
                         }
                         @Override
@@ -488,6 +515,9 @@ public class GroupDetailActivity extends AppCompatActivity {
                             groupEntity.setGroupTag(updatedGroupTag);
                             groupNameText.setText(updatedGroupName);
                             groupTagText.setText(updatedGroupTag);
+
+                            EventBus.getDefault().post(new GroupInfoUpdatedEvent(groupEntity, false));
+
                             dialog.dismiss();
                         }
                         @Override
@@ -529,6 +559,27 @@ public class GroupDetailActivity extends AppCompatActivity {
             meetingTimeText.setText(time);
         }
 
+        meetingView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isMeetingDetailViewClicked) {
+                    meetingDetailFragment = MeetingDetailFragment.newInstance(bundle);
+                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+                    transaction.add(R.id.meeting_detail_layout, meetingDetailFragment);
+                    transaction.commit();
+                    meetingDetailLayout.setVisibility(View.VISIBLE);
+                    isMeetingDetailViewClicked = true;
+                }
+                else {
+                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+                    transaction.remove(meetingDetailFragment);
+                    transaction.commit();
+                    meetingDetailLayout.setVisibility(View.GONE);
+                    isMeetingDetailViewClicked = false;
+                }
+            }
+        });
+
         meetingAddView.setVisibility(View.GONE);
         meetingView.setVisibility(View.VISIBLE);
 
@@ -540,6 +591,8 @@ public class GroupDetailActivity extends AppCompatActivity {
         meetingEntities.clear();
 
         meetingAddView.setVisibility(View.VISIBLE);
+        setClickListenerMeetingCreateBtn();
+
         meetingView.setVisibility(View.GONE);
         meetingSettingButton.setVisibility(View.GONE);
     }

@@ -44,6 +44,17 @@
             android:textSize="18sp" />
 
         <ImageButton
+            android:id="@+id/refresh_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="false"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="15dp"
+            android:layout_toLeftOf="@+id/group_create_bar_btn"
+            android:background="@color/white"
+            android:src="@drawable/ic_refresh" />
+
+        <ImageButton
             android:id="@+id/group_create_bar_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

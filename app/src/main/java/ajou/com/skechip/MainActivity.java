@@ -6,6 +6,7 @@ import android.os.Parcelable;
 
 import ajou.com.skechip.Event.AlarmReceivedEvent;
 import ajou.com.skechip.Event.AppointmentCreationEvent;
+import ajou.com.skechip.Event.GroupInfoUpdatedEvent;
 import ajou.com.skechip.Event.MeetingCreationEvent;
 import ajou.com.skechip.Event.MeetingDeleteEvent;
 import ajou.com.skechip.Event.TimeTableImageUploadEvent;
@@ -100,8 +101,9 @@ public class MainActivity extends AppCompatActivity {
     public void onMeetingCreationEvent(MeetingCreationEvent event) {
         Log.e(TAG, "그룹 미팅 생성 이벤트 발생!!");
         List<Kakao> members = event.getGroupEntityWithNewMeeting().getGroupMembers();
-        for(int i=0;i<members.size();i++) { FirebaseToServer(members.get(i).getUserId(),'m'); }
-        GroupEntity groupWithNewMeeting = event.getGroupEntityWithNewMeeting();
+        for(Kakao member : members){
+            FirebaseToServer(member.getUserId(),'m');
+        }        GroupEntity groupWithNewMeeting = event.getGroupEntityWithNewMeeting();
         ArrayList<Cell> cells = (ArrayList<Cell>) groupWithNewMeeting.getMeetingEntities().get(0).getMeetingTimeCells();
         epFragment.onTimeCellsCreateEvent(cells);
         groupListFragment.updateGroupEntities();
@@ -114,12 +116,22 @@ public class MainActivity extends AppCompatActivity {
         refreshTimeTableFromEP();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onGroupInfoUpdatedEvent(GroupInfoUpdatedEvent event) {
+        Log.e(TAG, "모임 정보 수정 이벤트 발생!");
+        groupListFragment.onGroupInfoUpdatedEvent(event.getUpdatedGroupEntity());
+        if(event.isMeetingUpdated()){
+            refreshTimeTableFromEP();
+        }
+    }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onGroupCreationEvent(GroupCreationEvent event) {
         Log.e(TAG, "그룹 생성 이벤트 발생!!");
         List<Kakao> members = event.getNewGroup().getGroupMembers();
-        for(int i=0;i<members.size();i++) { FirebaseToServer(members.get(i).getUserId(),'s'); }
-        groupListFragment.updateGroupEntities();
+        for(Kakao member : members){
+            FirebaseToServer(member.getUserId(),'m');
+        }        groupListFragment.updateGroupEntities();
         EventBus.getDefault().removeStickyEvent(event);
     }
 

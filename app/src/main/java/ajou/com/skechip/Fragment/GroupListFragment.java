@@ -100,6 +100,16 @@ public class GroupListFragment extends Fragment {
                 startGroupCreate();
             }
         });
+
+        ImageButton refreshBtn = view.findViewById(R.id.refresh_button);
+        refreshBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "모임 새로고침" , Toast.LENGTH_SHORT).show();
+                updateGroupEntities();
+            }
+        });
+
         updateGroupEntities();
 
         return view;
@@ -372,7 +382,14 @@ public class GroupListFragment extends Fragment {
         if(curOpenedGroupPosition != -1){
             groupEntities.get(curOpenedGroupPosition).clearMeetingEntities();
             mAdapter.notifyItemChanged(curOpenedGroupPosition);
-            curOpenedGroupPosition = -1;
+//            curOpenedGroupPosition = -1;
+        }
+    }
+
+    public void onGroupInfoUpdatedEvent(GroupEntity updatedGroup){
+        if(curOpenedGroupPosition != -1){
+            groupEntities.set(curOpenedGroupPosition, updatedGroup);
+            mAdapter.notifyItemChanged(curOpenedGroupPosition);
         }
     }
 
@@ -419,8 +436,6 @@ public class GroupListFragment extends Fragment {
             super.onItemRangeMoved(fromPosition, toPosition, itemCount);
         }
     };
-
-
 
     private void setAppUsersProfileImg(List<Kakao> members) {
         for (int i = 0; i < members.size(); i++) {

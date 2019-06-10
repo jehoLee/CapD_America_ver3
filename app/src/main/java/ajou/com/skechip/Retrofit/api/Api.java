@@ -163,9 +163,10 @@ public interface Api {
     );
 
     @FormUrlEncoded
-    @PUT("reviseMeetingInfo/{id}")
+    @PUT("reviseMeetingInfo/{id}/{cellPositionList}")
     Call<DefaultResponse> reviseMeetingInfo(
             @Path("id") Integer meetingId,
+            @Path("cellPositionList") String cellPositionList,
             @Field("title") String title,
             @Field("place") String place
     );

@@ -26,6 +26,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kakao.friends.response.model.AppFriendInfo;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import ajou.com.skechip.Adapter.EP_CustomAdapter;
 import ajou.com.skechip.CalendarActivity;
@@ -60,7 +62,7 @@ public class EP_Fragment extends Fragment {
     private Button append;
     private ImageButton change;
     private ImageButton calendar;
-    private ImageButton setting;
+    private ImageButton refresh;
     private ImageButton compare;
     private ExcelPanel excelPanel;
     private ProgressBar progress;
@@ -117,7 +119,7 @@ public class EP_Fragment extends Fragment {
             view = inflater.inflate(R.layout.fragment_time_table, container, false);
             calendar = view.findViewById(R.id.calendar);
             change = view.findViewById(R.id.change_timetable);
-            setting = view.findViewById(R.id.refresh);
+            refresh = view.findViewById(R.id.refresh);
             excelPanel = view.findViewById(R.id.content_container);
             progress = view.findViewById(R.id.progress);
             adapter = new EP_CustomAdapter(getActivity(), blockListener);
@@ -139,11 +141,11 @@ public class EP_Fragment extends Fragment {
                     startActivity(intent);
                 }
             });
-            setting.setOnClickListener(new Button.OnClickListener() {
+            refresh.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-//                    Intent intent = new Intent(getActivity(), SettingActivity.class);
-//                    startActivity(intent);
+                    Toast.makeText(getContext(), "시간표 새로고침" , Toast.LENGTH_SHORT).show();
+                    refreshTimeTable();
                 }
             });
             change.setOnClickListener(new Button.OnClickListener() {
@@ -155,7 +157,7 @@ public class EP_Fragment extends Fragment {
                         change.setImageResource(R.drawable.ic_plus);
                         revise_mode = false;
                         calendar.setVisibility(View.VISIBLE);
-                        setting.setVisibility(View.VISIBLE);
+                        refresh.setVisibility(View.VISIBLE);
                         append.setVisibility(View.INVISIBLE);
                         for (int i = 0; i < SELECTED_CELLS.size(); i++) {
                             SELECTED_CELLS.get(i).setStatus(0);
@@ -168,7 +170,7 @@ public class EP_Fragment extends Fragment {
                         revise_mode = true;
                         title.setText("추가");
                         calendar.setVisibility(View.INVISIBLE);
-                        setting.setVisibility(View.INVISIBLE);
+                        refresh.setVisibility(View.INVISIBLE);
                         append.setVisibility(View.VISIBLE);
                     }
                 }
@@ -178,7 +180,7 @@ public class EP_Fragment extends Fragment {
                 public void onClick(View v) {
                     revise_mode = false;
                     calendar.setVisibility(View.VISIBLE);
-                    setting.setVisibility(View.VISIBLE);
+                    refresh.setVisibility(View.VISIBLE);
                     append.setVisibility(View.INVISIBLE);
                     title.setText("시간표");
                     change.setImageResource(R.drawable.ic_plus);
@@ -273,7 +275,12 @@ public class EP_Fragment extends Fragment {
             uploadBtn.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //TODO : 업로드 액티비티 띄우고 갤러리 이미지 불러온 뒤 선택하게 하기
+
+
+//                    CropImage.startPickImageActivity();
+//
+//                    CropImage.activity(null).setGuidelines(CropImageView.Guidelines.ON).start(getActivity());
+
                     Intent intent = new Intent(getActivity(), UploadingActivity.class);
                     intent.putExtra("kakaoBundle", bundle);
                     startActivity(intent);
