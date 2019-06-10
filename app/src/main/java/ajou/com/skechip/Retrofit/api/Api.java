@@ -77,8 +77,8 @@ public interface Api {
     @POST("createAlarm")
     Call<DefaultResponse> createAlarm(
             @Field("type") Character type,
-            @Field("to") Long to,
-            @Field("from") Long from
+            @Field("to") String to,
+            @Field("from") String from
     );
 
     @FormUrlEncoded

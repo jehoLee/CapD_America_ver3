@@ -4,13 +4,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class AlarmEntity implements Parcelable {
+    private int alarmNum;
     private String alarmTitle;
     private char alarmType;
     private String from;
     private String alarmContent;
     private String alarmTime;
-
-    public AlarmEntity(char alarmType, String from, String alarmTime) {
+    public AlarmEntity(int alarmNum, char alarmType, String from, String alarmTime) {
+        this.alarmNum = alarmNum;
         this.alarmType = alarmType;
         this.from = from;
         this.alarmTime = alarmTime;
@@ -32,6 +33,8 @@ public class AlarmEntity implements Parcelable {
                 this.alarmContent=from+"님이 친구요청을 하였습니다.";
         }
     }
+    public int getAlarmNum(){ return alarmNum;}
+
     public String getAlarmTitle() {
         return alarmTitle;
     }
@@ -50,6 +53,7 @@ public class AlarmEntity implements Parcelable {
 
 
     protected AlarmEntity(Parcel in) {
+        alarmNum = in.readInt();
         alarmTitle = in.readString();
         alarmType = (char) in.readInt();
         from = in.readString();
@@ -59,6 +63,7 @@ public class AlarmEntity implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt((int)alarmNum);
         dest.writeString(alarmTitle);
         dest.writeInt((int) alarmType);
         dest.writeString(from);

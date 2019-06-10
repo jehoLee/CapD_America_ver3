@@ -9,6 +9,9 @@ import ajou.com.skechip.Event.MeetingCreationEvent;
 import ajou.com.skechip.Event.TimeTableImageUploadEvent;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
+import ajou.com.skechip.Retrofit.json.Data;
+import ajou.com.skechip.Retrofit.json.Notification;
+import ajou.com.skechip.Retrofit.json.TranslationResultDTO;
 import ajou.com.skechip.Retrofit.models.AlarmToken;
 import ajou.com.skechip.Retrofit.models.AlarmTokenResponse;
 import ajou.com.skechip.Retrofit.models.FirebaseResponse;
@@ -70,16 +73,16 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG = "ssss.MainActivity";
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onTimeTableImgUploadedEvent(TimeTableImageUploadEvent event){
+    public void onTimeTableImgUploadedEvent(TimeTableImageUploadEvent event) {
         Log.d(TAG, "업로드 이벤트 발생 !");
         onTimeTableUploadedChangeEPfragment();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onAppointmentCreationEvent(AppointmentCreationEvent event){
+    public void onAppointmentCreationEvent(AppointmentCreationEvent event) {
         Log.d(TAG, "약속 생성 이벤트 발생!!");
-        ArrayList<Cell> cells = (ArrayList<Cell>)event.getAppointmentTimeCells();
-        FirebaseToServer(event.getFriendID(),'p');
+        ArrayList<Cell> cells = (ArrayList<Cell>) event.getAppointmentTimeCells();
+        FirebaseToServer(event.getFriendID(), 'p');
         epFragment.onTimeCellsCreateEvent(cells);
     }
 
@@ -87,7 +90,10 @@ public class MainActivity extends AppCompatActivity {
     public void onMeetingCreationEvent(MeetingCreationEvent event) {
         Log.d(TAG, "그룹 미팅 생성 이벤트 발생!!");
         List<Kakao> members = event.getGroupEntityWithNewMeeting().getGroupMembers();
-        for(int i=0;i<members.size();i++) { FirebaseToServer(members.get(i).getUserId(),'m'); }
+        for (int i = 0; i < members.size(); i++) {
+            if(members.get(i).getUserId().equals(kakaoUserInfo.getId())){continue;}
+            FirebaseToServer(members.get(i).getUserId(), 's');
+        }
         GroupEntity groupWithNewMeeting = event.getGroupEntityWithNewMeeting();
         ArrayList<Cell> cells = (ArrayList<Cell>) groupWithNewMeeting.getMeetingEntities().get(0).getMeetingTimeCells();
         epFragment.onTimeCellsCreateEvent(cells);
@@ -98,7 +104,10 @@ public class MainActivity extends AppCompatActivity {
     public void onGroupCreationEvent(GroupCreationEvent event) {
         Log.d(TAG, "그룹 생성 이벤트 발생!!");
         List<Kakao> members = event.getNewGroup().getGroupMembers();
-        for(int i=0;i<members.size();i++) { FirebaseToServer(members.get(i).getUserId(),'s'); }
+        for (int i = 0; i < members.size(); i++) {
+            if(members.get(i).getUserId().equals(kakaoUserInfo.getId())){continue;}
+            FirebaseToServer(members.get(i).getUserId(), 'm');
+        }
         groupListFragment.updateGroupEntities();
         EventBus.getDefault().removeStickyEvent(event);
     }
@@ -114,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
     final AppFriendContext friendContext = new AppFriendContext(true, 0, 10, "asc");
     private List<Kakao> kakaoFriends = new ArrayList<>();
     private List<String> friendsNickname_list = new ArrayList<>();
-
+    private String myToken;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -212,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
                                             timeTableUploaded = !timeTableList.isEmpty();
                                             initiateFragmentsAndNavigation();
                                         }
+
                                         @Override
                                         public void onFailure(Call<TimeTablesResponse> call, Throwable t) {
                                         }
@@ -227,9 +237,8 @@ public class MainActivity extends AppCompatActivity {
                                                     }
                                                     // Get new Instance ID token
                                                     String token = task.getResult().getToken();
-                                                    Log.e("token",token);
-                                                    // Log and toast
-//                                                    String msg = getString(R.string.msg_token_fmt, token);
+                                                    myToken = token;
+                                                    Log.e("token", token);
 
                                                     Call<DefaultResponse> call = RetrofitClient
                                                             .getInstance()
@@ -237,10 +246,12 @@ public class MainActivity extends AppCompatActivity {
                                                             .createAlarmToken(kakaoUserInfo.getId(), token);
                                                     call.enqueue(new Callback<DefaultResponse>() {
                                                         @Override
-                                                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {}
+                                                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+                                                        }
 
                                                         @Override
-                                                        public void onFailure(Call<DefaultResponse> call, Throwable t) {}
+                                                        public void onFailure(Call<DefaultResponse> call, Throwable t) {
+                                                        }
                                                     });
                                                 }
                                             });
@@ -312,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void onTimeTableUploadedChangeEPfragment(){
+    private void onTimeTableUploadedChangeEPfragment() {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.remove(epFragment).commitAllowingStateLoss();
         epFragment = null;
@@ -336,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
         Call<DefaultResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
-                .createUser(user.getUserId(), user.getProfileNickname(), user.getProfileThumbnailImage(),0);
+                .createUser(user.getUserId(), user.getProfileNickname(), user.getProfileThumbnailImage(), 0);
 
         call.enqueue(new Callback<DefaultResponse>() {
             @Override
@@ -355,7 +366,7 @@ public class MainActivity extends AppCompatActivity {
         Call<DefaultResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
-                .createUser(user.getId(), user.getNickname(), user.getProfileImagePath(),1);
+                .createUser(user.getId(), user.getNickname(), user.getProfileImagePath(), 1);
 
         call.enqueue(new Callback<DefaultResponse>() {
             @Override
@@ -420,40 +431,39 @@ public class MainActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
     }
-    public void FirebaseToServer(long Id, char type){
+
+    public void FirebaseToServer(long Id, char type) {
+        Log.e("test", "" + Id + type);
         Call<AlarmTokenResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
                 .getAlarmToken(Id);
-        switch(type){
+        switch (type) {
             case 'p':
                 call.enqueue(new Callback<AlarmTokenResponse>() {
                     @Override
                     public void onResponse(Call<AlarmTokenResponse> call, Response<AlarmTokenResponse> response) {
                         String friendToken;
                         friendToken = response.body().getAlarmToken();
-                        try {
-                            JSONObject paramObject = new JSONObject();
-                            paramObject.put("notification:", "\"title\":\"약속 생성\"\n" + "\t\t\"body\":"+kakaoUserInfo.getNickname()+"님께서 1대1 약속 생성을 했습니다.");
-                            paramObject.put("to", friendToken);
-                            paramObject.put("priority","high");
-                            paramObject.put("data","\"alarmtype\":\"p\"");
-                            Call<DefaultResponse> alarmcall = RetrofitClient
-                                    .getInstance()
-                                    .getFirebaseApi()
-                                    .sendAlert(paramObject.toString());
-                            alarmcall.enqueue(new Callback<DefaultResponse>() {
-                                @Override
-                                public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {}
-                                @Override
-                                public void onFailure(Call<DefaultResponse> call, Throwable t) {}
-                            });
-                        }catch(JSONException e){
-                            e.printStackTrace();
-                        }
+                        Notification notification = new Notification("약속 생성", kakaoUserInfo.getNickname() + "님께서 1대1 약속을 생성하셨습니다.");
+                        Data data = new Data("p",friendToken,myToken);
+                        TranslationResultDTO translationResultDTO = new TranslationResultDTO(notification, friendToken, "high", data);
+                        Log.e("test", translationResultDTO.toString());
+                        Call<DefaultResponse> alarmcall = RetrofitClient
+                                .getInstance()
+                                .getFirebaseApi()
+                                .sendAlert(translationResultDTO);
+                        alarmcall.enqueue(new Callback<DefaultResponse>() {
+                            @Override
+                            public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {Log.e("result is ", response.toString());}
+                            @Override
+                            public void onFailure(Call<DefaultResponse> call, Throwable t) {}
+                        });
                     }
+
                     @Override
-                    public void onFailure(Call<AlarmTokenResponse> call, Throwable t) {}
+                    public void onFailure(Call<AlarmTokenResponse> call, Throwable t) {
+                    }
                 });
                 break;
 
@@ -463,28 +473,23 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(Call<AlarmTokenResponse> call, Response<AlarmTokenResponse> response) {
                         String friendToken;
                         friendToken = response.body().getAlarmToken();
-                        try {
-                            JSONObject paramObject = new JSONObject();
-                            paramObject.put("notification:", "\"title\":\"그룹 미팅\"\n" + "\t\t\"body\":"+kakaoUserInfo.getNickname()+"님께서 그룹 미팅일정을 생성하셨습니다.");
-                            paramObject.put("to", friendToken);
-                            paramObject.put("priority","high");
-                            paramObject.put("data","\"alarmtype\":\"m\"");
-                            Call<DefaultResponse> alarmcall = RetrofitClient
-                                    .getInstance()
-                                    .getFirebaseApi()
-                                    .sendAlert(paramObject.toString());
+                        Notification notification = new Notification("그룹 생성",kakaoUserInfo.getNickname()+"님께서 그룹을 생성하셨습니다.");
+                        Data data = new Data("m",friendToken,myToken);
+                        TranslationResultDTO translationResultDTO= new TranslationResultDTO(notification,friendToken,"high",data);
+                        Call<DefaultResponse> alarmcall = RetrofitClient
+                                .getInstance()
+                                .getFirebaseApi()
+                                .sendAlert(translationResultDTO);
                             alarmcall.enqueue(new Callback<DefaultResponse>() {
                                 @Override
-                                public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {}
+                                public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) { Log.e("result is ", response.toString()); }
                                 @Override
                                 public void onFailure(Call<DefaultResponse> call, Throwable t) {}
                             });
-                        }catch(JSONException e){
-                            e.printStackTrace();
-                        }
                     }
+
                     @Override
-                    public void onFailure(Call<AlarmTokenResponse> call, Throwable t) {}
+                    public void onFailure(Call<AlarmTokenResponse> call, Throwable t) { }
                 });
                 break;
 
@@ -494,25 +499,19 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(Call<AlarmTokenResponse> call, Response<AlarmTokenResponse> response) {
                         String friendToken;
                         friendToken = response.body().getAlarmToken();
-                        try {
-                            JSONObject paramObject = new JSONObject();
-                            paramObject.put("notification:", "\"title\":\"그룹 생성\"\n" + "\t\t\"body\":"+kakaoUserInfo.getNickname()+"님께서 그룹을 생성하셨습니다.");
-                            paramObject.put("to", friendToken);
-                            paramObject.put("priority","high");
-                            paramObject.put("data","\"alarmtype\":\"s\"");
-                            Call<DefaultResponse> alarmcall = RetrofitClient
-                                    .getInstance()
-                                    .getFirebaseApi()
-                                    .sendAlert(paramObject.toString());
-                            alarmcall.enqueue(new Callback<DefaultResponse>() {
-                                @Override
-                                public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {}
-                                @Override
-                                public void onFailure(Call<DefaultResponse> call, Throwable t) {}
-                            });
-                        }catch(JSONException e){
-                            e.printStackTrace();
-                        }
+                        Notification notification = new Notification("그룹 미팅 생성",kakaoUserInfo.getNickname()+"님께서 그룹 미팅일정을 생성하셨습니다.");
+                        Data data = new Data("s",friendToken,myToken);
+                        TranslationResultDTO translationResultDTO= new TranslationResultDTO(notification,friendToken,"high",data);
+                        Call<DefaultResponse> alarmcall = RetrofitClient
+                                .getInstance()
+                                .getFirebaseApi()
+                                .sendAlert(translationResultDTO);
+                        alarmcall.enqueue(new Callback<DefaultResponse>() {
+                            @Override
+                            public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) { Log.e("result is ", response.toString()); }
+                            @Override
+                            public void onFailure(Call<DefaultResponse> call, Throwable t) {}
+                        });
                     }
                     @Override
                     public void onFailure(Call<AlarmTokenResponse> call, Throwable t) {}

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.kakao.friends.response.model.AppFriendInfo;
@@ -15,11 +16,19 @@ import ajou.com.skechip.Adapter.Alarm_Recycler_Adapter;
 import ajou.com.skechip.Fragment.bean.AlarmEntity;
 import ajou.com.skechip.R;
 import ajou.com.skechip.Adapter.RecyclerItemClickListener;
+import ajou.com.skechip.Retrofit.api.RetrofitClient;
+import ajou.com.skechip.Retrofit.models.Alarm;
+import ajou.com.skechip.Retrofit.models.AlarmResponse;
+import ajou.com.skechip.Retrofit.models.DefaultResponse;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AlarmFragment  extends Fragment {
     private final String TAG = "#FriendListFragment: ";
@@ -29,6 +38,7 @@ public class AlarmFragment  extends Fragment {
     private Long kakaoUserID;
     private List<AppFriendInfo> kakaoFriends;
     private ArrayList<AlarmEntity> alarmEntities = new ArrayList<>();
+    private List<Alarm> alarmTable = new ArrayList<>();
     private Bundle bundle;
     private View view;
     private RecyclerView mRecyclerView;
@@ -60,11 +70,8 @@ public class AlarmFragment  extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_alarm_list, container, false);
-//        refresh_list();
+        refresh_list();
         return view;
-    }
-    public void addAlarmEntity(AlarmEntity alarmEntity) {
-        alarmEntities.add(alarmEntity);
     }
 
     public void updatealarmEntityOnMeetingCreate(AlarmEntity alarmEntity){
@@ -95,46 +102,56 @@ public class AlarmFragment  extends Fragment {
                         }
 
                         @Override
-                        public void onLongItemClick(View view, int position) {
-                            Toast.makeText(getActivity(), position + "번 째 아이템 롱 클릭", Toast.LENGTH_SHORT).show();
+                        public void onLongItemClick(View view, final int position) {
+                            final AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                            LayoutInflater inflater = getLayoutInflater();
+                            View dialog_view = inflater.inflate(R.layout.dialog_delete_alarm, null);
+                            builder.setView(dialog_view);
+                            Button delete_alarm_btn= dialog_view.findViewById(R.id.delete_alarm);
+                            final AlertDialog dialog = builder.create();
+
+                            delete_alarm_btn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Call<DefaultResponse> call = RetrofitClient
+                                            .getInstance()
+                                            .getApi()
+                                            .deleteAlarm(alarmEntities.get(position).getAlarmNum());
+                                    call.enqueue(new Callback<DefaultResponse>() {
+                                        @Override
+                                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+                                            dialog.dismiss();
+                                            updateAlarmListView();
+                                        }
+                                        @Override
+                                        public void onFailure(Call<DefaultResponse> call, Throwable t) {}
+                                    });
+                                }
+                            });
+                            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                            dialog.show();
                         }
                     }));
 
         }
     }
-//    public void refresh_list(){
-//        Call<AvailableMeetingTimesResponse> call = RetrofitClient
-//                .getInstance()
-//                .getApi()
-//                .getAvailableMeetingTimes(list.toString());
-//        call.enqueue(new Callback<AvailableMeetingTimesResponse>() {
-//            @Override
-//            public void onResponse(Call<AvailableMeetingTimesResponse> call, Response<AvailableMeetingTimesResponse> response) {
-//
-//            }
-//        }
-//    }
+    public void refresh_list(){
+        Call<AlarmResponse> call = RetrofitClient
+                .getInstance()
+                .getApi()
+                .getAlarm(kakaoUserID);
+        call.enqueue(new Callback<AlarmResponse>() {
+            @Override
+            public void onResponse(Call<AlarmResponse> call, Response<AlarmResponse> response) {
+                alarmTable = response.body().getAlarmList();
+                for(Alarm alarm : alarmTable) {
+                    alarmEntities.add(new AlarmEntity(alarm.getId(),alarm.getType(),alarm.getFrom(),alarm.getTime()));
+                }
+                updateAlarmListView();
+            }
+            @Override
+            public void onFailure(Call<AlarmResponse> call, Throwable t) {}
+        });
 
-//    private void createNotificationChannel() {
-//        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-//                .setSmallIcon(R.drawable.ic_application)
-//                .setContentTitle("My notification")
-//                .setContentText("Much longer text that cannot fit one line...")
-//                .setStyle(new NotificationCompat.BigTextStyle()
-//                        .bigText("Much longer text that cannot fit one line..."))
-//                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-//        // Create the NotificationChannel, but only on API 26+ because
-//        // the NotificationChannel class is new and not in the support library
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            CharSequence name = getString(R.string.app_name);
-//            String description = getString(R.string.app_name);
-//            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-//            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-//            channel.setDescription(description);
-//            // Register the channel with the system; you can't change the importance
-//            // or other notification behaviors after this
-//            NotificationManager notificationManager = getActivity().getSystemService(NotificationManager.class);
-//            notificationManager.createNotificationChannel(channel);
-//        }
-//    }
+    }
 }
