@@ -225,7 +225,7 @@ public class FriendDetailActivity extends AppCompatActivity {
                     //TODO : 업로드 액티비티 띄우고 갤러리 이미지 불러온 뒤 선택하게 하기
                     Intent intent = new Intent(getApplicationContext(), UploadingActivity.class);
                     Bundle bundle = new Bundle();
-                    bundle.putLong("kakaoUserID",kakaoUserID);
+                    bundle.putLong("kakaoUserID",friendEntity.getUserID());
                     intent.putExtra("kakaoBundle",bundle);
                     startActivity(intent);
                 }

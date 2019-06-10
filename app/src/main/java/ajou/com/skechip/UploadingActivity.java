@@ -96,7 +96,7 @@ public class UploadingActivity extends AppCompatActivity {
 //        startActivity(intent);
 
         CropImage.activity(null).setGuidelines(CropImageView.Guidelines.ON).start(this); // cropper 이용시
-
+        //TODO:흰색 빈화면 없애기
         /*
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
         //사진을 여러개 선택할수 있도록 한다
