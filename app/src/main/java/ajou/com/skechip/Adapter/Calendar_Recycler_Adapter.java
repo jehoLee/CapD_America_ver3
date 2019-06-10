@@ -30,7 +30,7 @@ public class Calendar_Recycler_Adapter extends RecyclerView.Adapter<Calendar_Rec
             calendarTitle = view.findViewById(R.id.calendar_title);
             untilTime = view.findViewById(R.id.calendar_untilTime);
             cardView = view.findViewById(R.id.calendar_cardview);
-            checkBox = view.findViewById(R.id.checkBox);
+            checkBox = view.findViewById(R.id.calendar_card_checkBox);
         }
     }
 
