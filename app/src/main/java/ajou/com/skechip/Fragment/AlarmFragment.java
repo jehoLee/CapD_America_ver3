@@ -131,10 +131,7 @@ public class AlarmFragment extends Fragment {
                 new RecyclerItemClickListener(getActivity(), mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        Toast.makeText(getActivity(), position + "번 째 아이템 클릭 : " + alarmEntities.get(position).getAlarmType(), Toast.LENGTH_SHORT).show();
                         ((MainActivity) Objects.requireNonNull(getActivity())).ChangeFragment(alarmEntities.get(position).getAlarmType());
-                        //TODO : 해당 알림과 관련된 액티비티 이동
-
                     }
 
                     @Override
@@ -167,8 +164,7 @@ public class AlarmFragment extends Fragment {
                                     }
 
                                     @Override
-                                    public void onFailure(Call<DefaultResponse> call, Throwable t) {
-                                    }
+                                    public void onFailure(Call<DefaultResponse> call, Throwable t) {}
                                 });
                             }
                         });
