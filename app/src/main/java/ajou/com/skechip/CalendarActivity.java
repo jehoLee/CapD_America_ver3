@@ -385,7 +385,6 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
         List<String> eventStrings = new ArrayList<String>();
 
         public MakeRequestTask(CalendarActivity activity, GoogleAccountCredential credential) {
-            Log.e("Event", "10");
             mActivity = activity;
 
             HttpTransport transport = AndroidHttp.newCompatibleTransport();
@@ -411,7 +410,7 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
                 if (mID == 1) {
                     return createCalendar();
                 } else if (mID == 2) {
-                    return addEvent(cells.get(0));
+                    return addEvent(curcell);
                 }
 //                else if (mID == 3) {
 //                    return getEvent();
@@ -516,19 +515,17 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
         }
 
         private String addEvent(Cell cell) {
-            Log.e("Event", "12");
             String calendarID = getCalendarID("CalendarTitle");
             Event event = new Event()
                     .setSummary(cell.getSubjectName())
                     .setLocation(cell.getPlaceName())
-                    .setDescription("모임일정에서 생성된 일정입니다.");
+                    .setDescription("미유밋 앱에서 생성된 일정입니다.");
             java.util.Calendar calander;
 
             calander = java.util.Calendar.getInstance();
             int time = calander.get(java.util.Calendar.DAY_OF_WEEK);    //일1, 월2, 화3, ....
             SimpleDateFormat simpledateformat;
-            //simpledateformat = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssZ", Locale.KOREA);
-            // Z에 대응하여 +0900이 입력되어 문제 생겨 수작업으로 입력
+
             simpledateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.KOREA);
             String datetime = simpledateformat.format(calander.getTime());
             DateTime startDateTime = new DateTime(datetime);
