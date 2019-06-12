@@ -5,6 +5,7 @@ import ajou.com.skechip.Adapter.EP_CustomAdapter;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.ColTitle;
 import ajou.com.skechip.Fragment.bean.RowTitle;
+import ajou.com.skechip.GroupDetailActivity;
 import ajou.com.skechip.MeetingCreateActivity;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
 import ajou.com.skechip.Retrofit.models.AvailableMeetingTimesResponse;
@@ -44,6 +45,7 @@ public class SelectMeetingTimeFragment extends Fragment {
 
     private List<Kakao> selectedMembers;
     private List<Long> selectedMemberIds = new ArrayList<>();
+    private Boolean isForReviseTime = false;
 
     public static SelectMeetingTimeFragment newInstance(Bundle bundle) {
         SelectMeetingTimeFragment fragment = new SelectMeetingTimeFragment();
@@ -61,6 +63,7 @@ public class SelectMeetingTimeFragment extends Fragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             selectedMembers = bundle.getParcelableArrayList("selectedMembers");
+            isForReviseTime = bundle.getBoolean("isForReviseTime", false);
             Long myId = bundle.getLong("kakaoUserID");
 
             if (selectedMembers != null) {
@@ -85,18 +88,46 @@ public class SelectMeetingTimeFragment extends Fragment {
         initTimeTableView();
 
         Button confirmTimeBtn = view.findViewById(R.id.confirm_time_button);
-        confirmTimeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(SELECTED_CELLS.size() == 0) {
-                    Toast.makeText(getActivity(), "선택한 시간이 없습니다.", Toast.LENGTH_SHORT).show();
+        if(isForReviseTime){
+            Button cancelBtn = view.findViewById(R.id.cancel_button);
+            cancelBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ((GroupDetailActivity)Objects.requireNonNull(getActivity())).onReviseTimesCanceledEvent();
                 }
-                else {
-                    ((MeetingCreateActivity) Objects.requireNonNull(getActivity())).onSelectTimesFinishedEvent(SELECTED_CELLS);
+            });
+
+            confirmTimeBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(SELECTED_CELLS.size() == 0) {
+                        Toast.makeText(getActivity(), "선택한 시간이 없습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        ((GroupDetailActivity)Objects.requireNonNull(getActivity())).onReviseTimesFinishedEvent(SELECTED_CELLS);
+                    }
                 }
-            }
-        });
-        Toast.makeText(getActivity(), "일정을 생성할 시간을 선택하세요", Toast.LENGTH_LONG).show();
+            });
+            Toast.makeText(getActivity(), "일정을 생성할 시간을 선택하세요", Toast.LENGTH_LONG).show();
+
+        }
+        else {
+
+            confirmTimeBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(SELECTED_CELLS.size() == 0) {
+                        Toast.makeText(getActivity(), "선택한 시간이 없습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        ((MeetingCreateActivity) Objects.requireNonNull(getActivity())).onSelectTimesFinishedEvent(SELECTED_CELLS);
+                    }
+                }
+            });
+            Toast.makeText(getActivity(), "일정을 생성할 시간을 선택하세요", Toast.LENGTH_LONG).show();
+
+        }
+
         return view;
     }
 

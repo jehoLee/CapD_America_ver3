@@ -5,9 +5,11 @@ import ajou.com.skechip.Event.MeetingCreationEvent;
 import ajou.com.skechip.Event.MeetingDeleteEvent;
 import ajou.com.skechip.Fragment.GroupListFragment;
 import ajou.com.skechip.Fragment.MeetingDetailFragment;
+import ajou.com.skechip.Fragment.SelectMeetingTimeFragment;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.MeetingEntity;
 import ajou.com.skechip.Retrofit.api.RetrofitClient;
+import ajou.com.skechip.Retrofit.models.CreateMeetingResponse;
 import ajou.com.skechip.Retrofit.models.DefaultResponse;
 import ajou.com.skechip.Retrofit.models.Kakao;
 import ajou.com.skechip.Retrofit.models.TimeTable;
@@ -21,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -96,6 +99,8 @@ public class GroupDetailActivity extends AppCompatActivity {
     private MeetingDetailFragment meetingDetailFragment;
     private Boolean isMeetingDetailViewClicked;
     private FrameLayout meetingDetailLayout;
+    private SelectMeetingTimeFragment selectMeetingTimeFragment;
+    private FrameLayout meetingTimeReviseLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +139,7 @@ public class GroupDetailActivity extends AppCompatActivity {
         });
 
         meetingSettingButton = findViewById(R.id.meeting_setting_button);
+        meetingTimeReviseLayout = findViewById(R.id.meeting_time_revise_layout);
 
         if (meetingEntities.isEmpty()) {
             setClickListenerMeetingCreateBtn();
@@ -259,7 +265,7 @@ public class GroupDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                showMeetingTimeReviseDialog(v);
+                showMeetingTimeReviseFragment();
             }
         });
         deleteMeetingBtn.setOnClickListener(new View.OnClickListener() {
@@ -354,21 +360,69 @@ public class GroupDetailActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void showMeetingTimeReviseDialog(View v){
+    private void showMeetingTimeReviseFragment(){
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("isForReviseTime", true);
+        bundle.putParcelableArrayList("selectedMembers", (ArrayList<? extends Parcelable>) groupEntity.getGroupMembers());
 
+        selectMeetingTimeFragment = SelectMeetingTimeFragment.newInstance(bundle);
+        fragmentManager.beginTransaction()
+                .add(R.id.meeting_time_revise_layout, selectMeetingTimeFragment)
+                .commit();
 
+        meetingTimeReviseLayout.setVisibility(View.VISIBLE);
+    }
 
+    public void onReviseTimesFinishedEvent(List<Cell> selectedCells){
+        MeetingEntity meetingEntity = meetingEntities.get(0);
 
+        List<Integer> positions = new ArrayList<>();
+        for (Cell cell : meetingEntity.getMeetingTimeCells())
+            positions.add(cell.getPosition());
+        String deletedCellPositions = positions.toString();
 
+        positions.clear();
+        for (Cell cell : selectedCells)
+            positions.add(cell.getPosition());
+        String newCellPositions = positions.toString();
 
+        meetingEntity.setMeetingTimeCells(selectedCells);
+        meetingEntities.set(0, meetingEntity);
+        groupEntity.setMeetingEntities(meetingEntities);
 
+        //server changes
+        Call<DefaultResponse> call = RetrofitClient
+                .getInstance()
+                .getApi()
+                .reviseMeetingTime(meetingEntities.get(0).getMeetingID(), deletedCellPositions, newCellPositions);
 
+        call.enqueue(new Callback<DefaultResponse>() {
+            @Override
+            public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+                //view changes - for local, for app main
+                if(!meetingEntities.get(0).getMeetingTimeCells().isEmpty()) {
+                    String time = meetingEntities.get(0).getMeetingTimeCells().get(0).getWeekofday() + " " + meetingEntities.get(0).getMeetingTimeCells().get(0).getStartTime();
+                    meetingTimeText.setText(time);
+                }
+                fragmentManager.beginTransaction()
+                        .remove(selectMeetingTimeFragment)
+                        .commit();
+                meetingTimeReviseLayout.setVisibility(View.GONE);
 
+                EventBus.getDefault().post(new GroupInfoUpdatedEvent(groupEntity, true));
+            }
+            @Override
+            public void onFailure(Call<DefaultResponse> call, Throwable t) {
 
+            }
+        });
+    }
 
-
-
-
+    public void onReviseTimesCanceledEvent(){
+        fragmentManager.beginTransaction()
+                .remove(selectMeetingTimeFragment)
+                .commit();
+        meetingTimeReviseLayout.setVisibility(View.GONE);
     }
 
     private void showMeetingDeleteConfirmDialog(View v) {
