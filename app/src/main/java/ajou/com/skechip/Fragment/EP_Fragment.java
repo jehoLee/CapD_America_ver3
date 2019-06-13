@@ -121,7 +121,7 @@ public class EP_Fragment extends Fragment {
             change = view.findViewById(R.id.change_timetable);
             refresh = view.findViewById(R.id.refresh);
             excelPanel = view.findViewById(R.id.content_container);
-            progress = view.findViewById(R.id.progress);
+//            progress = view.findViewById(R.id.progress);
             adapter = new EP_CustomAdapter(getActivity(), blockListener);
             compare = view.findViewById(R.id.compare);
             compare.setVisibility(View.INVISIBLE);
@@ -502,7 +502,7 @@ public class EP_Fragment extends Fragment {
                     cells.get(i).addAll(tmplist);
                 }
 
-                progress.setVisibility(View.GONE);
+//                progress.setVisibility(View.GONE);
                 adapter.setAllData(colTitles, rowTitles, cells);
                 adapter.disableFooter();
                 adapter.disableHeader();
