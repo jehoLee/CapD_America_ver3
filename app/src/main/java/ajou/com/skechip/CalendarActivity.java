@@ -148,10 +148,11 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
 
                 mStatusText.setText("");
                 mID = 2;        // 이벤트 생성 프로세스. 내 시간표를 구글캘린더에 저장하는 모드
-                for(int i=0;i<mAdapter.getItemCount();i++) {
+                for(int i=0;i<7;i++) {
                     CheckBox checkBox = mLayoutManager.findViewByPosition(i).findViewById(R.id.calendar_card_checkBox);
                     if(checkBox.isChecked()){
                         curcell= cells.get(i);
+                        Log.e("test - up",""+curcell.getSubjectName());
                         getResultsFromApi();
                     }
                 }
@@ -410,6 +411,7 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
                 if (mID == 1) {
                     return createCalendar();
                 } else if (mID == 2) {
+                    Log.e("test - down",""+curcell.getSubjectName());
                     return addEvent(curcell);
                 }
 //                else if (mID == 3) {
@@ -533,7 +535,7 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
             long startDate, endDate;
             startDate = (currtime / (ONE_DAY * 7)) * (ONE_DAY * 7) + (cell.getPosition() % 5 -3 ) * ONE_DAY + (cell.getPosition() / 5) * 90 * 60 * 1000 + ONE_DAY*7;
             endDate = startDate + 90 * 60 * 1000;
-            if (time >= (cell.getPosition() % 5 + 2)){   //현재있는시간이 금요일, 추가할날이 월요일..
+            if (time > (cell.getPosition() % 5 + 2)){   //현재있는시간이 금요일, 추가할날이 월요일..
                 startDate+=ONE_DAY*7;
                 endDate+=ONE_DAY*7;
             }

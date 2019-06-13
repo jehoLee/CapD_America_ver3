@@ -101,8 +101,9 @@ public class MainActivity extends AppCompatActivity {
     public void onMeetingCreationEvent(MeetingCreationEvent event) {
         Log.e(TAG, "그룹 미팅 생성 이벤트 발생!!");
         List<Kakao> members = event.getGroupEntityWithNewMeeting().getGroupMembers();
+        Log.e("members:",""+members.size());
         for(Kakao member : members){
-            FirebaseToServer(member.getUserId(),'m');
+            FirebaseToServer(member.getUserId(),'s');
         }        GroupEntity groupWithNewMeeting = event.getGroupEntityWithNewMeeting();
         ArrayList<Cell> cells = (ArrayList<Cell>) groupWithNewMeeting.getMeetingEntities().get(0).getMeetingTimeCells();
         epFragment.onTimeCellsCreateEvent(cells);
@@ -129,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
     public void onGroupCreationEvent(GroupCreationEvent event) {
         Log.e(TAG, "그룹 생성 이벤트 발생!!");
         List<Kakao> members = event.getNewGroup().getGroupMembers();
+        Log.e("members:",""+members.size());
         for(Kakao member : members){
             FirebaseToServer(member.getUserId(),'m');
         }        groupListFragment.updateGroupEntities();
