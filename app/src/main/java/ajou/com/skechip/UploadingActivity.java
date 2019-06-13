@@ -121,27 +121,19 @@ public class UploadingActivity extends AppCompatActivity {
         int checkajouschdulepoint=0 ;
         //Crooper 사용시
         img_output = new Mat();
-        Log.e("1", "test0");
         imageprocessing(img_input.getNativeObjAddr(), img_output.getNativeObjAddr());
         temp[0] = Bitmap.createBitmap(img_output.cols(), img_output.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(img_output,temp[0]);
-        Log.e("1", "test1");
         BitmapDrawable drawable = (BitmapDrawable)imageVIewOuput.getDrawable();
         temp[1]= drawable.getBitmap();
 
         Mat circle = new Mat();
-        Log.e("1"," 아웃풋 문제 없음");
-        Imgproc.HoughCircles(img_output,circle, Imgproc.HOUGH_GRADIENT,1.0,(double)img_output.rows()/30,100.0,25.0,3,40);
-        Log.e("1", "test3");
+
+        Imgproc.HoughCircles(img_output,circle, Imgproc.HOUGH_GRADIENT,1.0,(double)img_output.rows()/30,100.0,10.0,5,20);
         for (int x = 0; x < circle.cols(); x++) {
             double[] c = circle.get(0, x);
             Point center = new Point(Math.round(c[0]), Math.round(c[1]));
             Log.e("1","cols "+img_output.height()+" x: "+center.x+" y: "+center.y);
-            // circle center
-            Imgproc.circle(img_output, center, 1, new Scalar(0,0,0), 5, 8, 0 );
-            // circle outline
-            int radius = (int) Math.round(c[2]);
-            Imgproc.circle(img_output, center, radius, new Scalar(0,0,255), 3, 8, 0 );
         }
         Log.e("1", "test4");
 
@@ -156,10 +148,10 @@ public class UploadingActivity extends AppCompatActivity {
                     for (int j = 0; j < 5; j++) {
                         double[] c = circle.get(0, x);
                         Point center = new Point((int)Math.round(c[0]), (int)Math.round(c[1]));
-                        if ((center.y < (temp[1].getHeight() / 6) * (i + 1)) &&
-                                (center.y > (temp[1].getHeight() / 6) * i) &&
-                                (center.x > (temp[1].getWidth() / 5) * j) &&
-                                (center.x < (temp[1].getWidth() / 5) * (j + 1))) {
+                        if ((center.y < (img_output.height() / 6) * (i + 1)) &&
+                                (center.y > (img_output.height() / 6) * i) &&
+                                (center.x > (img_output.width() / 5) * j) &&
+                                (center.x < (img_output.width() / 5) * (j + 1))) {
                             Log.e("1","cols "+img_output.height()+" x: "+center.x+" y: "+center.y);
                             Schedul[i][j] = 1;
                             Cell cell = new Cell();
@@ -183,6 +175,7 @@ public class UploadingActivity extends AppCompatActivity {
             Log.e("1"," "+ Schedul[4][0]+" "+ Schedul[4][1]+" "+ Schedul[4][2]+" "+ Schedul[4][3]+" "+ Schedul[4][4]);
             Log.e("1"," "+ Schedul[5][0]+" "+ Schedul[5][1]+" "+ Schedul[5][2]+" "+ Schedul[5][3]+" "+ Schedul[5][4]);
             con.append_server(scheduleCells, kakaoUserID, 'c');
+
         }
         else {
             Log.e("1", "에브리타임");
