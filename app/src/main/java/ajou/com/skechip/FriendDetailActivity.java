@@ -14,11 +14,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.tasks.Tasks;
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import ajou.com.skechip.Adapter.EP_CustomAdapter;
 import ajou.com.skechip.Event.AppointmentCreationEvent;
+import ajou.com.skechip.Event.FriendTimeTableUploadEvent;
 import ajou.com.skechip.Fragment.bean.Cell;
 import ajou.com.skechip.Fragment.bean.ColTitle;
 import ajou.com.skechip.Fragment.bean.FriendEntity;
@@ -38,6 +42,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class FriendDetailActivity extends AppCompatActivity {
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onFriendTimeTableUploadEvent(FriendTimeTableUploadEvent event){
+        Log.e("친구", "친구 시간표 업로드 이벤트 발생 !");
+        initData();
+    }
+
     public List<String> PLACE_NAME = new ArrayList<String>();
     public List<String> SUBJECT_NAME = new ArrayList<String>();
     public List<Cell> SELECTED_CELLS = new ArrayList<Cell>();
@@ -75,6 +86,7 @@ public class FriendDetailActivity extends AppCompatActivity {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
 
         if (getIntent() != null) {
             bundle = getIntent().getBundleExtra("kakaoBundle");
@@ -226,6 +238,7 @@ public class FriendDetailActivity extends AppCompatActivity {
                     Intent intent = new Intent(getApplicationContext(), UploadingActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putLong("kakaoUserID",friendEntity.getUserID());
+                    bundle.putBoolean("isFriendTimeTableUpload", true);
                     intent.putExtra("kakaoBundle",bundle);
                     startActivity(intent);
                 }
@@ -254,7 +267,7 @@ public class FriendDetailActivity extends AppCompatActivity {
             refresh.setOnClickListener(new Button.OnClickListener(){
                 @Override
                 public void onClick(View v) {
-
+                    initData();
                 }
             });
             compare_selected.setOnClickListener(new Button.OnClickListener() {
@@ -663,6 +676,13 @@ public class FriendDetailActivity extends AppCompatActivity {
                 Log.e("error",t.getMessage());
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        EventBus.getDefault().unregister(this);
+        finish();
+        super.onBackPressed();
     }
 
 }

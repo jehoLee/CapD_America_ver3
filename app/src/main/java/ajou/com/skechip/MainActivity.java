@@ -6,6 +6,7 @@ import android.os.Parcelable;
 
 import ajou.com.skechip.Event.AlarmReceivedEvent;
 import ajou.com.skechip.Event.AppointmentCreationEvent;
+import ajou.com.skechip.Event.FriendTimeTableUploadEvent;
 import ajou.com.skechip.Event.GroupInfoUpdatedEvent;
 import ajou.com.skechip.Event.MeetingCreationEvent;
 import ajou.com.skechip.Event.MeetingDeleteEvent;

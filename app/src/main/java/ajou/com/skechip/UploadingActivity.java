@@ -1,5 +1,6 @@
 package ajou.com.skechip;
 
+import ajou.com.skechip.Event.FriendTimeTableUploadEvent;
 import ajou.com.skechip.Event.TimeTableImageUploadEvent;
 import ajou.com.skechip.Fragment.bean.GroupEntity;
 import ajou.com.skechip.Retrofit.conn.CallMethod;
@@ -69,7 +70,7 @@ public class UploadingActivity extends AppCompatActivity {
     private Bitmap[] temp;
     private int imgUploadcount;
     boolean isReady = false;
-
+    private Boolean isFriendTimeTableUpload;
 
 
     @Override
@@ -80,6 +81,8 @@ public class UploadingActivity extends AppCompatActivity {
         temp = new Bitmap[10];
         bundle = getIntent().getBundleExtra("kakaoBundle");
         kakaoUserID = bundle.getLong("kakaoUserID");
+        isFriendTimeTableUpload = bundle.getBoolean("isFriendTimeTableUpload", false);
+
         imageVIewOuput = (ImageView)findViewById(R.id.imageView);
         /*
         Intent intent = new Intent(Intent.ACTION_PICK);
@@ -406,10 +409,13 @@ public class UploadingActivity extends AppCompatActivity {
         //con.delete_server(scheduleCells,kakaoUserID);
         con.append_server(scheduleCells,kakaoUserID,'c');
         */
-        //TODO : UI update
         //2. 시간표 업데이트
 
-        EventBus.getDefault().post(new TimeTableImageUploadEvent());
+        if(isFriendTimeTableUpload){
+            EventBus.getDefault().post(new FriendTimeTableUploadEvent());
+        }else {
+            EventBus.getDefault().post(new TimeTableImageUploadEvent());
+        }
         finish();
     }
 
