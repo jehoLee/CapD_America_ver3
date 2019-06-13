@@ -50,7 +50,7 @@ public class FriendDetailActivity extends AppCompatActivity {
     private ImageButton refresh;
     private ImageButton compare_selected;
     private ExcelPanel excelPanel;
-    private ProgressBar progress;
+//    private ProgressBar progress;
     private EP_CustomAdapter adapter;
     private TextView desc1, desc2;
     private boolean revise_mode;
@@ -232,8 +232,8 @@ public class FriendDetailActivity extends AppCompatActivity {
             });
         } else {
             setContentView(R.layout.fragment_time_table);
-            progress = findViewById(R.id.progress);
-            progress.setVisibility(View.GONE);
+//            progress = findViewById(R.id.progress);
+//            progress.setVisibility(View.GONE);
             calendar = findViewById(R.id.calendar);
             calendar.setVisibility(View.GONE);
             change = findViewById(R.id.change_timetable);
