@@ -118,11 +118,11 @@
         app:normal_cell_width="@dimen/room_status_cell_length"
         app:top_cell_height="@dimen/top_cell_height"/>
 
-    <ProgressBar
-        android:id="@+id/progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+    <!--<ProgressBar-->
+        <!--android:id="@+id/progress"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center" />-->
 
 
 </LinearLayout>
