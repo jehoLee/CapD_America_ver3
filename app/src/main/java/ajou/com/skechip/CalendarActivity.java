@@ -80,7 +80,7 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
     private Button mAddEventButton;
     private ArrayList<Cell> cells = new ArrayList<>();
     private ArrayList<Cell> tmpcells;
-    private Cell curcell;
+    private ArrayList<Cell> selectcells = new ArrayList<>();
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
@@ -151,11 +151,10 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
                 for(int i=0;i<7;i++) {
                     CheckBox checkBox = mLayoutManager.findViewByPosition(i).findViewById(R.id.calendar_card_checkBox);
                     if(checkBox.isChecked()){
-                        curcell= cells.get(i);
-                        Log.e("test - up",""+curcell.getSubjectName());
-                        getResultsFromApi();
+                        selectcells.add(cells.get(i));
                     }
                 }
+                getResultsFromApi();
                 mAddEventButton.setEnabled(true);
                 if (getPackageList()) {
                     Intent intent = getPackageManager().getLaunchIntentForPackage("com.google.android.calendar");
@@ -411,8 +410,7 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
                 if (mID == 1) {
                     return createCalendar();
                 } else if (mID == 2) {
-                    Log.e("test - down",""+curcell.getSubjectName());
-                    return addEvent(curcell);
+                    return addEvent(selectcells);
                 }
 //                else if (mID == 3) {
 //                    return getEvent();
@@ -516,54 +514,57 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
             }
         }
 
-        private String addEvent(Cell cell) {
+        private String addEvent(ArrayList<Cell>cells) {
             String calendarID = getCalendarID("CalendarTitle");
-            Event event = new Event()
-                    .setSummary(cell.getSubjectName())
-                    .setLocation(cell.getPlaceName())
-                    .setDescription("미유밋 앱에서 생성된 일정입니다.");
-            java.util.Calendar calander;
+            for(Cell cell : cells) {
+                Event event = new Event()
+                        .setSummary(cell.getSubjectName())
+                        .setLocation(cell.getPlaceName())
+                        .setDescription("미유밋 앱에서 생성된 일정입니다.");
 
-            calander = java.util.Calendar.getInstance();
-            int time = calander.get(java.util.Calendar.DAY_OF_WEEK);    //일1, 월2, 화3, ....
-            SimpleDateFormat simpledateformat;
 
-            simpledateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.KOREA);
-            String datetime = simpledateformat.format(calander.getTime());
-            DateTime startDateTime = new DateTime(datetime);
-            long currtime = startDateTime.getValue();   //안스에선 한국시간 주기에 9시간 더할필요 없음
-            long startDate, endDate;
-            startDate = (currtime / (ONE_DAY * 7)) * (ONE_DAY * 7) + (cell.getPosition() % 5 -3 ) * ONE_DAY + (cell.getPosition() / 5) * 90 * 60 * 1000 + ONE_DAY*7;
-            endDate = startDate + 90 * 60 * 1000;
-            if (time > (cell.getPosition() % 5 + 2)){   //현재있는시간이 금요일, 추가할날이 월요일..
-                startDate+=ONE_DAY*7;
-                endDate+=ONE_DAY*7;
+                java.util.Calendar calander;
+
+                calander = java.util.Calendar.getInstance();
+                int time = calander.get(java.util.Calendar.DAY_OF_WEEK);    //일1, 월2, 화3, ....
+                SimpleDateFormat simpledateformat;
+
+                simpledateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.KOREA);
+                String datetime = simpledateformat.format(calander.getTime());
+                DateTime startDateTime = new DateTime(datetime);
+                long currtime = startDateTime.getValue();   //안스에선 한국시간 주기에 9시간 더할필요 없음
+                long startDate, endDate;
+                startDate = (currtime / (ONE_DAY * 7)) * (ONE_DAY * 7) + (cell.getPosition() % 5 - 3) * ONE_DAY + (cell.getPosition() / 5) * 90 * 60 * 1000 + ONE_DAY * 7;
+                endDate = startDate + 90 * 60 * 1000;
+                if (time > (cell.getPosition() % 5 + 2)) {   //현재있는시간이 금요일, 추가할날이 월요일..
+//                    startDate += ONE_DAY * 7;
+//                    endDate += ONE_DAY * 7;
+                }
+                DateTime nstartDateTime = new DateTime(startDate);
+                DateTime nendDateTime = new DateTime(endDate);
+                EventDateTime start = new EventDateTime()
+                        .setDateTime(nstartDateTime)
+                        .setTimeZone("Asia/Seoul");
+                event.setStart(start);
+
+                EventDateTime end = new EventDateTime()
+                        .setDateTime(nendDateTime)
+                        .setTimeZone("Asia/Seoul");
+                event.setEnd(end);
+
+                //String[] recurrence = new String[]{"RRULE:FREQ=DAILY;COUNT=2"};
+                //event.setRecurrence(Arrays.asList(recurrence));
+
+                try {
+                    event = mService.events().insert(calendarID, event).execute();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.e("Exception", "Exception : " + e.toString());
+                }
+                System.out.printf("Event created: %s\n", event.getHtmlLink());
+                Log.e("Event", "created : " + event.getHtmlLink());
             }
-            DateTime nstartDateTime = new DateTime(startDate);
-            DateTime nendDateTime = new DateTime(endDate);
-            EventDateTime start = new EventDateTime()
-                    .setDateTime(nstartDateTime)
-                    .setTimeZone("Asia/Seoul");
-            event.setStart(start);
-
-            EventDateTime end = new EventDateTime()
-                    .setDateTime(nendDateTime)
-                    .setTimeZone("Asia/Seoul");
-            event.setEnd(end);
-
-            //String[] recurrence = new String[]{"RRULE:FREQ=DAILY;COUNT=2"};
-            //event.setRecurrence(Arrays.asList(recurrence));
-
-            try {
-                event = mService.events().insert(calendarID, event).execute();
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e("Exception", "Exception : " + e.toString());
-            }
-            System.out.printf("Event created: %s\n", event.getHtmlLink());
-            Log.e("Event", "created : " + event.getHtmlLink());
-            String eventStrings = "created : " + event.getHtmlLink();
-            return eventStrings;
+            return "created calendar events";
         }
     }
 }
