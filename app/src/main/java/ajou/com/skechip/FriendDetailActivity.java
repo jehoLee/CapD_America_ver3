@@ -344,17 +344,17 @@ public class FriendDetailActivity extends AppCompatActivity {
                                             return;
                                         }
                                         boolean newone = true;
-                                        for (int i = 0; i < SUBJECT_NAME.size(); i++) {
-                                            if (SUBJECT_NAME.get(i).equals(strSubject)) {
-                                                for (int j = 0; j < SELECTED_CELLS.size(); j++) {
-                                                    SELECTED_CELLS.get(j).setStatus(i);
-                                                    SELECTED_CELLS.get(j).setSubjectName(strSubject);
-                                                    SELECTED_CELLS.get(j).setPlaceName(strPlace);
-                                                }
-                                                newone = false;
-                                                break;
-                                            }
-                                        }
+//                                        for (int i = 0; i < SUBJECT_NAME.size(); i++) {
+////                                            if (SUBJECT_NAME.get(i).equals(strSubject)) {
+////                                                for (int j = 0; j < SELECTED_CELLS.size(); j++) {
+////                                                    SELECTED_CELLS.get(j).setStatus(i);
+////                                                    SELECTED_CELLS.get(j).setSubjectName(strSubject);
+////                                                    SELECTED_CELLS.get(j).setPlaceName(strPlace);
+////                                                }
+////                                                newone = false;
+////                                                break;
+////                                            }
+////                                        }
                                         if (newone) {
                                             for (int i = 0; i < SELECTED_CELLS.size(); i++) {
                                                 SELECTED_CELLS.get(i).setStatus(SUBJECT_NAME.size());
@@ -459,17 +459,17 @@ public class FriendDetailActivity extends AppCompatActivity {
                                         return;
                                     }
                                     boolean newone = true;
-                                    for (int i = 0; i < SUBJECT_NAME.size(); i++) {
-                                        if (SUBJECT_NAME.get(i).equals(strSubject)) {
-                                            for (int j = 0; j < SELECTED_CELLS.size(); j++) {
-                                                SELECTED_CELLS.get(j).setStatus(i);
-                                                SELECTED_CELLS.get(j).setSubjectName(strSubject);
-                                                SELECTED_CELLS.get(j).setPlaceName(strPlace);
-                                            }
-                                            newone = false;
-                                            break;
-                                        }
-                                    }
+//                                    for (int i = 0; i < SUBJECT_NAME.size(); i++) {
+//                                        if (SUBJECT_NAME.get(i).equals(strSubject)) {
+//                                            for (int j = 0; j < SELECTED_CELLS.size(); j++) {
+//                                                SELECTED_CELLS.get(j).setStatus(i);
+//                                                SELECTED_CELLS.get(j).setSubjectName(strSubject);
+//                                                SELECTED_CELLS.get(j).setPlaceName(strPlace);
+//                                            }
+//                                            newone = false;
+//                                            break;
+//                                        }
+//                                    }
                                     if (newone) {
                                         for (int i = 0; i < SELECTED_CELLS.size(); i++) {
                                             SELECTED_CELLS.get(i).setStatus(SUBJECT_NAME.size());
