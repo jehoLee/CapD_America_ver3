@@ -129,23 +129,22 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
         // Google Calendar API 호출중에 표시되는 ProgressDialog
         mProgress = new ProgressDialog(this);
         mProgress.setMessage("Google Calendar API 호출 중입니다.");
+        // Google Calendar API 사용하기 위해 필요한 인증 초기화( 자격 증명 credentials, 서비스 객체 )
+        // OAuth 2.0를 사용하여 구글 계정 선택 및 인증하기 위한 준비
+        mCredential = GoogleAccountCredential.usingOAuth2(
+                getApplicationContext(),
+                Arrays.asList(SCOPES)
+        ).setBackOff(new ExponentialBackOff()); // I/O 예외 상황을 대비해서 백오프 정책 사용
+        //로딩중, 캘린더 생성/불러오기 완료
+        mStatusText.setText("");
+        mID = 1;           //캘린더
+        getResultsFromApi();
+        mAddEventButton.setEnabled(false);
 
         /**버튼 클릭으로 동작 테스트 */
         mAddEventButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Google Calendar API 사용하기 위해 필요한 인증 초기화( 자격 증명 credentials, 서비스 객체 )
-                // OAuth 2.0를 사용하여 구글 계정 선택 및 인증하기 위한 준비
-                mCredential = GoogleAccountCredential.usingOAuth2(
-                        getApplicationContext(),
-                        Arrays.asList(SCOPES)
-                ).setBackOff(new ExponentialBackOff()); // I/O 예외 상황을 대비해서 백오프 정책 사용
-                //로딩중, 캘린더 생성/불러오기 완료
-                mStatusText.setText("");
-                mID = 1;           //캘린더
-                getResultsFromApi();
-                mAddEventButton.setEnabled(false);
-
                 mStatusText.setText("");
                 mID = 2;        // 이벤트 생성 프로세스. 내 시간표를 구글캘린더에 저장하는 모드
                 for(int i=0;i<7;i++) {
@@ -452,6 +451,7 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
             String ids = getCalendarID("CalendarTitle");
 
             if (ids != null) {
+                mAddEventButton.setEnabled(true);
                 return "기존의 캘린더를 불러왔습니다. ";
             }
 
@@ -485,6 +485,7 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
                             .execute();
 
             // 새로 추가한 캘린더의 ID를 리턴
+            mAddEventButton.setEnabled(true);
             return "캘린더를 생성했습니다.";
         }
 
@@ -536,9 +537,10 @@ public class CalendarActivity extends Activity implements EasyPermissions.Permis
                 long startDate, endDate;
                 startDate = (currtime / (ONE_DAY * 7)) * (ONE_DAY * 7) + (cell.getPosition() % 5 - 3) * ONE_DAY + (cell.getPosition() / 5) * 90 * 60 * 1000 + ONE_DAY * 7;
                 endDate = startDate + 90 * 60 * 1000;
+                Log.e("test",""+startDate);
                 if (time > (cell.getPosition() % 5 + 2)) {   //현재있는시간이 금요일, 추가할날이 월요일..
-//                    startDate += ONE_DAY * 7;
-//                    endDate += ONE_DAY * 7;
+                    startDate += ONE_DAY * 7;
+                    endDate += ONE_DAY * 7;
                 }
                 DateTime nstartDateTime = new DateTime(startDate);
                 DateTime nendDateTime = new DateTime(endDate);
